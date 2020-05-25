@@ -1,5 +1,9 @@
 # 连接Mongo
 
+
+
+## 1.连接的 mgo 包
+
 ```go
 package main
 
@@ -103,4 +107,127 @@ https://blog.csdn.net/tamtian/article/details/105786611
 //mongo
 
 
+
+```go
+package model
+
+import (
+	"brc_scan_block/log"
+	"gopkg.in/ini.v1"
+	"gopkg.in/mgo.v2"
+)
+
+var Session *mgo.Session
+
+var C1 *mgo.Database
+
+func InitDB(cfg *ini.File) {
+
+	ip := cfg.Section("Mongo").Key("ip").String()
+	port := cfg.Section("Mongo").Key("port").String()
+	URL := ip + ":" + port
+	log.Info.Println("URL=", URL)
+	//mongodb://test:8888@127.0.0.1:28015/database?authSource=admin
+	//[mongodb://][user:pass@]host1[:port1][,host2[:port2],...][/database][?options]
+
+	//connect
+	url := cfg.Section("Mongo").Key("url").String()
+	log.Info.Println("URL=", url)
+
+	var Session, err = mgo.Dial(URL)
+	if err != nil {
+		panic(err)
+	}
+	log.Info.Println("Connection successful！")
+
+	//use database test
+	log.Info.Println("Database is test.")
+	C1 = Session.DB("test")
+
+}
+
+```
+
+
+
+## 2.连接的 官方drive 包
+
+```go
+package model
+
+import "C"
+import (
+	"brc_scan_block/log"
+	"context"
+	"fmt"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/ini.v1"
+)
+
+var Client *mongo.Client
+
+var C *mongo.Database
+
+func InitDB_Mgo(cfg *ini.File) {
+	// Read configuration.
+	// url := cfg.Section("Mongo").Key("url").String()
+	//log.Info.Println("连接Mongo的url===", url)
+
+	//localhost
+	url := "mongodb://localhost:27017"
+	// Set client connection configuration.
+	clientOptions := options.Client().ApplyURI(url)
+
+	// connect MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Error.Println(err)
+	}
+
+	// ping
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Error.Println(err)
+	}
+	log.Info.Println("Connection mongo is successfully!")
+
+	//use databases
+	C = client.Database("test")
+
+	log.Info.Println("Select database is test.")
+
+}
+
+func InitDB_Mgo1() {
+
+	// Set client connection configuration.
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+
+	// connect MongoDB
+	var Client1, err = mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Error.Println(err)
+	}
+
+	// ping
+	err = Client1.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Error.Println(err)
+	}
+	fmt.Println("Connected to MongoDB!")
+	collection := Client1.Database("test").Collection("m2")
+	insertResult, err := collection.InsertOne(context.TODO(), map[string]interface{}{
+		"mgo2": "drive2",
+	})
+
+	fmt.Println("Inserted a single document: ", insertResult)
+	if err != nil {
+		log.Error.Println(err)
+	}
+
+}
+
+```
 
