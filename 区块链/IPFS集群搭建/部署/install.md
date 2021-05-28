@@ -205,3 +205,12 @@ ipfs-cluster-ctl status CID
 
 ```
 
+##### 参考信息
+
+```
+https://segmentfault.com/a/1190000021539562
+https://cloud.tencent.com/developer/search/article-IPFS
+https://cloud.tencent.com/developer/article/1430873
+https://www.cnblogs.com/sumingk/articles/9434253.html
+```
+
