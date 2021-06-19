@@ -4,8 +4,9 @@ import (
 	"database/sql"
 
 	"fmt"
-	"github.com/cosmopolitann/clouddb/sugar"
 	"testing"
+
+	"github.com/cosmopolitann/clouddb/sugar"
 )
 
 func TestArticleList(t *testing.T) {

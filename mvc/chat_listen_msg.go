@@ -63,7 +63,6 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				sugar.Log.Error("subscribe failed.", err)
 				return
 			}
-			sugar.Log.Debugf("receive: %s\n", data.Data)
 
 			msg = vo.ChatListenParams{}
 
@@ -83,6 +82,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 					// not me
 					continue
 				}
+
+				sugar.Log.Debugf("receive: %s\n", data.Data)
 
 				res, err := handleAddRecordMsg(db, tmp)
 				if err != nil {
@@ -107,6 +108,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 					continue
 				}
 
+				sugar.Log.Debugf("receive: %s\n", data.Data)
+
 				res, err := handleNewMsg(db, tmp)
 				if err != nil {
 					if err != vo.ErrorRowIsExists {
@@ -128,6 +131,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 					// not me
 					continue
 				}
+
+				sugar.Log.Debugf("receive: %s\n", data.Data)
 
 				res, err := handleWithdrawMsg(db, tmp)
 				if err != nil {

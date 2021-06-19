@@ -1,54 +1,58 @@
 package chat
 
-// import (
-// 	"database/sql"
-// 	"fmt"
-// 	"testing"
-// 	"time"
+import (
+	"database/sql"
+	"fmt"
+	"testing"
+	"time"
 
-// 	"github.com/cosmopolitann/clouddb/sugar"
+	"github.com/cosmopolitann/clouddb/sugar"
+	"github.com/cosmopolitann/clouddb/test/chat/ipfs"
 
-// 	"github.com/cosmopolitann/clouddb/jwt"
-// 	_ "github.com/mattn/go-sqlite3"
+	"github.com/cosmopolitann/clouddb/jwt"
+	_ "github.com/mattn/go-sqlite3"
+)
 
-// 	shell "github.com/ipfs/go-ipfs-api"
-// )
+func TestChatListenMsg(t *testing.T) {
+	sugar.InitLogger()
+	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
+	//The path is default.
+	sugar.Log.Info("Start Open Sqlite3 Database.")
+	d, err := sql.Open("sqlite3", "/Users/apple/Projects/clouddb/tables/foo.db")
+	if err != nil {
+		panic(err)
+	}
+	sugar.Log.Info("Open Sqlite3 is ok.")
+	sugar.Log.Info("Db value is ", d)
+	err = d.Ping()
+	if err != nil {
+		panic(err)
+	}
 
-// func TestChatListenMsg(t *testing.T) {
-// 	sugar.InitLogger()
-// 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
-// 	//The path is default.
-// 	sugar.Log.Info("Start Open Sqlite3 Database.")
-// 	d, err := sql.Open("sqlite3", "/data/projects/clouddb/tables/foo.db")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	sugar.Log.Info("Open Sqlite3 is ok.")
-// 	sugar.Log.Info("Db value is ", d)
-// 	err = d.Ping()
-// 	if err != nil {
-// 		panic(err)
-// 	}
+	ss := Testdb(d)
 
-// 	ss := Testdb(d)
+	token, _ := jwt.GenerateToken("409330202166956089", 30*24*60*60)
 
-// 	sh := shell.NewShell("localhost:5001")
+	fmt.Println(token)
+	sugar.Log.Info("token: ", token)
 
-// 	token, _ := jwt.GenerateToken("409330202166956089", 30*24*60*60)
+	var cl ChatLister
 
-// 	fmt.Println(token)
+	node, err := ipfs.GetIpfsNode("/Users/apple/.ipfs")
+	if err != nil {
+		sugar.Log.Info("xxxxx----", err)
+		panic(err)
+	}
 
-// 	var cl ChatLister
+	resp := ss.ChatListenMsg(node, token, &cl)
+	t.Log("获取返回的数据 :=  ", resp)
 
-// 	resp := ss.ChatListenMsg(sh, token, &cl)
-// 	t.Log("获取返回的数据 :=  ", resp)
+	time.Sleep(time.Hour)
 
-// 	time.Sleep(time.Hour)
+}
 
-// }
+type ChatLister struct{}
 
-// type ChatLister struct{}
-
-// func (cl *ChatLister) HandlerChat(abc string) {
-// 	fmt.Println("1111", abc, "2222")
-// }
+func (cl *ChatLister) HandlerChat(abc string) {
+	fmt.Println("1111", abc, "2222")
+}
