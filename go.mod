@@ -17,9 +17,10 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.6 // indirect
 	github.com/libp2p/go-libp2p-core v0.8.5
 	github.com/libp2p/go-libp2p-peerstore v0.2.7
-	github.com/libp2p/go-libp2p-pubsub v0.4.1 // indirect
+	github.com/libp2p/go-libp2p-pubsub v0.4.1
 	github.com/libp2p/go-sockaddr v0.1.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
+	github.com/mr-tron/base58 v1.2.0
 	github.com/multiformats/go-multiaddr v0.3.2
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible

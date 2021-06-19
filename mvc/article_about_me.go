@@ -54,8 +54,8 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 		//var phone interface{}
 		//var sex interface{}
 		//var NickName interface{}
-		//var islike interface{}
-		err = rows.Scan(&id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.ShareNum, &dl.PlayNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+		//var islike interface{}PlayNum
+		err = rows.Scan(&id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err

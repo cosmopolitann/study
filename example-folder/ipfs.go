@@ -2,9 +2,7 @@ package example_folder
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"github.com/cosmopolitann/clouddb/mvc"
 	config "github.com/ipfs/go-ipfs-config"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/go-ipfs/core"
@@ -414,46 +412,40 @@ func InItipfs() {
 	//		fmt.Println("msg from Topics:", msg.Topics())
 	//		fmt.Println("msg from Seq:", string(msg.Seq()))
 	//		//var from =msg.From()
-	//		//  判断 来自 的 节点id
-	//		//if from !=peerId && from == "12D3KooWDoBhdQwGT6oq2EG8rsduRCmyTZtHaBCowFZ7enwP4i8J" {
-	//		//	//执行 同步数据库
-	//		//
-	//		//
-	//		//
-	//		//}
-	//
-	//
-	//		// 解析数据,调用同步方法
-	//		// 判断 peer id 是否是自己的
-	//		// todo
-	//
-	//		var sc vo.SyncParams
-	//		err = json.Unmarshal([]byte(msg.Data()), &sc)
-	//		if err != nil {
-	//			sugar.Log.Error("Marshal is failed.Err is ", err)
-	//		}
-	//		log.Println(" 解析的 /db-online-sync  值 =", sc)
-	//		if sc.Method == "SyncUser" {
-	//			//json 转成 string
-	//			jsonBytes, err := json.Marshal(sc.Data)
-	//			if err != nil {
-	//				fmt.Println("解析错误:", err)
-	//			}
-	//			fmt.Println("转换为 json 串打印结果:%s", string(jsonBytes))
-	//			//打开数据库
-	//			d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
-	//
-	//			ss := sqlitedb(d)
-	//
-	//			resp := ss.SyncUser(string(jsonBytes))
-	//			log.Println("这是返回的数据 =", resp)
-	//		}
+	//		//判断 来自 的 节点id//
+	//		//msg.From()
 	//
 	//	}
-	//}()
-	select {}
-
-}
-func sqlitedb(sq *sql.DB) mvc.Sql {
-	return mvc.Sql{DB: sq}
+	//	//
+	//	//
+	//	//		// 解析数据,调用同步方法
+	//	//		// 判断 peer id 是否是自己的
+	//	//		// todo
+	//	//
+	//	//		var sc vo.SyncParams
+	//	//		err = json.Unmarshal([]byte(msg.Data()), &sc)
+	//	//		if err != nil {
+	//	//			sugar.Log.Error("Marshal is failed.Err is ", err)
+	//	//		}
+	//	//		log.Println(" 解析的 /db-online-sync  值 =", sc)
+	//	//		if sc.Method == "SyncUser" {
+	//	//			//json 转成 string
+	//	//			jsonBytes, err := json.Marshal(sc.Data)
+	//	//			if err != nil {
+	//	//				fmt.Println("解析错误:", err)
+	//	//			}
+	//	//			fmt.Println("转换为 json 串打印结果:%s", string(jsonBytes))
+	//	//			//打开数据库
+	//	//			d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	//	//
+	//	//			ss := sqlitedb(d)
+	//	//
+	//	//			resp := ss.SyncUser(string(jsonBytes))
+	//	//			log.Println("这是返回的数据 =", resp)
+	//	//		}
+	//	//
+	//	//	}
+	//	//}()
+	//	select {}
+	//}
 }

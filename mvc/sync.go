@@ -1,17 +1,17 @@
 package mvc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"
 	"github.com/cosmopolitann/clouddb/vo"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/mr-tron/base58/base58"
 	"log"
 	"strconv"
-
-	"context"
-	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"time"
 )
 
@@ -335,8 +335,6 @@ func SyncUserUpdate(db *Sql, value string) error {
 	return nil
 }
 
-type sycn struct {
-}
 
 var Topicmp map[string]*pubsub.Topic
 
@@ -403,10 +401,27 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		sugar.Log.Infof("----这是  string(fromId)  %v \n---:", string(fromId))
 		sugar.Log.Info("---- 这是 谁发来的消息 fromId    msg.From:", msg.From)
 		sugar.Log.Infof("----这是  string(fromId)的类型  %T \n---:", string(fromId))
-		wayId:="12D3KooWDoBhdQwGT6oq2EG8rsduRCmyTZtHaBCowFZ7enwP4i8J"
-			if string(fromId)==wayId{
+		log.Printf("公共节点的信息 \n",msg.From)
 
+
+
+		wayId:="12D3KooWDoBhdQwGT6oq2EG8rsduRCmyTZtHaBCowFZ7enwP4i8J"
+
+		sugar.Log.Info("----公共网关节点 id =---:", wayId)
+
+		FromID:=base58.Encode(fromId)
+
+		log.Println("-----这是 base58 转string 类型 ----FromID ;",FromID)
+
+		if FromID==wayId{
+				sugar.Log.Info("---- 因为 公共网关 节点id 等于 i8j 所以满足条件进来 ---:", peerId)
+
+				
 				if peerId==recieve.FromId{
+
+					sugar.Log.Info("---- 因为 本地 节点id 等于 recieve fromId  所以不满足 ---:")
+					sugar.Log.Info("---- 因为 本地 节点id  ---",peerId)
+					sugar.Log.Info("---- 因为 本地 recieve.FromId  ---",recieve.FromId)
 
 					continue
 				}else {

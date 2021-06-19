@@ -78,13 +78,14 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 		}
 		Topicmp[topic] = tp
 	}
+
 	rows1, err := db.DB.Query("select * from article where id=?", art.Id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
 	}
 	for rows1.Next() {
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+		err = rows1.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return err
