@@ -27,7 +27,7 @@ func tt() (*Cloud, error) {
 }
 
 func main() {
-
+//test
 	d := mvc.NTestNode("")
 	err := d.Add()
 	sugar.Log.Info("创建数据库失败，错误:", err)
