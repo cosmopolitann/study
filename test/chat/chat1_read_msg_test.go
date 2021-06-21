@@ -38,7 +38,7 @@ func TestChatReadMsg(t *testing.T) {
 
 	ss := Testdb(d)
 
-	resp := ss.ChatReadMsg(nil, string(value))
+	resp := ss.ChatReadMsg(string(value))
 	t.Log("获取返回的数据 :=  ", resp)
 
 }

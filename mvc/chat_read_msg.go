@@ -8,11 +8,9 @@ import (
 	"github.com/cosmopolitann/clouddb/vo"
 
 	"github.com/cosmopolitann/clouddb/jwt"
-
-	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
 
-func ChatReadMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
+func ChatReadMsg(db *Sql, value string) error {
 
 	// 接收参数
 	var msg vo.ChatReadMsgParams
