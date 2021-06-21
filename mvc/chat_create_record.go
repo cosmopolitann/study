@@ -44,15 +44,17 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 		return ret, errors.New("token is not msg.from_id")
 	}
 
-	ret.Id = genRecordID(msg.FromId, msg.ToId)
-	ret.Name = msg.Name
+	recordId1 := genRecordID(msg.FromId, msg.ToId)
+	recordId2 := genRecordID2(msg.FromId, msg.ToId)
+
+	ret.Name = ""
 	ret.FromId = msg.FromId
 	ret.Toid = msg.ToId
 	ret.LastMsg = ""
 	ret.Ptime = time.Now().Unix()
 
 	// 检查是否存在
-	err = db.DB.QueryRow("SELECT id, name, from_id, to_id, ptime, last_msg FROM chat_record WHERE id = ?", ret.Id).Scan(&ret.Id, &ret.Name, &ret.FromId, &ret.Toid, &ret.Ptime, &ret.LastMsg)
+	err = db.DB.QueryRow("SELECT id, from_id, to_id, ptime, last_msg FROM chat_record WHERE id = ? OR id = ?", recordId1, recordId2).Scan(&ret.Id, &ret.FromId, &ret.Toid, &ret.Ptime, &ret.LastMsg)
 	if err != nil && err != sql.ErrNoRows {
 		sugar.Log.Error("Query chat_record failed.Err is", err)
 		return ret, err
@@ -60,6 +62,7 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 
 	switch err {
 	case sql.ErrNoRows:
+		ret.Id = recordId1
 		// no room
 		res, err := db.DB.Exec("INSERT INTO chat_record (id, name, from_id, to_id, ptime, last_msg) VALUES (?, ?, ?, ?, ?, ?)", ret.Id, ret.Name, ret.FromId, ret.Toid, ret.Ptime, ret.LastMsg)
 		if err != nil {
@@ -139,4 +142,8 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 
 func genRecordID(fromID, toID string) string {
 	return fromID + "_" + toID
+}
+
+func genRecordID2(fromID, toID string) string {
+	return toID + "_" + fromID
 }
