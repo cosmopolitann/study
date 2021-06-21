@@ -40,7 +40,7 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 	}
 	sugar.Log.Info("claim := ", claim)
 	userid := claim["UserId"]
-	rows, err := db.DB.Query("SELECT b.* from article_like as a LEFT JOIN article as b on a.article_id=b.id WHERE a.is_like=1 and a.user_id=? ORDER BY ptime LIMIT ?,?", userid, r, result.PageSize)
+	rows, err := db.DB.Query("SELECT b.*,(SELECT COUNT(*) FROM article_like WHERE a.article_id) as sum from article_like as a LEFT JOIN article as b on a.article_id=b.id WHERE a.is_like=1 and a.user_id=? ORDER BY ptime LIMIT ?,?", userid, r, result.PageSize)
 
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
@@ -55,7 +55,7 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 		//var sex interface{}
 		//var NickName interface{}
 		//var islike interface{}PlayNum
-		err = rows.Scan(&id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+		err = rows.Scan(&id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize,&dl.Count)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err

@@ -15,7 +15,7 @@ import (
 )
 
 func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
-	sugar.Log.Error(" ----  AddArticle Method ----")
+	sugar.Log.Info(" ----  AddArticle Method ----")
 	var art vo.ArticleAddParams
 	err := json.Unmarshal([]byte(value), &art)
 	if err != nil {
@@ -120,7 +120,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 	sugar.Log.Info("PageNum:= ", result.PageNum)
 	sugar.Log.Info("PageSize:= ", result.PageSize)
 	//这里 要修改   加上 where  参数 判断
-	rows, err := db.DB.Query("SELECT * FROM article where user_id=? limit ?,?",userid,r,result.PageSize)
+	rows, err := db.DB.Query("SELECT * FROM article where user_id=? order by ptime Desc limit ?,?",userid,r,result.PageSize)
 	if err != nil {
 		sugar.Log.Error("Query article table is failed.Err:", err)
 		return art, errors.New(" Query article list is failed.")
@@ -150,4 +150,35 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 	sugar.Log.Info(" ----  ArticleList  Method  End ----")
 	return art, nil
 
+}
+
+
+func ArticleAddTest(db *Sql, value string) error{
+	sugar.Log.Info(" ----  AddArticle Method ----")
+	var art vo.ArticleAddParams
+	err := json.Unmarshal([]byte(value), &art)
+	if err != nil {
+		sugar.Log.Error("Marshal is failed.Err:", err)
+		return errors.New(" Marshal article params is failed. ")
+	}
+	sugar.Log.Info("Marshal article params data : ", art)
+	id := utils.SnowId()
+	t := time.Now().Unix()
+	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	if err != nil {
+		sugar.Log.Error("Insert into article table is failed.Err: ", err)
+		return errors.New(" Insert into article table is failed. ")
+	}
+	sid := strconv.FormatInt(id, 10)
+	//stmt.QueryRow()
+	res, err := stmt.Exec(sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	if err != nil {
+		sugar.Log.Error(" Insert into article  is Failed.", err)
+		return errors.New(" Execute query article table is failed. ")
+	}
+	l, _ := res.RowsAffected()
+	if l == 0 {
+		return errors.New(" Insert into article table is failed. ")
+	}
+	return  nil
 }

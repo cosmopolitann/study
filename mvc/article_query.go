@@ -24,7 +24,7 @@ func ArticleQuery(db *Sql, value string) (data vo.ArticleResp, e error) {
 
 	//var islike interface{}
 
-	rows, err := db.DB.Query("SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname from article as a LEFT JOIN sys_user as b on a.user_id=b.id where a.user_id=(select c.user_id from article as c where id =?) and a.id=?;", list.Id, list.Id)
+	rows, err := db.DB.Query("SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname from article as a LEFT JOIN sys_user as b on a.user_id=b.id where a.user_id=(select c.user_id from article as c where id =?) and a.id=? order by ptime desc;", list.Id, list.Id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return dl, errors.New("查询下载列表信息失败")
@@ -48,7 +48,7 @@ func ArticleQuery(db *Sql, value string) (data vo.ArticleResp, e error) {
 			dl.Phone = k
 			dl.Sex = 0
 			dl.NickName = k
-			dl.IsLike = 0
+			dl.LikeNum = 0
 		} else {
 			dl.PeerId = peerId.(string)
 			dl.Name = name.(string)

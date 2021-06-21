@@ -36,7 +36,7 @@ func ResponseSuccess(item ...interface{}) string {
 		sugar.Log.Error("Marshal is failed.")
 	}
 	sugar.Log.Info("response info is successful.")
-	sugar.Log.Info("这是 返回数据 2 ", string(b))
+	sugar.Log.Info("这是 返回数据  ", string(b))
 	return string(b)
 }
 func ResponseErrorMsg(code int, msg string) string {
