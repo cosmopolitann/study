@@ -44,14 +44,14 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 	sugar.Log.Debugf("Get User: %#v", user)
 
 	// 查询会话列表
-	rows, err := db.DB.Query("SELECT id, name, from_id, to_id, ptime, last_msg FROM chat_record WHERE from_id = ? OR to_id = ?", user.Id, user.Id)
+	rows, err := db.DB.Query("SELECT id, from_id, to_id, ptime, last_msg FROM chat_record WHERE from_id = ? OR to_id = ?", user.Id, user.Id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 	}
 
 	for rows.Next() {
 		var ri vo.ChatRecordRespListParams
-		err := rows.Scan(&ri.Id, &ri.Name, &ri.FromId, &ri.ToId, &ri.Ptime, &ri.LastMsg)
+		err := rows.Scan(&ri.Id, &ri.FromId, &ri.ToId, &ri.Ptime, &ri.LastMsg)
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 			return ret, err
@@ -99,9 +99,11 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 
 			} else {
 				sugar.Log.Debugf("Update Peer: %#v", peer)
-				if ri.FromId == peer.Id {
-					ri.Img = peer.Img
 
+				ri.Name = peer.Name
+				ri.Img = peer.Img
+
+				if ri.FromId == peer.Id {
 					ri.FromName = peer.Name
 					ri.FromImg = peer.Img
 					ri.FromPhone = peer.Phone
@@ -109,8 +111,6 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 					ri.FromNickName = peer.NickName
 					ri.FromSex = peer.Sex
 				} else {
-					ri.Img = peer.Img
-
 					ri.ToName = peer.Name
 					ri.ToImg = peer.Img
 					ri.ToPhone = peer.Phone

@@ -30,14 +30,14 @@ func TestChatCreateRecord(t *testing.T) {
 		panic(err)
 	}
 
-	token, _ := jwt.GenerateToken("411647506288480256", 30*24*60*60)
+	token, _ := jwt.GenerateToken("411642059200401408", 30*24*60*60)
 
 	fmt.Println(token)
 
 	req := vo.ChatAddRecordParams{
 		Name:   "Record Name 2222",
-		FromId: "411647506288480256",
-		ToId:   "411642059200401408",
+		FromId: "411642059200401408",
+		ToId:   "411647506288480256",
 		Token:  token,
 	}
 
