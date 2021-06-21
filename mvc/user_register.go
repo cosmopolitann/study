@@ -75,6 +75,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) (vo.UserLoginRes
 	var tp *pubsub.Topic
 	var ok bool
 	ctx := context.Background()
+	Topicmp = make(map[string]*pubsub.Topic)
 	if tp,ok = Topicmp["/db-online-sync"];ok == false {
 		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
