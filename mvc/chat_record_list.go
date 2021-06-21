@@ -100,6 +100,8 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			} else {
 				sugar.Log.Debugf("Update Peer: %#v", peer)
 				if ri.FromId == peer.Id {
+					ri.Img = peer.Img
+
 					ri.FromName = peer.Name
 					ri.FromImg = peer.Img
 					ri.FromPhone = peer.Phone
@@ -107,6 +109,8 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 					ri.FromNickName = peer.NickName
 					ri.FromSex = peer.Sex
 				} else {
+					ri.Img = peer.Img
+
 					ri.ToName = peer.Name
 					ri.ToImg = peer.Img
 					ri.ToPhone = peer.Phone

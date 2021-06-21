@@ -67,3 +67,9 @@ type ChatRecordRespListParams struct {
 	ToNickName string `json:"toNickName"`
 	ToSex      int64  `json:"toSex"`
 }
+
+type ChatRenameRecordParams struct {
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Token string `json:"token"`
+}

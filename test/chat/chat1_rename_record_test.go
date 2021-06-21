@@ -14,7 +14,7 @@ import (
 	"github.com/cosmopolitann/clouddb/jwt"
 )
 
-func TestChatCreateRecord(t *testing.T) {
+func TestChatRenameRecord(t *testing.T) {
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
@@ -34,17 +34,16 @@ func TestChatCreateRecord(t *testing.T) {
 
 	fmt.Println(token)
 
-	req := vo.ChatAddRecordParams{
-		Name:   "Record Name 2222",
-		FromId: "411647506288480256",
-		ToId:   "411642059200401408",
-		Token:  token,
+	req := vo.ChatRenameRecordParams{
+		Id:    "411647506288480256_411642059200401408",
+		Name:  "Record Name 2222 3333",
+		Token: token,
 	}
 
 	value, _ := json.Marshal(req)
 
 	ss := Testdb(d)
-	resp := ss.ChatCreateRecord(nil, string(value))
+	resp := ss.ChatRenameRecord(nil, string(value))
 	t.Log("获取返回的数据 :=  ", resp)
 
 }

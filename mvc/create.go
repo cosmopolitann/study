@@ -540,6 +540,16 @@ func (db *Sql) ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, msg string) string 
 	return vo.ResponseSuccess(data)
 }
 
+// ChatCreateRecord  创建会话
+func (db *Sql) ChatRenameRecord(ipfsNode *ipfsCore.IpfsNode, msg string) string {
+
+	err := ChatRenameRecord(ipfsNode, db, msg)
+	if err != nil {
+		return vo.ResponseErrorMsg(400, err.Error())
+	}
+	return vo.ResponseSuccess()
+}
+
 // ChatSendMsg  发送消息
 func (db *Sql) ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, msg string) string {
 
@@ -548,6 +558,16 @@ func (db *Sql) ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, msg string) string {
 		return vo.ResponseErrorMsg(400, err.Error())
 	}
 	return vo.ResponseSuccess(data)
+}
+
+// ChatReadMsg  发送消息
+func (db *Sql) ChatReadMsg(ipfsNode *ipfsCore.IpfsNode, msg string) string {
+
+	err := ChatReadMsg(ipfsNode, db, msg)
+	if err != nil {
+		return vo.ResponseErrorMsg(400, err.Error())
+	}
+	return vo.ResponseSuccess()
 }
 
 // ChatWithdrawMsg  撤回消息

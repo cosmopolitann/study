@@ -3,18 +3,16 @@ package chat
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"testing"
 
+	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
 
 	_ "github.com/mattn/go-sqlite3"
-
-	"github.com/cosmopolitann/clouddb/jwt"
 )
 
-func TestChatCreateRecord(t *testing.T) {
+func TestChatReadMsg(t *testing.T) {
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
@@ -32,19 +30,15 @@ func TestChatCreateRecord(t *testing.T) {
 
 	token, _ := jwt.GenerateToken("411647506288480256", 30*24*60*60)
 
-	fmt.Println(token)
-
-	req := vo.ChatAddRecordParams{
-		Name:   "Record Name 2222",
-		FromId: "411647506288480256",
-		ToId:   "411642059200401408",
-		Token:  token,
+	req := vo.ChatReadMsgParams{
+		Ids:   []string{"223", "222"},
+		Token: token,
 	}
-
 	value, _ := json.Marshal(req)
 
 	ss := Testdb(d)
-	resp := ss.ChatCreateRecord(nil, string(value))
+
+	resp := ss.ChatReadMsg(nil, string(value))
 	t.Log("获取返回的数据 :=  ", resp)
 
 }
