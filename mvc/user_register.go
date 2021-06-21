@@ -2,9 +2,12 @@ package mvc
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"
+	"github.com/cosmopolitann/clouddb/vo"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"strconv"
@@ -44,14 +47,14 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	t := time.Now().Unix()
 	stmt, err := db.DB.Prepare("INSERT INTO sys_user values(?,?,?,?,?,?,?,?,?)")
 	if err != nil {
-		sugar.Log.Error("Insert data to sys_user is failed.")
+		sugar.Log.Error("Insert data to sys_user is failed:",err.Error())
 		return err
 	}
 	sid := strconv.FormatInt(id, 10)
 	user.Phone = sid //手机号注册不用了,phone字段直接用id来填,兼容老版本
 		res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
 	if err != nil {
-		sugar.Log.Error("Insert data to sys_user is failed.", res)
+		sugar.Log.Error("Insert data to sys_user is failed:", err.Error())
 		return err
 	}
 	c, _ := res.RowsAffected()
@@ -161,4 +164,19 @@ func FindIsExistUser(db *Sql, user SysUser) (int64, error) {
 		return 0, nil
 	}
 
+}
+
+//导出用户的私钥
+func (db *Sql)ExportUser(token string) string {
+	claim, b := jwt.JwtVeriyToken(token)
+	if !b {
+		return vo.ResponseErrorMsg(400,"登陆已过期")
+	}
+	userid := claim["UserId"].(string)
+	r,err := utils.AesEncrypt([]byte(userid))
+	if err != nil {
+		return vo.ResponseErrorMsg(400,err.Error())
+	}
+	s := base64.StdEncoding.EncodeToString(r)
+	return vo.ResponseSuccess(s)
 }

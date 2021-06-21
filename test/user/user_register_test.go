@@ -17,7 +17,7 @@ func TestUserRegister(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "../../tables/foo.db")
 	if err != nil {
 		panic(err)
 	}
@@ -45,14 +45,16 @@ func TestUserRegister(t *testing.T) {
 	//这里 改成 穿 json 字符串，字段 要改成更新之后的数据。
 
 	//{"id":"4324","peerId":"124","name":"20","phone":1,"sex":"1","nickName":"nick"}
-	value := `{"id":"43243421","peerId":"Q1w213e1233221","name":"20","phone":"12233456","sex":"1","nickName":"nick","img":"123"}`
+	value := `{"id":"43243421","peerId":"Q1w213e12332211","name":"20","phone":"12233456","sex":"1","nickName":"nick","img":"123"}`
 	//resp:= ss.UserAdd(string(b1)
 
-	resp := ss.UserRegister(value)
-
+	resp := ss.UserRegister(nil,value)
 	fmt.Println("这是返回的数据 =", resp)
-
 }
 func Testdb(sq *sql.DB) mvc.Sql {
 	return mvc.Sql{DB: sq}
+}
+
+func TestExportUser(t *testing.T) {
+	
 }
