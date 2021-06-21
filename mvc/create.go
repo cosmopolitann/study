@@ -315,7 +315,10 @@ func (db *Sql) ArticleCategory(dInfo string) string {
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
-
+	//
+	//resmodel := vo.BuildResp()
+	//resmodel.Count=11
+	//resmodel.Data=data
 	return vo.ResponseSuccess(data)
 }
 
@@ -412,6 +415,16 @@ func (db *Sql) ArticleRecommend(dInfo string) string {
 	}
 
 	return vo.ResponseSuccess(data)
+}
+
+func (db *Sql) ArticleAddTest(dInfo string) string {
+
+	e := ArticleAddTest(db, dInfo)
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+
+	return vo.ResponseSuccess()
 }
 
 /*

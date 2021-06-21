@@ -69,7 +69,7 @@ func SyncUser(db *Sql, value string) error {
 
 	sugar.Log.Info("-----------用户 信息 ", user)
 
-	id := utils.SnowId()
+	//id := utils.SnowId()
 	//create now time
 	//t:=time.Now().Format("2006-01-02 15:04:05")
 	t := time.Now().Unix()
@@ -78,8 +78,8 @@ func SyncUser(db *Sql, value string) error {
 		sugar.Log.Error("Insert data to sys_user is failed.")
 		return err
 	}
-	sid := strconv.FormatInt(id, 10)
-	res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+	//sid := strconv.FormatInt(user.Id, 10)
+	res, err := stmt.Exec(user.Id, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed.", res)
 		return err
@@ -394,16 +394,6 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 			sugar.Log.Error("解析失败:", err)
 			continue
 		}
-		sugar.Log.Info("---- 解析收到同步消息是---:", recieve)
-		sugar.Log.Info("---- 这是 谁发来的消息 fromId    peerId:", string(fromId))
-		sugar.Log.Info("---- 这是消息内容里面的 recieve.FromId    ---:", recieve.FromId)
-		sugar.Log.Info("---- 本机  peerId ---:", peerId)
-		sugar.Log.Infof("----这是  string(fromId)  %v \n---:", string(fromId))
-		sugar.Log.Info("---- 这是 谁发来的消息 fromId    msg.From:", msg.From)
-		sugar.Log.Infof("----这是  string(fromId)的类型  %T \n---:", string(fromId))
-		log.Printf("公共节点的信息 \n",msg.From)
-
-
 
 		wayId:="12D3KooWDoBhdQwGT6oq2EG8rsduRCmyTZtHaBCowFZ7enwP4i8J"
 
@@ -411,14 +401,10 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 
 		FromID:=base58.Encode(fromId)
 
-		log.Println("-----这是 base58 转string 类型 ----FromID ;",FromID)
-
 		if FromID==wayId{
 				sugar.Log.Info("---- 因为 公共网关 节点id 等于 i8j 所以满足条件进来 ---:", peerId)
-
 				
 				if peerId==recieve.FromId{
-
 					sugar.Log.Info("---- 因为 本地 节点id 等于 recieve fromId  所以不满足 ---:")
 					sugar.Log.Info("---- 因为 本地 节点id  ---",peerId)
 					sugar.Log.Info("---- 因为 本地 recieve.FromId  ---",recieve.FromId)
@@ -429,7 +415,6 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 					if recieve.Method == "receiveArticleAdd" {
 						//  添加 文章  入库
 						//第一步 解析
-
 						var syn vo.SyncRecieveArticleParams
 						err = json.Unmarshal(msg.Data, &syn)
 						if err != nil {
@@ -437,7 +422,6 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 							continue
 						}
 						// string
-
 						userInfo, err := json.Marshal(syn.Data)
 						if err != nil {
 							sugar.Log.Error("同步添加文章失败:", err)
@@ -449,15 +433,12 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 							sugar.Log.Error("同步添加文章失败:", err)
 							continue
 						}
-
 						sugar.Log.Info("同步添加文章成功")
 					} else if recieve.Method == "receiveArticlePlayAdd" {
 						sugar.Log.Info("-----  同步增加播放次数  -----")
-
 						sugar.Log.Info("-----  同步增加播放次数 的数据  -----", value)
 						//---
 						//第一步 解析
-
 						var syn vo.SyncRecievePlayParams
 						err = json.Unmarshal(msg.Data, &syn)
 						if err != nil {
@@ -479,19 +460,7 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 							sugar.Log.Error("-----  同步增加播放次数 失败  -----", err)
 							continue
 						}
-						//  增加播放次数
-						//var tmp vo.ChatMsgParams
-						//json1, _ := json.Marshal(msg.Data)
-						//json.Unmarshal(json1, &tmp)
-						//
-						//res, err := handleNewMsg(db, tmp)
-						//if err != nil {
-						//	sugar.Log.Error("handle add message failed.", err)
-						//	continue
-						//}
-						//msg.Data = res
-						//jsonStr, _ := json.Marshal(msg)
-						//clh.HandlerChat(string(jsonStr))
+
 					} else if recieve.Method == "receiveArticleShareAdd" {
 						//  增加 分享 次数
 
@@ -500,7 +469,6 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 						sugar.Log.Info("-----  同步  增加 分享 次数  的数据  -----", value)
 						//--
 						//第一步 解析
-
 						var syn vo.SyncRecievePlayParams
 						err = json.Unmarshal(msg.Data, &syn)
 						if err != nil {

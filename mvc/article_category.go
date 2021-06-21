@@ -29,7 +29,9 @@ func ArticleCategory(db *Sql, value string) ([]vo.ArticleResp, error) {
 	//rows, err := db.DB.Query("SELECT * FROM article limit ?,?", r,result.PageSize)
 	//SELECT * from article as a LEFT JOIN sys_user as b on a.user_id=b.id  LIMIT 0,4;
 	//userid:=cla
-	rows, err := db.DB.Query("SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id WHERE a.accesstory_type =?  ORDER BY ptime desc LIMIT ?,?", result.AccesstoryType, r, r1)
+	//rows, err := db.DB.Query("SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id WHERE a.accesstory_type =?  ORDER BY ptime desc LIMIT ?,?", result.AccesstoryType, r, r1)
+	//SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,f.is_like FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id WHERE a.accesstory_type =2
+	rows, err := db.DB.Query("SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,IFNULL(f.is_like,0) FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id WHERE a.accesstory_type =? ORDER BY ptime desc LIMIT ?,?", result.AccesstoryType, r, r1)
 
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
@@ -43,7 +45,7 @@ func ArticleCategory(db *Sql, value string) ([]vo.ArticleResp, error) {
 		var sex interface{}
 		var NickName interface{}
 		//var likeNum int64
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &peerId, &name, &phone, &sex, &NickName, &dl.IsLike)
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &peerId, &name, &phone, &sex, &NickName, &dl.LikeNum,&dl.Islike)
 		if err != nil { //PlayNum
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err

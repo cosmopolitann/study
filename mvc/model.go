@@ -74,6 +74,7 @@ type Article struct {
 	Thumbnail string `json:"thumbnail"`
 	FileName  string `json:"fileName"`
 	FileSize  string `json:"fileSize"`
+	Count    int64   `json:"count"`
 }
 
 //article like

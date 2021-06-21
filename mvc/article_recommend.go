@@ -28,7 +28,7 @@ func ArticleRecommend(db *Sql, value string) ([]Article, error) {
 	//SELECT * from article as a LEFT JOIN sys_user as b on a.user_id=b.id  LIMIT 0,4;
 	//userid:=cla
 
-	rows, err := db.DB.Query("SELECT * from article LIMIT ?,?;", r, result.PageSize)
+	rows, err := db.DB.Query("SELECT * from article order by ptime desc LIMIT ?,?;", r, result.PageSize)
 
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
