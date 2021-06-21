@@ -4,6 +4,7 @@ package vo
 
 type UserLoginParams struct {
 	Phone string `json:"phone"`
+	Prikey string `json:"prikey"`
 }
 
 // 登录返回参数
