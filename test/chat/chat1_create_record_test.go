@@ -37,7 +37,7 @@ func TestChatCreateRecord(t *testing.T) {
 	req := vo.ChatAddRecordParams{
 		Name:   "Record Name 2222",
 		FromId: "411647506288480256",
-		ToId:   "411642059200401408",
+		ToId:   "4116420592004014081",
 		Token:  token,
 	}
 

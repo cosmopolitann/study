@@ -2,6 +2,7 @@ package mvc
 
 import (
 	"context"
+	"database/sql"
 	bsql "database/sql"
 	"encoding/json"
 	"errors"
@@ -190,8 +191,12 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 		// 查询对方信息
 		err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM cloud_user WHERE id = ?", msg.FromId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
 		if err != nil {
-			sugar.Log.Error("Query Peer User Failed. Err:", err)
-			return ret, err
+			if err == sql.ErrNoRows {
+				sugar.Log.Warn("not found peer info, so set empty")
+			} else {
+				sugar.Log.Error("query peer info failed.Err is ", err)
+				return ret, err
+			}
 		}
 
 		return ret, nil
@@ -271,7 +276,7 @@ func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
 	switch err {
 	case bsql.ErrNoRows:
 		res, err := db.DB.Exec("INSERT INTO chat_record (id, name, from_id, to_id, ptime, last_msg) values (?, ?, ?, ?, ?, ?)",
-			ret.RecordId, "...", ret.FromId, ret.ToId, ret.Ptime, ret.Content)
+			ret.RecordId, "", ret.FromId, ret.ToId, ret.Ptime, ret.Content)
 		if err != nil {
 			return ret, err
 		}

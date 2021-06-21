@@ -83,8 +83,12 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 	// 查询对方信息
 	err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM sys_user WHERE id = ?", msg.ToId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
 	if err != nil {
-		sugar.Log.Error("Query Peer User Failed. Err:", err)
-		return ret, err
+		if err == sql.ErrNoRows {
+			sugar.Log.Warn("not found peer info, so set empty")
+		} else {
+			sugar.Log.Error("Query Peer User Failed. Err:", err)
+			return ret, err
+		}
 	}
 
 	swapMsg := vo.ChatSwapRecordParams{
