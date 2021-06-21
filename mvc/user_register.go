@@ -3,7 +3,6 @@ package mvc
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
@@ -23,7 +22,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 
 	}
 	sugar.Log.Info("params ：= ", user)
-
+	/** 手机号注册不用了,改用直接注册
 	l, e := FindIsExistUser(db, user)
 	if e != nil {
 		sugar.Log.Error("FindIsExistUser info is Failed.")
@@ -35,9 +34,8 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 		sugar.Log.Error("user is exist.")
 		return errors.New("user is exist.")
 	}
-
+*/
 	//inExist insert into sys_user.
-
 	sugar.Log.Info("-----------用户 信息 ", user)
 
 	id := utils.SnowId()
@@ -50,7 +48,8 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 		return err
 	}
 	sid := strconv.FormatInt(id, 10)
-	res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+	user.Phone = sid //手机号注册不用了,phone字段直接用id来填,兼容老版本
+		res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed.", res)
 		return err
