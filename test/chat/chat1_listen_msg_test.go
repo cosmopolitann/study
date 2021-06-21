@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/cosmopolitann/clouddb/sugar"
-	"github.com/cosmopolitann/clouddb/test/chat/ipfs"
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	_ "github.com/mattn/go-sqlite3"
@@ -38,13 +37,13 @@ func TestChatListenMsg(t *testing.T) {
 
 	var cl ChatLister
 
-	node, err := ipfs.GetIpfsNode("/Users/apple/.ipfs")
-	if err != nil {
-		sugar.Log.Info("xxxxx----", err)
-		panic(err)
-	}
+	// node, err := ipfs.GetIpfsNode("/Users/apple/.ipfs")
+	// if err != nil {
+	// 	sugar.Log.Info("xxxxx----", err)
+	// 	panic(err)
+	// }
 
-	resp := ss.ChatListenMsg(node, token, &cl)
+	resp := ss.ChatListenMsg(nil, token, &cl)
 	t.Log("获取返回的数据 :=  ", resp)
 
 	time.Sleep(time.Hour)

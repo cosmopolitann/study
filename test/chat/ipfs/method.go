@@ -1,36 +1,36 @@
 package ipfs
 
-import (
-	"fmt"
+// import (
+// 	"fmt"
 
-	ipfs_core "github.com/ipfs/go-ipfs/core"
-)
+// 	ipfs_core "github.com/ipfs/go-ipfs/core"
+// )
 
-func GetIpfsNode(path string) (*ipfs_core.IpfsNode, error) {
+// func GetIpfsNode(path string) (*ipfs_core.IpfsNode, error) {
 
-	repo, repoError := OpenRepo(path)
-	if repoError != nil {
-		return nil, repoError
-	}
-	if repo == nil {
-		config, err := NewDefaultConfig()
-		if err != nil {
-			fmt.Print("config error")
-			return nil, err
-		}
-		initRepoError := InitRepo(path, config)
-		if initRepoError != nil {
-			fmt.Print("initRepo error")
-		}
-		repo, repoError = OpenRepo(path)
-		if repoError != nil {
-			return nil, repoError
-		}
-	}
-	node, nodeError := NewNode(repo)
-	if nodeError != nil {
-		return nil, nodeError
-	}
+// 	repo, repoError := OpenRepo(path)
+// 	if repoError != nil {
+// 		return nil, repoError
+// 	}
+// 	if repo == nil {
+// 		config, err := NewDefaultConfig()
+// 		if err != nil {
+// 			fmt.Print("config error")
+// 			return nil, err
+// 		}
+// 		initRepoError := InitRepo(path, config)
+// 		if initRepoError != nil {
+// 			fmt.Print("initRepo error")
+// 		}
+// 		repo, repoError = OpenRepo(path)
+// 		if repoError != nil {
+// 			return nil, repoError
+// 		}
+// 	}
+// 	node, nodeError := NewNode(repo)
+// 	if nodeError != nil {
+// 		return nil, nodeError
+// 	}
 
-	return node.ipfsMobile.IpfsNode, nodeError
-}
+// 	return node.ipfsMobile.IpfsNode, nodeError
+// }
