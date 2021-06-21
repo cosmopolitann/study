@@ -44,6 +44,13 @@ type ChatRecordInfo struct {
 	Sex      int64  `json:"sex"`
 }
 type ChatRecordRespListParams struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Img          string `json:"img"`
+	LastMsg      string `json:"lastMsg"`
+	Ptime        int64  `json:"ptime"`
+	UnreadMsgNum int64  `json:"unreadMsgNum"`
+
 	FromId       string `json:"fromId"`
 	FromName     string `json:"fromName"`
 	FromImg      string `json:"fromImg"`

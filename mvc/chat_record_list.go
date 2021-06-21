@@ -44,18 +44,20 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 	sugar.Log.Debugf("Get User: %#v", user)
 
 	// 查询会话列表
-	rows, err := db.DB.Query("SELECT from_id, to_id FROM chat_record WHERE from_id = ? OR to_id = ?", user.Id, user.Id)
+	rows, err := db.DB.Query("SELECT id, name, from_id, to_id, ptime, last_msg FROM chat_record WHERE from_id = ? OR to_id = ?", user.Id, user.Id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 	}
 
 	for rows.Next() {
 		var ri vo.ChatRecordRespListParams
-		err := rows.Scan(&ri.FromId, &ri.ToId)
+		err := rows.Scan(&ri.Id, &ri.Name, &ri.FromId, &ri.ToId, &ri.Ptime, &ri.LastMsg)
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 			return ret, err
 		}
+
+		sugar.Log.Debug(ri)
 
 		peerId := ""
 
@@ -113,7 +115,11 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 					ri.ToSex = peer.Sex
 				}
 			}
+		}
 
+		err = db.DB.QueryRow("SELECT count(id) FROM chat_msg WHERE record_id = ? AND is_read = 0 AND from_id != ?", ri.Id, user.Id).Scan(&ri.UnreadMsgNum)
+		if err != nil {
+			sugar.Log.Warn("Query unread msg failed.Err is ", err)
 		}
 
 		ret = append(ret, ri)
