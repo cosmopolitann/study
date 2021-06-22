@@ -190,7 +190,7 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 		}
 
 		// 查询对方信息
-		err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM cloud_user WHERE id = ?", msg.FromId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
+		err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM sys_user WHERE id = ?", msg.FromId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
 		if err != nil {
 			if err == bsql.ErrNoRows {
 				sugar.Log.Warn("not found peer info, so set empty")
@@ -273,7 +273,7 @@ func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
 	}
 
 	// 检查房间是否存在
-	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ?", ret.Id).Scan(&recordId)
+	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ?", ret.RecordId).Scan(&recordId)
 	switch err {
 	case bsql.ErrNoRows:
 		ftid := strings.Split(ret.RecordId, "_")
