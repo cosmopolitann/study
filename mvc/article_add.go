@@ -2,6 +2,7 @@ package mvc
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"github.com/cosmopolitann/clouddb/jwt"
@@ -25,7 +26,7 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	sugar.Log.Info("Marshal article params data : ", art)
 	id := utils.SnowId()
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values (?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.Err: ", err)
 		return errors.New(" Insert into article table is failed. ")
@@ -42,7 +43,7 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 		return errors.New(" Insert into article table is failed. ")
 	}
 
-	// publish msg
+	//--------------- publish msg ----------------
 	var ok bool
 	topic:="/db-online-sync"
 	var tp *pubsub.Topic
@@ -58,17 +59,23 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
     //step 1
  	//query a article data
 	var dl vo.ArticleResp
-	rows, err := db.DB.Query("SELECT * from article where id=?;",sid)
-	if err != nil {
-		sugar.Log.Error("Query data is failed.Err is ", err)
-		return errors.New(" Sync query article table is failed. ")
-	}
-	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.ShareNum, &dl.PlayNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
-		if err != nil {
-			sugar.Log.Error("Query scan data is failed.The err is ", err)
-			return err
-		}
+	//rows, err := db.DB.Query("SELECT * from article where id=?;",sid)
+	//if err != nil {
+	//	sugar.Log.Error("Query data is failed.Err is ", err)
+	//	return errors.New(" Sync query article table is failed. ")
+	//}
+	//for rows.Next() {
+	//	err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.ShareNum, &dl.PlayNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+	//	if err != nil {
+	//		sugar.Log.Error("Query scan data is failed.The err is ", err)
+	//		return err
+	//	}
+	//}
+	//
+	err = db.DB.QueryRow("SELECT * from article where id=?;",sid).Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.ShareNum, &dl.PlayNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+	if err != nil && err != sql.ErrNoRows {
+		sugar.Log.Error("Query article failed.Err is", err)
+		return err
 	}
 	var g PubSyncArticle
 	g.Data = dl
@@ -90,6 +97,9 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	sugar.Log.Info(" ----  AddArticle Method  End ----")
 	return nil
 }
+
+
+
 type PubSyncArticle struct {
 	Type string `json:"type"`
 	Data vo.ArticleResp `json:"data"`

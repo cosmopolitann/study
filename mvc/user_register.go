@@ -44,7 +44,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) (vo.UserLoginRes
 	//create now time
 	//t:=time.Now().Format("2006-01-02 15:04:05")
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO sys_user values(?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values(?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed:",err.Error())
 		return resp,err

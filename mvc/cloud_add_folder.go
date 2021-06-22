@@ -19,16 +19,12 @@ func AddFolder(db *Sql, value string) error {
 	var f vo.CloudAddFolderParams
 	f1 := ConvertString(value, f)
 	err := mapstructure.Decode(f1, &f)
-
-
 	sugar.Log.Info("---- 开始 解析 参数  ---- 参数：",f)
-
 	sugar.Log.Info("Decode data  is  ", f)
 	sugar.Log.Info("参数 ParentId: ", f.ParentId)
 	sugar.Log.Info("参数 FileName:", f.FileName)
 	sugar.Log.Info("参数 Id:", f.Id)
 	sugar.Log.Info("参数 Token:", f.Token)
-
 
 	if err != nil {
 		sugar.Log.Error("Decode is failed.", err)
@@ -83,25 +79,6 @@ func AddFolder(db *Sql, value string) error {
 			return errors.New("创建文件夹失败")
 		}
 	}
-
-	//stmt, err := db.DB.Prepare("INSERT INTO cloud_file values(?,?,?,?,?,?,?,?,?,?)")
-	//if err != nil {
-	//	sugar.Log.Error("Insert into cloud_file table is failed.",err)
-	//	return err
-	//}
-	//sid := strconv.FormatInt(id, 10)
-	//res, err := stmt.Exec(sid,f.UserId ,f.FileName, f.ParentId,t ,f.FileCid,f.FileSize,f.FileStatus,f.FileType,f.IsFolder)
-	//if err != nil {
-	//	sugar.Log.Error("Insert into file  is Failed.",err)
-	//	return err
-	//}
-	//sugar.Log.Info("Insert into file  is successful.")
-	//l,_:=res.RowsAffected()
-	////
-	//fmt.Println(" l =",l)
-	//先查询一下本层有没有相同文件名，否则不能创建文件夹
-
-	//the create folder isexist.if exist,add local timestamp suffix
 	sugar.Log.Info("--  新建 文件夹 成功  返回  ---")
 
 	return nil

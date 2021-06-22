@@ -30,13 +30,7 @@ func TestAddArticleCategory(t *testing.T) {
 	t.Log("request value :=", value)
 	resp := ss.ArticleCategory(value)
 	t.Log("result:=", resp)
-	// test 2
-	//value2:=`{"pageSize":3,"pageNum":1,"accesstoryType":1}
-	//`
-	//
-	//	t.Log("request value :=",value2)
-	//	resp2:= ss.ArticleCategory(value2)
-	//	t.Log("result:=",resp2)
+
 
 }
 func Testdb(sq *sql.DB) mvc.Sql {

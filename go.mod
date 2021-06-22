@@ -9,6 +9,7 @@ require (
 	github.com/goinggo/mapstructure v0.0.0-20140717182941-194205d9b4a9
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/ipfs/go-ipfs v0.8.0
+	github.com/ipfs/go-ipfs-api v0.2.0
 	github.com/ipfs/go-ipfs-config v0.14.0
 	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/interface-go-ipfs-core v0.4.0

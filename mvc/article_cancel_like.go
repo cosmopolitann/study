@@ -42,5 +42,4 @@ func ArticleCancelLike(db *Sql, value string) error {
 		return err
 	}
 	return nil
-
 }
