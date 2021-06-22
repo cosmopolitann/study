@@ -24,7 +24,7 @@ func TestArticleQuery(t *testing.T) {
 	ss := Testdb(d)
 	// request json  params
 	// test 1
-	value := `{"id":"411581424198488064"}
+	value := `{"id":"413271162890489856"}
 `
 	t.Log("request value :=", value)
 	resp := ss.ArticleQuery(value)
