@@ -2,10 +2,14 @@ package chat
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
-	"github.com/cosmopolitann/clouddb/sugar"
-	_ "github.com/mattn/go-sqlite3"
 	"testing"
+
+	"github.com/cosmopolitann/clouddb/jwt"
+	"github.com/cosmopolitann/clouddb/sugar"
+	"github.com/cosmopolitann/clouddb/vo"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestChatRecordList(t *testing.T) {
@@ -13,7 +17,7 @@ func TestChatRecordList(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Projects/clouddb/tables/foo.db")
 	if err != nil {
 		panic(err)
 	}
@@ -22,9 +26,17 @@ func TestChatRecordList(t *testing.T) {
 	e := d.Ping()
 	fmt.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
-	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI","fromId":"410199041234702336"}
-`
-	resp := ss.ChatRecordList(value)
+
+	token, _ := jwt.GenerateToken("411647506288480256", 30*24*60*60)
+
+	req := vo.ChatRecordListParams{
+		FromId: "411647506288480256",
+		Token:  token,
+	}
+
+	value, _ := json.Marshal(req)
+
+	resp := ss.ChatRecordList(string(value))
 	t.Log("获取返回的数据 :=  ", resp)
 
 }

@@ -44,6 +44,13 @@ type ChatRecordInfo struct {
 	Sex      int64  `json:"sex"`
 }
 type ChatRecordRespListParams struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Img          string `json:"img"`
+	LastMsg      string `json:"lastMsg"`
+	Ptime        int64  `json:"ptime"`
+	UnreadMsgNum int64  `json:"unreadMsgNum"`
+
 	FromId       string `json:"fromId"`
 	FromName     string `json:"fromName"`
 	FromImg      string `json:"fromImg"`
@@ -59,4 +66,10 @@ type ChatRecordRespListParams struct {
 	ToPeerId   string `json:"toPeerId"`
 	ToNickName string `json:"toNickName"`
 	ToSex      int64  `json:"toSex"`
+}
+
+type ChatRenameRecordParams struct {
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Token string `json:"token"`
 }

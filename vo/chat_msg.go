@@ -26,6 +26,11 @@ type ChatSendMsgParams struct {
 	Token       string `json:"token"`       //token
 }
 
+type ChatReadMsgParams struct {
+	Ids   []string `json:"ids"`   //require
+	Token string   `json:"token"` //token
+}
+
 type ChatSwapMsgParams struct {
 	Id          string `json:"id"`
 	RecordId    string `json:"recordId"`    //require     coment 消息记录id

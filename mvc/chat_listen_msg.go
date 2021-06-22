@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"runtime/debug"
+	"strings"
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
@@ -63,7 +64,6 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				sugar.Log.Error("subscribe failed.", err)
 				return
 			}
-			sugar.Log.Debugf("receive: %s\n", data.Data)
 
 			msg = vo.ChatListenParams{}
 
@@ -83,6 +83,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 					// not me
 					continue
 				}
+
+				sugar.Log.Debugf("receive: %s\n", data.Data)
 
 				res, err := handleAddRecordMsg(db, tmp)
 				if err != nil {
@@ -107,6 +109,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 					continue
 				}
 
+				sugar.Log.Debugf("receive: %s\n", data.Data)
+
 				res, err := handleNewMsg(db, tmp)
 				if err != nil {
 					if err != vo.ErrorRowIsExists {
@@ -128,6 +132,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 					// not me
 					continue
 				}
+
+				sugar.Log.Debugf("receive: %s\n", data.Data)
 
 				res, err := handleWithdrawMsg(db, tmp)
 				if err != nil {
@@ -168,12 +174,13 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 	}
 
 	var ptime int64
-	err := db.DB.QueryRow("SELECT ptime FROM chat_record WHERE id = ?", msg.Id).Scan(&ptime)
+
+	err := db.DB.QueryRow("SELECT ptime FROM chat_record WHERE id = ?", ret.Id).Scan(&ptime)
 
 	switch err {
 	case bsql.ErrNoRows:
 		res, err := db.DB.Exec("INSERT INTO chat_record (id, name, from_id, to_id, ptime, last_msg) values (?, ?, ?, ?, ?, ?)",
-			msg.Id, msg.Name, msg.FromId, msg.ToId, msg.Ptime, msg.LastMsg)
+			ret.Id, "", ret.FromId, ret.Toid, ret.Ptime, ret.LastMsg)
 		if err != nil {
 			return ret, err
 		}
@@ -185,14 +192,18 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 		// 查询对方信息
 		err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM cloud_user WHERE id = ?", msg.FromId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
 		if err != nil {
-			sugar.Log.Error("Query Peer User Failed. Err:", err)
-			return ret, err
+			if err == bsql.ErrNoRows {
+				sugar.Log.Warn("not found peer info, so set empty")
+			} else {
+				sugar.Log.Error("query peer info failed.Err is ", err)
+				return ret, err
+			}
 		}
 
 		return ret, nil
 	case nil:
 		if ptime > msg.Ptime {
-			res, err := db.DB.Exec("UPDATE chat_record SET from_id, to_id, ptime = ?, last_msg = ? WHERE id = ?", msg.FromId, msg.ToId, msg.Ptime, msg.LastMsg, msg.Id)
+			res, err := db.DB.Exec("UPDATE chat_record SET from_id = ?, to_id = ?, ptime = ? WHERE id = ?", ret.FromId, ret.Toid, msg.Ptime, ret.Id)
 			if err != nil {
 				return ret, err
 			}
@@ -262,11 +273,16 @@ func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
 	}
 
 	// 检查房间是否存在
-	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ?", ret.RecordId).Scan(&recordId)
+	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ?", ret.Id).Scan(&recordId)
 	switch err {
 	case bsql.ErrNoRows:
+		ftid := strings.Split(ret.RecordId, "_")
+		if len(ftid) < 2 {
+			return ret, errors.New("recorId error: " + ret.RecordId)
+		}
+
 		res, err := db.DB.Exec("INSERT INTO chat_record (id, name, from_id, to_id, ptime, last_msg) values (?, ?, ?, ?, ?, ?)",
-			ret.RecordId, "...", ret.FromId, ret.ToId, ret.Ptime, ret.Content)
+			ret.RecordId, "", ftid[0], ftid[1], ret.Ptime, ret.Content)
 		if err != nil {
 			return ret, err
 		}

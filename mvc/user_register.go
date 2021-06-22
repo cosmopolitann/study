@@ -3,27 +3,28 @@ package mvc
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"
+	"github.com/cosmopolitann/clouddb/vo"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"strconv"
 	"time"
 )
 
-func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
+func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) (vo.UserLoginRespParams,error) {
 	//user string ==> user struct
 	//Add sys_user
 	//create snow id
-
+	var resp vo.UserLoginRespParams
 	var user SysUser
 	err := json.Unmarshal([]byte(value), &user)
 	if err != nil {
 
 	}
 	sugar.Log.Info("params ：= ", user)
-
+	/** 手机号注册不用了,改用直接注册
 	l, e := FindIsExistUser(db, user)
 	if e != nil {
 		sugar.Log.Error("FindIsExistUser info is Failed.")
@@ -35,9 +36,8 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 		sugar.Log.Error("user is exist.")
 		return errors.New("user is exist.")
 	}
-
+*/
 	//inExist insert into sys_user.
-
 	sugar.Log.Info("-----------用户 信息 ", user)
 
 	id := utils.SnowId()
@@ -46,21 +46,26 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	t := time.Now().Unix()
 	stmt, err := db.DB.Prepare("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values(?,?,?,?,?,?,?,?,?)")
 	if err != nil {
-		sugar.Log.Error("Insert data to sys_user is failed.")
-		return err
+		sugar.Log.Error("Insert data to sys_user is failed:",err.Error())
+		return resp,err
 	}
 	sid := strconv.FormatInt(id, 10)
+	user.Phone = sid //手机号注册不用了,phone字段直接用id来填,兼容老版本
+	user.Sex = 0
+	user.NickName = "飞天" + sid[0:4]
 	res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
 	if err != nil {
-		sugar.Log.Error("Insert data to sys_user is failed.", res)
-		return err
+		sugar.Log.Error("Insert data to sys_user is failed:", err.Error())
+		return resp,err
 	}
 	c, _ := res.RowsAffected()
 	sugar.Log.Info("~~~~~   Insert into sys_user data is Successful ~~~~~~", c)
 	//生成 token
 	// 手机号
 	//token,err:=jwt.GenerateToken(user.Phone,60)
-
+	resp.Token,_ = jwt.GenerateToken(sid,-1)
+	resp.UserInfo = GetUser(db,sid)
+	//return resp,nil
 	//=====
 	// publish msg
 	topic:="/db-online-sync"
@@ -73,7 +78,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	if tp,ok = Topicmp["/db-online-sync"];ok == false {
 		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
-			return err
+			return resp,err
 		}
 		Topicmp[topic] = tp
 
@@ -88,13 +93,13 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	rows, err := db.DB.Query("select * from sys_user where id=?", sid)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
-		return err
+		return resp,err
 	}
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
-			return err
+			return resp,err
 		}
 		sugar.Log.Info("Query a entire data is ", dl)
 	}
@@ -111,7 +116,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	jsonBytes, err := json.Marshal(s3)
 	if err != nil {
 		sugar.Log.Info("--- 开始 发布的消息 ---")
-		return err
+		return resp,err
 	}
 	sugar.Log.Info("--- 解析后的数据 返回给 转接服务器 ---",string(jsonBytes))
 	sugar.Log.Info("--- 这是 节点的id 信息 ---",ipfsNode.Identity.String())
@@ -121,11 +126,10 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	err = tp.Publish(ctx,jsonBytes)
 	if err != nil {
 		sugar.Log.Error("发布错误:", err)
-		return err
+		return resp,err
 	}
 	sugar.Log.Error("---  发布的消息  完成  ---")
-
-	return nil
+	return resp,nil
 }
 
 

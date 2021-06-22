@@ -45,14 +45,14 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 	}
 
 	ret.Id = genRecordID(msg.FromId, msg.ToId)
-	ret.Name = msg.Name
+	ret.Name = ""
 	ret.FromId = msg.FromId
 	ret.Toid = msg.ToId
 	ret.LastMsg = ""
 	ret.Ptime = time.Now().Unix()
 
 	// 检查是否存在
-	err = db.DB.QueryRow("SELECT id, name, from_id, to_id, ptime, last_msg FROM chat_record WHERE id = ?", ret.Id).Scan(&ret.Id, &ret.Name, &ret.FromId, &ret.Toid, &ret.Ptime, &ret.LastMsg)
+	err = db.DB.QueryRow("SELECT id, from_id, to_id, ptime, last_msg FROM chat_record WHERE id = ?", ret.Id).Scan(&ret.Id, &ret.FromId, &ret.Toid, &ret.Ptime, &ret.LastMsg)
 	if err != nil && err != sql.ErrNoRows {
 		sugar.Log.Error("Query chat_record failed.Err is", err)
 		return ret, err
@@ -83,8 +83,12 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 	// 查询对方信息
 	err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM sys_user WHERE id = ?", msg.ToId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
 	if err != nil {
-		sugar.Log.Error("Query Peer User Failed. Err:", err)
-		return ret, err
+		if err == sql.ErrNoRows {
+			sugar.Log.Warn("not found peer info, so set empty")
+		} else {
+			sugar.Log.Error("Query Peer User Failed. Err:", err)
+			return ret, err
+		}
 	}
 
 	swapMsg := vo.ChatSwapRecordParams{
@@ -134,5 +138,10 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 }
 
 func genRecordID(fromID, toID string) string {
-	return fromID + "_" + toID
+	if fromID <= toID {
+		return fromID + "_" + toID
+	} else {
+		return toID + "_" + fromID
+	}
+
 }
