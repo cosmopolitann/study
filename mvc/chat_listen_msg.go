@@ -73,6 +73,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				continue
 			}
 
+			sugar.Log.Debugf("receive-0: %s\n", data.Data)
+
 			if msg.Type == vo.MSG_TYPE_RECORD {
 
 				var tmp vo.ChatSwapRecordParams
@@ -190,7 +192,7 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 		}
 
 		// 查询对方信息
-		err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM cloud_user WHERE id = ?", msg.FromId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
+		err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM sys_user WHERE id = ?", msg.FromId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
 		if err != nil {
 			if err == bsql.ErrNoRows {
 				sugar.Log.Warn("not found peer info, so set empty")
