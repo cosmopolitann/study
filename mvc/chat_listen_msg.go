@@ -175,15 +175,12 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 
 	var ptime int64
 
-	recordId1 := genRecordID(msg.FromId, msg.ToId)
-	recordId2 := genRecordID2(msg.FromId, msg.ToId)
-
-	err := db.DB.QueryRow("SELECT ptime FROM chat_record WHERE id = ? OR id = ?", recordId1, recordId2).Scan(&ptime)
+	err := db.DB.QueryRow("SELECT ptime FROM chat_record WHERE id = ?", ret.Id).Scan(&ptime)
 
 	switch err {
 	case bsql.ErrNoRows:
 		res, err := db.DB.Exec("INSERT INTO chat_record (id, name, from_id, to_id, ptime, last_msg) values (?, ?, ?, ?, ?, ?)",
-			msg.Id, "", msg.FromId, msg.ToId, msg.Ptime, msg.LastMsg)
+			ret.Id, "", ret.FromId, ret.Toid, ret.Ptime, ret.LastMsg)
 		if err != nil {
 			return ret, err
 		}
@@ -206,7 +203,7 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 		return ret, nil
 	case nil:
 		if ptime > msg.Ptime {
-			res, err := db.DB.Exec("UPDATE chat_record SET id = ?, from_id = ?, to_id = ?, ptime = ? WHERE id = ? OR id = ?", msg.Id, msg.FromId, msg.ToId, msg.Ptime, recordId1, recordId2)
+			res, err := db.DB.Exec("UPDATE chat_record SET from_id = ?, to_id = ?, ptime = ? WHERE id = ?", ret.FromId, ret.Toid, msg.Ptime, ret.Id)
 			if err != nil {
 				return ret, err
 			}
@@ -276,14 +273,12 @@ func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
 	}
 
 	// 检查房间是否存在
-	recordId1 := genRecordID(msg.FromId, msg.ToId)
-	recordId2 := genRecordID2(msg.FromId, msg.ToId)
-	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ? OR id = ?", recordId1, recordId2).Scan(&recordId)
+	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ?", ret.Id).Scan(&recordId)
 	switch err {
 	case bsql.ErrNoRows:
-		ftid := strings.Split(msg.RecordId, "_")
+		ftid := strings.Split(ret.RecordId, "_")
 		if len(ftid) < 2 {
-			return ret, errors.New("recorId error: " + msg.RecordId)
+			return ret, errors.New("recorId error: " + ret.RecordId)
 		}
 
 		res, err := db.DB.Exec("INSERT INTO chat_record (id, name, from_id, to_id, ptime, last_msg) values (?, ?, ?, ?, ?, ?)",
