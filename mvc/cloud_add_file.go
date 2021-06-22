@@ -32,7 +32,7 @@ func AddFile(db *Sql, value string) (string, error) {
 	userId := claim["UserId"]
 	id := utils.SnowId()
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO cloud_file values(?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder) values(?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into cloud_file table is failed.", err)
 		return "", err

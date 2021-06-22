@@ -94,7 +94,7 @@ func InsertIntoData(db *Sql, f vo.CloudAddFolderParams, userId string) (c int64,
 	sugar.Log.Info("--  参数信息   ParentId---",f.FileName)
 	sugar.Log.Info("--  参数信息   ---",f)
 
-	stmt, err := db.DB.Prepare("INSERT INTO cloud_file values(?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder) values(?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into cloud_file table is failed.", err)
 		return 0, err
@@ -118,7 +118,6 @@ func InsertIntoData(db *Sql, f vo.CloudAddFolderParams, userId string) (c int64,
 }
 
 func IsFormat(f vo.CloudAddFolderParams) error {
-	sugar.Log.Info("判断文件夹 是否 不满足 格式 成功 3")
 
 	//pId, err := strconv.Atoi(f.ParentId)
 	pId,err := strconv.ParseInt(f.ParentId,10,64)
@@ -128,8 +127,6 @@ func IsFormat(f vo.CloudAddFolderParams) error {
 	if pId < 0 {
 		return errors.New("参数不能为负数")
 	}
-	sugar.Log.Info("判断文件夹 是否 不满足 格式 成功 4")
-
 	if IsEmptyRename(f.FileName) {
 		return errors.New("文件夹名称不能为空")
 	}
@@ -148,8 +145,6 @@ func IsFormat(f vo.CloudAddFolderParams) error {
 	if find := strings.Contains(f.FileName, "*"); find {
 		return errors.New("文件夹不能为包含非法字符")
 	}
-	sugar.Log.Info("判断文件夹 是否 不满足 格式 成功 5")
-
 	return nil
 }
 
@@ -169,7 +164,7 @@ func IsEmptyRename(rename string) bool {
 func FindOneDirIsExist(mvc *Sql, d vo.CloudAddFolderParams) (int64, error) {
 	//查询数据
 	var f File
-	rows, _ := mvc.DB.Query("SELECT * FROM cloud_file where file_name=? and parent_id=? and is_folder=?", d.FileName, d.ParentId, 1)
+	rows, _ := mvc.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0) FROM cloud_file where file_name=? and parent_id=? and is_folder=?", d.FileName, d.ParentId, 1)
 	for rows.Next() {
 		err := rows.Scan(&f.Id, &f.UserId, &f.FileName, &f.ParentId, &f.Ptime, &f.FileCid, &f.FileSize, &f.FileType, &f.IsFolder)
 		if err != nil {

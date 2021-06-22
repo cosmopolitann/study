@@ -38,7 +38,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) (vo.UserLoginRes
 	}
 */
 	//inExist insert into sys_user.
-	sugar.Log.Info("-----------用户 信息 ", user)
+	sugar.Log.Info("-----------用户 信息 -------", user)
 
 	id := utils.SnowId()
 	//create now time
@@ -90,7 +90,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) (vo.UserLoginRes
    //查询数据
 	var dl SysUser
 
-	rows, err := db.DB.Query("select * from sys_user where id=?", sid)
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", sid)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return resp,err

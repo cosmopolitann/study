@@ -3,6 +3,7 @@ package mvc
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
@@ -12,6 +13,8 @@ import (
 
 func TransferList(db *Sql, value string) (data []TransferDownLoadParams, e error) {
 	var list vo.TransferListParams
+	var arrfile []TransferDownLoadParams
+
 	err := json.Unmarshal([]byte(value), &list)
 	if err != nil {
 		sugar.Log.Error("Marshal is failed.Err is ", err)
@@ -22,11 +25,11 @@ func TransferList(db *Sql, value string) (data []TransferDownLoadParams, e error
 	//校验 token 是否 满足
 	claim, b := jwt.JwtVeriyToken(list.Token)
 	if !b {
+		return arrfile, errors.New("token失效")
 	}
 	sugar.Log.Info("claim := ", claim)
 
-	var arrfile []TransferDownLoadParams
-	rows, err := db.DB.Query("select * from cloud_transfer where user_id=?", claim["UserId"].(string))
+	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(down_path,'null'),IFNULL(file_type,0),IFNULL(transfer_type,0),IFNULL(upload_parent_id,0),IFNULL(upload_file_id,0) from cloud_transfer where user_id=?", claim["UserId"].(string))
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, errors.New("查询下载列表信息失败")
@@ -42,10 +45,6 @@ func TransferList(db *Sql, value string) (data []TransferDownLoadParams, e error
 		arrfile = append(arrfile, dl)
 	}
 	sugar.Log.Info("Query all data is ", arrfile)
-	return arrfile, nil
-
-	sugar.Log.Info("Insert into article  is successful.")
-
 	return arrfile, nil
 
 }

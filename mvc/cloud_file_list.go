@@ -27,7 +27,7 @@ func CloudFileList(db *Sql, value string) (data []File, e error) {
 	sugar.Log.Info("claim := ", claim)
 
 	// 查询
-	rows, err := db.DB.Query("select * from cloud_file where parent_id=? and is_folder=? and user_id", list.ParentId, 0, claim["UserId"].(string))
+	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0) from cloud_file where parent_id=? and is_folder=? and user_id", list.ParentId, 0, claim["UserId"].(string))
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, errors.New("查询下载列表信息失败")

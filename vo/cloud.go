@@ -18,6 +18,8 @@ type CloudAddFileParams struct {
 	FileSize int64  `json:"fileSize"`
 	FileType int64  `json:"fileType"`
 	Token    string `json:"token"`
+	//
+
 }
 
 //folder

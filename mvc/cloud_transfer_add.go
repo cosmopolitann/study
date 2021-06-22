@@ -28,7 +28,7 @@ func DownLoadFile(db *Sql, value string) (e error) {
 
 	//t := time.Now().Format("2006-01-02 15:04:05")
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO cloud_transfer values(?,?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO cloud_transfer (id,user_id,file_name,ptime,file_cid,file_size,down_path,file_type,transfer_type,upload_parent_id,upload_file_id) values(?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into cloud_down table is failed.", err)
 		return errors.New("插入cloud_down 表 数据失败")
