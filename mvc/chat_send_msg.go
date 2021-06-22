@@ -54,7 +54,7 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 	ret.Ptime = time.Now().Unix()
 	ret.IsWithdraw = 0
 	ret.IsRead = 0
-	ret.RecordId = genRecordID(msg.FromId, msg.ToId)
+	ret.RecordId = msg.RecordId
 
 	res, err := db.DB.Exec(
 		"INSERT INTO chat_msg (id, content_type, content, from_id, to_id, ptime, is_with_draw, is_read, record_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
