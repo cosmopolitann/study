@@ -73,8 +73,6 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				continue
 			}
 
-			sugar.Log.Debugf("receive-0: %s\n", data.Data)
-
 			if msg.Type == vo.MSG_TYPE_RECORD {
 
 				var tmp vo.ChatSwapRecordParams
@@ -275,7 +273,7 @@ func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
 	}
 
 	// 检查房间是否存在
-	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ?", ret.Id).Scan(&recordId)
+	err := db.DB.QueryRow("SELECT id FROM chat_record WHERE id = ?", ret.RecordId).Scan(&recordId)
 	switch err {
 	case bsql.ErrNoRows:
 		ftid := strings.Split(ret.RecordId, "_")
