@@ -542,7 +542,7 @@ func Exist(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
-func OffLineSyncData(db *Sql, filePath string) {
+func OffLineSyncData(db *Sql, value string) {
 	//
 	// sh = shell.NewShell("localhost:5001")
 	// hash := "QmaZMLejnjNKex6Nrs2RGLC8n7NvWQP8RFPn2dLs2XviYb"
@@ -561,7 +561,7 @@ func OffLineSyncData(db *Sql, filePath string) {
 
 	// 创建 local 文件。
 	fmt.Println(" ------------- 开始 执行 离线 任务  ------------")
-	var defaltPath = filePath + "local"
+	var defaltPath = "/Users/apple/winter/offline/" + "local"
 	fmt.Println(" 本地 local 路径 ： ", defaltPath)
 
 	b := Exist(defaltPath)
@@ -601,16 +601,13 @@ func OffLineSyncData(db *Sql, filePath string) {
 
 	//读出  本地 文件
 	log.Println(" ----- 开始  读取 本地 文件 local  信息 ----- ")
-
-	local, err := ioutil.ReadFile(filePath + "local") // just pass the file name
+	local, err := ioutil.ReadFile("/Users/apple/winter/offline/local") // just pass the file name
 	if err != nil {
 		fmt.Print(err)
 	}
 	log.Println("这是 读出的 本地 文件 local 内容 : ", string(local))
 
 	//读出  远程 文件
-	log.Println("这是 远程 remote 文件的hash  : ", hash)
-
 	read, err := sh.Cat(hash)
 	if err != nil {
 		fmt.Println(err)
@@ -640,9 +637,12 @@ func OffLineSyncData(db *Sql, filePath string) {
 		for i := 1; i < len(diff); i++ {
 			fmt.Println(" --- 开始 遍历 数组  diff  ----- ")
 			fmt.Println(" --- 开始 遍历 数组  v ==  ----- ", diff[i])
+			fmt.Println(" --- 开始 遍历 数组  diff[0] ==  ----- ", diff[0])
+			fmt.Println(" --- 开始 遍历 数组  string(diff[1]) ==  ----- ", string(diff[1]))
+			fmt.Println(" --- 开始 遍历 数组  string(diff[2]) ==  ----- ", string(diff[2]))
 
 			// 获取 cid
-			cidPath := filePath + string(diff[i])
+			cidPath := "/Users/apple/winter/offline/" + string(diff[i])
 			err := sh.Get(string(diff[i]), cidPath)
 			if err != nil {
 				fmt.Println(err)
@@ -799,9 +799,12 @@ func OffLineSyncData(db *Sql, filePath string) {
 
 	}
 
+	//
 	fmt.Println(" 开始 执行  更新 本地 数据  到 ipns ")
-	UploadFile(filePath, hash)
+	UploadFile("/Users/apple/winter/offline/", hash)
+
 	fmt.Println("远程和本地相等，不执行任何操作，直接返回。")
+
 }
 func checkFileIsExist(filename string) bool {
 	var exist = true
@@ -844,7 +847,7 @@ func UploadFile(path string, hash string) {
 	//  解析 k5 id  然后 拉取对应的 remote 数据
 
 	var updateCid string
-	b := Exist(path + "update")
+	b := Exist(path + "update.txt")
 	if !b {
 		//创建文件
 		_, err1 := os.OpenFile(path+"update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
@@ -853,21 +856,21 @@ func UploadFile(path string, hash string) {
 		}
 
 		// } else {
-	}
+	} else {
+		bytes1, err := ioutil.ReadFile(path + "update")
 
-	bytes1, err := ioutil.ReadFile(path + "update")
+		if err != nil {
+			fmt.Println("读取内容失败", err)
 
-	if err != nil {
-		fmt.Println("读取内容失败", err)
+		}
+		// 上传 ipfs
+		hash_local, err := sh.Add(bytes.NewBufferString(string(bytes1)))
+		if err != nil {
+			fmt.Println("上传ipfs时错误：", err)
+		}
+		fmt.Println("这是上传的时候 hash_local == ", hash_local)
+		updateCid = hash_local
 	}
-	// 上传 ipfs
-	hash_local, err := sh.Add(bytes.NewBufferString(string(bytes1)))
-	if err != nil {
-		fmt.Println("上传ipfs时错误：", err)
-	}
-	fmt.Println("这是上传的时候 hash_local == ", hash_local)
-	updateCid = hash_local
-
 	// 默认的文件 hash
 	// hash := "QmYntasS515q9oF2LC6Boka2aWAGs1EHnSdRfQzBYipH8j"
 	// hash := result
@@ -877,18 +880,16 @@ func UploadFile(path string, hash string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	remote1, readErr := ioutil.ReadAll(read)
-	if readErr != nil {
-		fmt.Println("读出远程文件的信息内容错误", readErr)
-	}
-	fmt.Println("  这是 读出的 remote 远程文件的信息内容：", string(remote1))
+	remote1, err := ioutil.ReadAll(read)
+	fmt.Println("  这是 读出的 remote 远程文件的信息内容：", remote1)
 	//  检查本地是否有 更新文件
 	//  读出本地 local 文件 信息内容
 	var defaltPath = path + "local"
 
 	lfile := Exist(defaltPath)
+
 	var upInfo string = string(remote1) + "_" + updateCid
-	if !lfile {
+	if lfile == false {
 		//创建
 		_, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
 		if err1 != nil {
@@ -897,13 +898,12 @@ func UploadFile(path string, hash string) {
 		fmt.Println("  ----- 本地 local 文件 存在  ----")
 
 	} else {
-		f1, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
-		if err1 != nil {
-			fmt.Println("  ----- 打开 local 文件失败  ----", err1)
-		}
+		f1, err := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
+
 		var all = string(remote1) + "_" + updateCid
 		//upInfo = all
 		fmt.Println("  ----- 上传的 信息 upInfo  ----", upInfo)
+
 		_, err = f1.WriteString(all)
 		if err != nil {
 			fmt.Println(" 写入 local 文件 错误：", err)
@@ -943,9 +943,9 @@ func UploadFile(path string, hash string) {
 				break
 			}
 		}
-		if !dbexist {
+		if dbexist == false {
 			fmt.Println(" ----- 因为  里面  没有 dbkey  所以 添加 秘钥 -----")
-			postFormDataWithSingleFile(path)
+			postFormDataWithSingleFile()
 		}
 	}
 
@@ -966,29 +966,12 @@ func UploadFile(path string, hash string) {
 	fmt.Println("pubresp Name=", pubresp.Name)
 	fmt.Println("pubresp Value=", pubresp.Value)
 	//http 请求 ipns
-	// 删除 update 文件。
-	existed := true
-	if _, err := os.Stat(path + "update"); os.IsNotExist(err) {
-		existed = false
-	}
-	if existed {
-		err := os.Remove(path + "update")
-
-		if err != nil {
-			fmt.Println(" 删除失败 update 文件 ", path+"update")
-			// 删除失败
-		} else {
-			fmt.Println(" 删除成功 update 文件", path+"update")
-			// 删除成功
-		}
-	}
-	fmt.Println(" ------ - 删除成功 update 文件  ----------", path+"update")
 
 }
 
 // 请求 ipns
 
-func postFormDataWithSingleFile(path string) {
+func postFormDataWithSingleFile() {
 	fmt.Println("------  开始 导入 dbkey ------")
 	client := http.Client{}
 	bodyBuf := &bytes.Buffer{}
@@ -996,9 +979,8 @@ func postFormDataWithSingleFile(path string) {
 
 	//路径  传进来。。
 	//todo
-	keyPath := path + "db-key"
 
-	file, err := os.Open(keyPath)
+	file, err := os.Open("/Users/apple/Desktop/db-key")
 	defer file.Close()
 	if err != nil {
 		log.Println("err")
@@ -1014,18 +996,18 @@ func postFormDataWithSingleFile(path string) {
 	contentType := bodyWrite.FormDataContentType()
 	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:5001/api/v0/key/import?arg=dbkey&ipns-base=base36", bodyBuf)
 	if err != nil {
-		log.Println(err)
+		log.Println("err")
 	}
 	// 设置头
 	req.Header.Set("Content-Type", contentType)
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Println("err")
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err)
+		log.Println("err")
 	}
 	fmt.Println(string(b))
 	fmt.Println("------  开始 导入 dbkey  成功------")

@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 )
 
-func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
+func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	var dl Article
 	var art vo.ArticlePlayAddParams
 	err := json.Unmarshal([]byte(value), &art)
@@ -65,14 +64,14 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	}
 
 	// publish msg
-	topic := "/db-online-sync"
-	sugar.Log.Info("发布主题:", "/db-online-sync")
-	sugar.Log.Info("发布消息:", value)
+	topic:="/db-online-sync"
+	sugar.Log.Info("发布主题:","/db-online-sync")
+	sugar.Log.Info("发布消息:",value)
 	//判断是否弃用
 	var tp *pubsub.Topic
 	var ok bool
 	ctx := context.Background()
-	if tp, ok = Topicmp["/db-online-sync"]; ok == false {
+	if tp,ok = Topicmp["/db-online-sync"];ok == false {
 		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
 			return err
@@ -105,17 +104,17 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	var s3 PlayAdd
 	s3.Type = "receiveArticlePlayAdd"
 	s3.Data = dl
-	s3.FromId = ipfsNode.Identity.String()
+	s3.FromId=ipfsNode.Identity.String()
 
 	jsonBytes, err := json.Marshal(s3)
 	if err != nil {
 		sugar.Log.Info("--- 开始 发布的消息 ---")
 		return err
 	}
-	sugar.Log.Info("--- 解析后的数据 返回给 转接服务器 ---", string(jsonBytes))
+	sugar.Log.Info("--- 解析后的数据 返回给 转接服务器 ---",string(jsonBytes))
 
 	//============================
-	err = tp.Publish(ctx, jsonBytes)
+	err = tp.Publish(ctx,jsonBytes)
 	if err != nil {
 		sugar.Log.Error("发布错误:", err)
 		return err
@@ -123,7 +122,7 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	sugar.Log.Error("---  发布的消息  完成  ---")
 
 	//==
-	err = tp.Publish(ctx, jsonBytes)
+	err = tp.Publish(ctx,jsonBytes)
 	if err != nil {
 		sugar.Log.Error("发布错误:", err)
 		return err
@@ -136,12 +135,13 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 // share add
 
 type PlayAdd struct {
-	Type   string  `json:"type"`
-	Data   Article `json:"data"`
-	FromId string  `json:"from"`
+	Type string   `json:"type"`
+	Data  Article `json:"data"`
+	FromId string `json:"from"`
 }
 
-func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
+
+func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	var dl Article
 	var art vo.ArticlePlayAddParams
 	err := json.Unmarshal([]byte(value), &art)
@@ -195,34 +195,24 @@ func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		return err
 	}
 
+
 	//=====
 	// publish msg
-	topic := "/db-online-sync"
-	sugar.Log.Info("发布主题:", "/db-online-sync")
-	sugar.Log.Info("发布消息:", value)
+	topic:="/db-online-sync"
+	sugar.Log.Info("发布主题:","/db-online-sync")
+	sugar.Log.Info("发布消息:",value)
 	//判断是否弃用
-	tp, ok := TopicJoin.Load(topic)
-	if !ok {
-		tp, err := ipfsNode.PubSub.Join(topic)
+	var tp *pubsub.Topic
+	var ok bool
+	ctx := context.Background()
+	if tp,ok = Topicmp["/db-online-sync"];ok == false {
+		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
-			sugar.Log.Error("subscribe Join failed.", err)
 			return err
 		}
+		Topicmp[topic] = tp
 
-		TopicJoin.Store(topic, tp)
 	}
-	// var tp *pubsub.Topic
-
-	// var ok bool
-	ctx := context.Background()
-	// if tp,ok = Topicmp["/db-online-sync"];ok == false {
-	// 	tp, err = ipfsNode.PubSub.Join(topic)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	Topicmp[topic] = tp
-
-	// }
 	sugar.Log.Info("--- 开始 发布的消息 ---")
 
 	sugar.Log.Info("发布的消息:", value)
@@ -251,12 +241,14 @@ func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	}
 	//
 
+
+
 	//
 	//第一步
 	var s3 ShareAdd
 	s3.Type = "receiveArticleShareAdd"
 	s3.Data = dl
-	s3.FromId = ipfsNode.Identity.String()
+	s3.FromId=ipfsNode.Identity.String()
 	//
 
 	jsonBytes, err := json.Marshal(s3)
@@ -264,9 +256,10 @@ func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		sugar.Log.Info("--- 开始 发布的消息 ---")
 		return err
 	}
-	sugar.Log.Info("--- 解析后的数据 返回给 转接服务器 ---", string(jsonBytes))
+	sugar.Log.Info("--- 解析后的数据 返回给 转接服务器 ---",string(jsonBytes))
 
-	err = tp.Publish(ctx, jsonBytes)
+
+	err = tp.Publish(ctx,jsonBytes)
 	if err != nil {
 		sugar.Log.Error("发布错误:", err)
 		return err
@@ -276,7 +269,7 @@ func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 }
 
 type ShareAdd struct {
-	Type   string  `json:"type"`
-	Data   Article `json:"data"`
+	Type string `json:"type"`
+	Data  Article `json:"data"`
 	FromId string  `json:"from"`
 }
