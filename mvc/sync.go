@@ -847,7 +847,7 @@ func UploadFile(path string, hash string) {
 	//  解析 k5 id  然后 拉取对应的 remote 数据
 
 	var updateCid string
-	b := Exist(path + "update.txt")
+	b := Exist(path + "update")
 	if !b {
 		//创建文件
 		_, err1 := os.OpenFile(path+"update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
@@ -945,7 +945,7 @@ func UploadFile(path string, hash string) {
 		}
 		if dbexist == false {
 			fmt.Println(" ----- 因为  里面  没有 dbkey  所以 添加 秘钥 -----")
-			postFormDataWithSingleFile()
+			postFormDataWithSingleFile(path)
 		}
 	}
 
@@ -971,7 +971,7 @@ func UploadFile(path string, hash string) {
 
 // 请求 ipns
 
-func postFormDataWithSingleFile() {
+func postFormDataWithSingleFile(path string) {
 	fmt.Println("------  开始 导入 dbkey ------")
 	client := http.Client{}
 	bodyBuf := &bytes.Buffer{}
@@ -980,7 +980,7 @@ func postFormDataWithSingleFile() {
 	//路径  传进来。。
 	//todo
 
-	file, err := os.Open("/Users/apple/Desktop/db-key")
+	file, err := os.Open(path + "db-key")
 	defer file.Close()
 	if err != nil {
 		log.Println("err")
