@@ -10,24 +10,23 @@ type CloudFindListParams struct {
 
 //file
 type CloudAddFileParams struct {
-	Id string `json:"id"`
-	//UserId     string    `json:"userId"`
-	FileName string `json:"fileName"`
-	ParentId string `json:"parentId"`
-	FileCid  string `json:"fileCid"`
-	FileSize int64  `json:"fileSize"`
-	FileType int64  `json:"fileType"`
-	Token    string `json:"token"`
-	//
-
+	Id        string `json:"id"`
+	FileName  string `json:"fileName"`  //文件名字
+	ParentId  string `json:"parentId"`  //父id
+	FileCid   string `json:"fileCid"`   //文件cid
+	FileSize  int64  `json:"fileSize"`  //文件大小
+	FileType  int64  `json:"fileType"`  //文件类型
+	Token     string `json:"token"`     //token
+	Thumbnail string `json:"thumbnail"` //缩略图
 }
 
 //folder
 type CloudAddFolderParams struct {
-	Id       string `json:"id"`
-	FileName string `json:"fileName"`
-	ParentId string `json:"parentId"`
-	Token    string `json:"token"`
+	Id        string `json:"id"`
+	FileName  string `json:"fileName"`
+	ParentId  string `json:"parentId"`
+	Token     string `json:"token"`
+	Thumbnail string `json:"thumbnail"` //缩略图
 }
 
 //file list
