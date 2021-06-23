@@ -3,6 +3,8 @@ package mvc
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -14,7 +16,9 @@ import (
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 )
 
-func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.UserLoginRespParams, error) {
+func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (vo.UserLoginRespParams, error) {
+	sugar.Log.Info(" ----  Path :", path)
+
 	//user string ==> user struct
 	//Add sys_user
 	//create snow id
@@ -129,7 +133,26 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.UserLoginRe
 		sugar.Log.Error("发布错误:", err)
 		return resp, err
 	}
-	sugar.Log.Error("---  发布的消息  完成  ---")
+	sugar.Log.Info("---  发布的消息  完成  ---")
+	// 写入文件
+	sugar.Log.Info("---  sql语句 写入文件  ---")
+	//
+	f1, err1 := os.OpenFile(path+"update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
+	if err1 != nil {
+		sugar.Log.Error("创建失败update :", err1)
+	}
+
+	sugar.Log.Info("----- 本地 local 文件 存在  ----")
+
+	// 拼接字符串 sql 语句
+	sql := fmt.Sprintf("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values('%s','%s','%s','%s',%d,%d,%d,'%s','%s')\n", sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+
+	_, err = f1.WriteString(sql)
+	if err != nil {
+		sugar.Log.Error("-----  写入 local 文件 错误：  ----", err)
+	}
+	sugar.Log.Info("-----  写入 local 文件 成功 ----", err)
+	//
 	return resp, nil
 }
 

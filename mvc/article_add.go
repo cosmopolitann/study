@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
 	"strconv"
 	"time"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"
@@ -15,8 +18,10 @@ import (
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 )
 
-func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
+func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) error {
 	sugar.Log.Info(" ----  AddArticle Method ----")
+	sugar.Log.Info(" ----  Path :", path)
+
 	var art vo.ArticleAddParams
 	err := json.Unmarshal([]byte(value), &art)
 	if err != nil {
@@ -94,6 +99,26 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		return err
 	}
 	sugar.Log.Info("---  Publish to other device  ---")
+	//
+
+	// 写入文件
+	sugar.Log.Info("---  sql语句 写入文件  ---")
+	//
+	f1, err1 := os.OpenFile(path+"update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
+	if err1 != nil {
+		sugar.Log.Error("创建失败update :", err1)
+	}
+
+	sugar.Log.Info("----- 本地 local 文件 存在  ----")
+
+	// 拼接字符串 sql 语句
+	sql := fmt.Sprintf("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('%s','%s','%s',%d,'%s','%s',%d,%d,%d,'%s','%s','%s','%s')\n", sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+
+	_, err = f1.WriteString(sql)
+	if err != nil {
+		sugar.Log.Error("-----  写入 update 文件 错误：  ----", err)
+	}
+	sugar.Log.Info("-----  写入 update 文件 成功 ----", err)
 	sugar.Log.Info(" ----  AddArticle Method  End ----")
 	return nil
 }

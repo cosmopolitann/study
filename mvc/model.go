@@ -149,3 +149,7 @@ type DeleteManyDirParams struct {
 type DeleteParams struct {
 	DropFile []File
 }
+	//sql := fmt.Sprintf("INSERT INTO article (id,  user_id      ,accesstory,    accesstory_type,    text,      tag,     ptime,   play_num,share_num,title,     thumbnail,file_name,file_size) values 
+	//                                        ('%s','%s',        '%s'           ,%d,                  '%s',  '    %s'    ,%d,          %d     ,%d,     '%s',   '     %s','    %s',     %d)\n", 
+	//                                         sid, art.UserId,  art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t,           0,       0,    art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	
