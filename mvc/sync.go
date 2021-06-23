@@ -542,7 +542,7 @@ func Exist(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
-func OffLineSyncData(db *Sql, value string) {
+func OffLineSyncData(db *Sql, path string) {
 	//
 	// sh = shell.NewShell("localhost:5001")
 	// hash := "QmaZMLejnjNKex6Nrs2RGLC8n7NvWQP8RFPn2dLs2XviYb"
@@ -561,7 +561,7 @@ func OffLineSyncData(db *Sql, value string) {
 
 	// 创建 local 文件。
 	fmt.Println(" ------------- 开始 执行 离线 任务  ------------")
-	var defaltPath = "/Users/apple/winter/offline/" + "local"
+	var defaltPath = path + "local"
 	fmt.Println(" 本地 local 路径 ： ", defaltPath)
 
 	b := Exist(defaltPath)
@@ -601,7 +601,7 @@ func OffLineSyncData(db *Sql, value string) {
 
 	//读出  本地 文件
 	log.Println(" ----- 开始  读取 本地 文件 local  信息 ----- ")
-	local, err := ioutil.ReadFile("/Users/apple/winter/offline/local") // just pass the file name
+	local, err := ioutil.ReadFile(path + "local") // just pass the file name
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -642,7 +642,7 @@ func OffLineSyncData(db *Sql, value string) {
 			fmt.Println(" --- 开始 遍历 数组  string(diff[2]) ==  ----- ", string(diff[2]))
 
 			// 获取 cid
-			cidPath := "/Users/apple/winter/offline/" + string(diff[i])
+			cidPath := path + string(diff[i])
 			err := sh.Get(string(diff[i]), cidPath)
 			if err != nil {
 				fmt.Println(err)
@@ -801,7 +801,7 @@ func OffLineSyncData(db *Sql, value string) {
 
 	//
 	fmt.Println(" 开始 执行  更新 本地 数据  到 ipns ")
-	UploadFile("/Users/apple/winter/offline/", hash)
+	UploadFile(path, hash)
 
 	fmt.Println("远程和本地相等，不执行任何操作，直接返回。")
 
