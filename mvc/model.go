@@ -31,15 +31,17 @@ type File struct {
 
 //DownLoadList
 type DownLoad struct {
-	Id           string `json:"id"`           //id
-	UserId       string `json:"userId"`       //用户uersid
-	FileName     string `json:"fileName"`     //文件名字
-	Ptime        int64  `json:"ptime"`        //时间
-	FileCid      string `json:"fileCid"`      //文件cid
-	FileSize     int64  `json:"fileSize"`     //文件大小
-	DownPath     string `json:"downPath"`     //下载路径
-	FileType     int64  `json:"fileType"`     //文件类型
-	TransferType int64  `json:"transferType"` //传输类型 1 上传 2 下载
+	Id             string `json:"id"`             //id
+	UserId         string `json:"userId"`         //用户uersid
+	FileName       string `json:"fileName"`       //文件名字
+	Ptime          int64  `json:"ptime"`          //时间
+	FileCid        string `json:"fileCid"`        //文件cid
+	FileSize       int64  `json:"fileSize"`       //文件大小
+	DownPath       string `json:"downPath"`       //下载路径
+	FileType       int64  `json:"fileType"`       //文件类型
+	TransferType   int64  `json:"transferType"`   //传输类型 1 上传 2 下载
+	UploadParentId string `json:"uploadParentId"` //下载父id
+	UploadFileId   string `json:"uploadFileId"`   //下载文件的id
 }
 
 //

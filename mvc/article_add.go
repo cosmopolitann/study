@@ -7,7 +7,6 @@ import (
 	"errors"
 	"strconv"
 	"time"
-
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"

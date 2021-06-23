@@ -147,7 +147,7 @@ func FindIsExistUser(db *Sql, user SysUser) (int64, error) {
 	sugar.Log.Info("user info is ", user.Phone)
 	sugar.Log.Info("user info is ", user)
 
-	rows, _ := db.DB.Query("SELECT * FROM sys_user where phone=?", user.Phone)
+	rows, _ := db.DB.Query("SELECT id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') FROM sys_user where phone=?", user.Phone)
 	for rows.Next() {
 		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img)
 		if err != nil {
