@@ -359,17 +359,17 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	sugar.Log.Info("加入 主题 房间  : ", topic)
 	// 判断 map 是否存在 当前 主题
 
-	tp, err := ipfsNode.PubSub.Join(topic)
-	if err != nil {
-		sugar.Log.Error("subscribe Join failed.", err)
-		return err
-	}
-	//
-	sugar.Log.Info("将tp 加入 到 map中  : ", topic)
-	Topicmp = make(map[string]*pubsub.Topic)
-	Topicmp["/db-online-sync"] = tp
-	sugar.Log.Info("主题map :", Topicmp)
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
+		tp, err := ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("subscribe Join failed.", err)
+			return err
+		}
 
+		TopicJoin.Store(topic, tp)
+	}
+	
 	sugar.Log.Info(" Subscribe topic  tp :", tp)
 
 	sub, err := tp.Subscribe()

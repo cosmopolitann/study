@@ -10,6 +10,3 @@ func init() {
 	TopicJoin = vo.NewTopicJoin()
 }
 
-func AddU(){
-	
-}
