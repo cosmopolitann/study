@@ -35,7 +35,7 @@ func TestUserRegister(t *testing.T) {
 	sugar.Log.Info("Db value is ", d)
 	e := d.Ping()
 	fmt.Println(" Ping is failed,err:=", e)
-	// ss := Testdb(d)
+	ss := Testdb(d)
 	//插入数据
 	var fi = mvc.File{
 		Id:       "1",
@@ -51,7 +51,6 @@ func TestUserRegister(t *testing.T) {
 	b1, e := json.Marshal(fi)
 	fmt.Println(e)
 	fmt.Println(b1)
-	//这里 改成 穿 json 字符串，字段 要改成更新之后的数据。
 	//{"id":"4324","peerId":"124","name":"20","phone":1,"sex":"1","nickName":"nick"}
 
 	// value := `{"id":"43243421","peerId":"Q1w213e1233221","name":"20","phone":"12233456","sex":"1","nickName":"nick","img":"123"}`
@@ -59,11 +58,11 @@ func TestUserRegister(t *testing.T) {
 	// resp := ss.UserRegister(value)
 	// fmt.Println("这是返回的数据 =", resp)
 
-	// value := `{"id":"43243421","peerId":"Q1w2112312323221111","name":"20","phone":"12233456","sex":"1","nickName":"nick","img":"123"}`
-	// //resp:= ss.UserAdd(string(b1)
+	value := `{"id":"43243421","peerId":"Q1w2112312323221111","name":"20","phone":"12233456","sex":"1","nickName":"nick","img":"123"}`
+	//resp:= ss.UserAdd(string(b1)
 
-	// resp := ss.UserRegister(nil, value)
-	// fmt.Println("这是返回的数据 =", resp)
+	resp := ss.UserRegister(nil, value)
+	fmt.Println("这是返回的数据 =", resp) //这里 改成 穿 json 字符串，字段 要改成更新之后的数据。
 
 }
 func Testdb(sq *sql.DB) mvc.Sql {

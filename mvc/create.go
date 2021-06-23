@@ -32,7 +32,7 @@ func (db *Sql) Ping() error {
 //  用户注册
 
 func (db *Sql) UserRegister(ipfsNode *ipfsCore.IpfsNode, user string) string {
-	data,err := AddUser(ipfsNode, db, user)
+	data, err := AddUser(ipfsNode, db, user)
 	//返回封装成方法
 	// 返回的时候 要改东西
 	if err != nil {
@@ -683,14 +683,22 @@ func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 ------------------------------------------------------
 */
 
-func (db *Sql) OfflineSync(dInfo string) string {
+func (db *Sql) OfflineSync(dInfo string) {
 
 	sugar.Log.Info("---- 开始  离线  同步 消息 ------")
+	// i := 0
+	// c := cron.New()
+	// spec := "*/5 * * * * ?"
+	// c.AddFunc(spec, func() {
+	// 	i++
+	// 	log.Println("cron running:", i)
+	// 	OffLineSyncData(db, dInfo)
 
+	// })
+	// c.Start()
 
+	// select {}
 	OffLineSyncData(db, dInfo)
-
-	return vo.ResponseSuccess()
 
 }
 

@@ -9,3 +9,7 @@ var TopicJoin *vo.TopicJoinMap
 func init() {
 	TopicJoin = vo.NewTopicJoin()
 }
+
+func AddU(){
+	
+}

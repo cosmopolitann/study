@@ -51,8 +51,8 @@ func main() {
 	fmt.Println(" Ping is failed,err:=", e)
 
 	ss := Testdb(d)
-	resp := ss.OfflineSync("123")
-	fmt.Println("result := ", resp)
+	path := "/Users/apple/winter/offline/"
+	ss.OfflineSync(path)
 
 }
 func Testdb(sq *sql.DB) mvc.Sql {

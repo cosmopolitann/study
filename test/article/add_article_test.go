@@ -47,7 +47,7 @@ func TestAddArticle(t *testing.T) {
 	// id := utils.SnowId()
 	// t1:=time.Now().Unix()
 	// stmt, err := d.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
-	stmt, err := d.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('asdfa123sdf','13414','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)")
+	stmt, err := d.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('笨猪','13414','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)")
 
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.", err)
@@ -61,15 +61,18 @@ func TestAddArticle(t *testing.T) {
 	}
 	l, _ := res.RowsAffected()
 	if l == 0 {
+		fmt.Println("插入失败")
 	}
 	// resp := (value)
 	// fmt.Println("这是返回的数据 =", resp)
 	// 添加的sql 语句 写入 文件中
+
 	f1, err1 := os.OpenFile("/Users/apple/winter/offline/update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
 	if err1 != nil {
 		fmt.Println("创建失败")
 	}
 	fmt.Println("  ----- 本地 local 文件 存在  ----")
+
 	//拼接sql 语句
 	sql := "INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('asdfa23','13414','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)\n"
 
@@ -78,9 +81,29 @@ func TestAddArticle(t *testing.T) {
 		fmt.Println(" 写入 local 文件 错误：", err)
 	}
 	fmt.Println(" 写入 local 文件 成功 1", err)
+	//
+	// var snowid = "猪吗"
+	// var user_id = "143141"
+	// var art = ArticleTest{
+	// 	Id
+	// 	UserId
+	// 	Accesstory
+	// 	AccesstoryType
+	// 	Text
+	// 	Tag
+	// 	Ptime
+	// 	PlayNum
+	// 	ShareNum
+	// 	Title
+	// 	Thumbnail
+	// 	FileName
+	// 	FileSize
+	// 	Count
+	// }
+	sql1 := fmt.Sprintf("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('%s','%s','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)\n", "猪", "safa")
 
-	sql1 := "INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('asdfa78','13414','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)\n"
-
+	// sql1 := "INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('asdfa78','13414','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)\n")
+	fmt.Println(sql)
 	_, err = f1.WriteString(sql1)
 	if err != nil {
 		fmt.Println(" 写入 local 文件 错误：", err)
@@ -90,4 +113,21 @@ func TestAddArticle(t *testing.T) {
 }
 func Testdb2(sq *sql.DB) mvc.Sql {
 	return mvc.Sql{DB: sq}
+}
+
+type ArticleTest struct {
+	Id             string `json:"id"`
+	UserId         string `json:"userId"`
+	Accesstory     string `json:"accesstory"`
+	AccesstoryType int64  `json:"accesstoryType"`
+	Text           string `json:"text"`
+	Tag            string `json:"tag"`
+	Ptime          int64  `json:"ptime"`
+	PlayNum        int64  `json:"playNum"`
+	ShareNum       int64  `json:"shareNum"`
+	Title          string `json:"title"`
+	Thumbnail      string `json:"thumbnail"`
+	FileName       string `json:"fileName"`
+	FileSize       string `json:"fileSize"`
+	Count          int64  `json:"count"`
 }
