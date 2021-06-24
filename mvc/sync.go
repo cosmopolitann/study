@@ -601,7 +601,7 @@ func OffLineSyncData(db *Sql, path string) {
 	if err != nil {
 		sugar.Log.Error(" Read local file content is failed. ", err)
 	}
-	sugar.Log.Info(" Read local file content. ", string(local))
+	sugar.Log.Info(" Read local file content : ", string(local))
 	//read remote file.
 	sugar.Log.Info(" Start read remote file content to use remote cid. ")
 	read, err := sh.Cat(hash)
@@ -648,7 +648,7 @@ func OffLineSyncData(db *Sql, path string) {
 			if err != nil {
 				sugar.Log.Error(" Open cidPath is failed.Err:", err)
 			}
-			f1.Close()
+			defer f1.Close()
 			rd1 := bufio.NewReader(f1)
 			for {
 				sugar.Log.Info(" Start loop read cidPath file by line util end. ")
@@ -667,19 +667,19 @@ func OffLineSyncData(db *Sql, path string) {
 				stmt, err := db.DB.Prepare(string(line))
 				if err != nil {
 					sugar.Log.Error("Insert data into table is failed.", err)
-					//continue
+					continue
 				}
 				res, err := stmt.Exec()
 				sugar.Log.Info(" --- 开始插入数据 ---  ", string(line))
 				time.Sleep(time.Second)
 				if err != nil {
 					sugar.Log.Error("Insert data into  is Failed.", err)
-					//continue
+					continue
 				}
 				l, err := res.RowsAffected()
 				if l == 0 {
 					sugar.Log.Error("Excute sql is failed.Err:", err)
-					//continue
+					continue
 				}
 			}
 			// 	delete cidPath file.
