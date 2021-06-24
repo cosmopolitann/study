@@ -567,8 +567,8 @@ func OffLineSyncData(db *Sql, path string) {
 	sugar.Log.Info(" ---  Start resolve remote ipns data.  ---")
 	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	// RemoteIpnsAddr
-	sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
-	result, err := sh.Resolve(RemoteIpnsAddr)
+	// sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
+	result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	if err != nil {
 		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
 	}

@@ -1,6 +1,7 @@
 package mvc
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 
@@ -23,18 +24,28 @@ func ArticleCategory(db *Sql, value string) ([]vo.ArticleResp, error) {
 		return art, err
 	}
 	//get user_id
-	claim, b := jwt.JwtVeriyToken(result.Token)
-	if !b {
-		return art, errors.New("用户消息 无效")
-	}
-	user_id := claim["UserId"]
 
 	sugar.Log.Error("Marshal data is  result := ", result)
 	r := (result.PageNum - 1) * result.PageSize
 	r1 := result.PageSize
 	//rows, err := db.DB.Query("SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id WHERE a.accesstory_type =?  ORDER BY ptime desc LIMIT ?,?", result.AccesstoryType, r, r1)
+
 	//SELECT a.*,b.peer_id,b.name,b.phone,b.sex,b.nickname ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,f.is_like FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id WHERE a.accesstory_type =2
-	rows, err := db.DB.Query("SELECT a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),IFNULL(b.peer_id,'0'),IFNULL(b.name,'0'),IFNULL(b.phone,'0'),IFNULL(b.sex,0),IFNULL(b.nickname,'0') ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,IFNULL(f.is_like,0) FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id and f.user_id=? WHERE a.accesstory_type =? ORDER BY a.ptime desc LIMIT ?,?", user_id, result.AccesstoryType, r, r1)
+	var rows *sql.Rows
+	if result.Token == "" {
+
+		rows, err = db.DB.Query("SELECT a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),IFNULL(b.peer_id,'0'),IFNULL(b.name,'0'),IFNULL(b.phone,'0'),IFNULL(b.sex,0),IFNULL(b.nickname,'0') ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,IFNULL(f.is_like,0) FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id  WHERE a.accesstory_type =? ORDER BY a.ptime desc LIMIT ?,?", result.AccesstoryType, r, r1)
+
+	} else {
+		claim, b := jwt.JwtVeriyToken(result.Token)
+		if !b {
+			return art, errors.New("用户消息 无效")
+		}
+		user_id := claim["UserId"]
+		rows, err = db.DB.Query("SELECT a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),IFNULL(b.peer_id,'0'),IFNULL(b.name,'0'),IFNULL(b.phone,'0'),IFNULL(b.sex,0),IFNULL(b.nickname,'0') ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,IFNULL(f.is_like,0) FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id and f.user_id=? WHERE a.accesstory_type =? ORDER BY a.ptime desc LIMIT ?,?", user_id, result.AccesstoryType, r, r1)
+	}
+
+	// rows, err := db.DB.Query("SELECT a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),IFNULL(b.peer_id,'0'),IFNULL(b.name,'0'),IFNULL(b.phone,'0'),IFNULL(b.sex,0),IFNULL(b.nickname,'0') ,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,IFNULL(f.is_like,0) FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id and f.user_id=? WHERE a.accesstory_type =? ORDER BY a.ptime desc LIMIT ?,?", user_id, result.AccesstoryType, r, r1)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return art, errors.New("查询下载列表信息失败")
