@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 
 	"github.com/cosmopolitann/clouddb/mvc"
@@ -13,7 +14,12 @@ import (
 )
 
 func TestUserLogin(t *testing.T) {
+	str := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIzMjczNzM2NTI2NDI0NzUwMDgiLCJjdGltZSI6MTYyNDM1Mjc2MTEwMCwiaWF0IjoxNjI0MzUyNzYxfQ.zduJoHT-qM6bvySnXWVImrieKx-MdO3bYH4PSjL-5wo"
+	a,_ := jwt.JwtVeriyToken(str)
+	fmt.Println("claim:",a)
+	return
 	sugar.InitLogger()
+
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
