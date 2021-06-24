@@ -56,7 +56,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	sid := strconv.FormatInt(id, 10)
 	user.Phone = sid //手机号注册不用了,phone字段直接用id来填,兼容老版本
 	user.Sex = 0
-	user.NickName = "飞天" + sid[0:4]
+	user.NickName = "dragon" + sid[len(sid)-5:]
 	res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed:", err.Error())
