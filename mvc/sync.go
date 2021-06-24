@@ -537,103 +537,58 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 
 var sh *shell.Shell
 
-//离线同步数据。
+//Off Line Data.
 func Exist(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
 func OffLineSyncData(db *Sql, path string) {
-	//
-	// sh = shell.NewShell("localhost:5001")
-	// hash := "QmaZMLejnjNKex6Nrs2RGLC8n7NvWQP8RFPn2dLs2XviYb"
-	// err := sh.Get(hash, "./output")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// //cat
-	// read, err := sh.Cat(hash)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// body, err := ioutil.ReadAll(read)
-	// log.Println(string(body))
-
-	// 创建 local 文件。
 	sugar.Log.Info("--- Start excute offline task ---")
 	var defaltPath = path + "local"
 	sugar.Log.Info(" Local Path :", defaltPath)
 	b := Exist(defaltPath)
 	if !b {
-		//创建
+		//create file.
 		sugar.Log.Info(" Local File is exist and create local file. ")
 		_, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
 		if err1 != nil {
 			sugar.Log.Error(" Create Local File Is Failed.Err: ", err1)
 		}
 	}
-
-	//拉取 cid 文件
-
-	//按行读文件
-	// var remote123 = "/Users/apple/winter/offline/remote"
-	// ipfs 拉取 文件cid  固定位置
 	sh = shell.NewShell("localhost:5001")
-	// hash := "QmYntasS515q9oF2LC6Boka2aWAGs1EHnSdRfQzBYipH8j"
-	//  解析 远程 remote ipns 的 cid 数据  并且 拉取内容
 	sugar.Log.Info(" ---  Start resolve remote ipns data.  ---")
-
 	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	// RemoteIpnsAddr
 	sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
-
 	result, err := sh.Resolve(RemoteIpnsAddr)
-
 	if err != nil {
 		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
 	}
 	sugar.Log.Info("The result what ipfs cat remote cid. ", result)
-
 	hash := result
 	sugar.Log.Info("Remote ipns addr cid : ", hash)
-
-	// err := sh.Get(hash, remote123)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// 将远程文件 cid 拉取到本地之后  比对 差异 然后拉取 对应 cid  读取 文件 遍历 sql
-
-	//读出  本地 文件
-	log.Println(" ----- 开始  读取 本地 文件 local  信息 ----- ")
+	//read local file.
 	sugar.Log.Info(" Read local file content. ")
 	local, err := ioutil.ReadFile(path + "local") // just pass the file name
 	if err != nil {
 		sugar.Log.Error(" Read local file content is failed. ", err)
-
 	}
 	sugar.Log.Info(" Read local file content. ", string(local))
-
-	//读出  远程 文件
+	//read remote file.
 	sugar.Log.Info(" Start read remote file content to use remote cid. ")
-
 	read, err := sh.Cat(hash)
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	remote1, Errremote := ioutil.ReadAll(read)
 	if Errremote != nil {
 		sugar.Log.Error("  Read remote file content is failed.Err: ", Errremote)
-
 	}
 	sugar.Log.Info("  Read remote file content: ", string(remote1))
-
 	if strings.ToLower(string(local)) == strings.ToLower(string(remote1)) {
 		sugar.Log.Info(" Remote equal Local ")
-
 	} else {
 		sugar.Log.Info(" Remote not equal Local ")
-
 		// loop pull not equal cid
 		// string split by  _
 		sugar.Log.Info(" Split remote and local file user _  ")
@@ -697,7 +652,6 @@ func OffLineSyncData(db *Sql, path string) {
 			}
 			// 	delete cidPath file.
 			sugar.Log.Info(" Start delete cidPath file.")
-
 			existed := true
 			if _, err := os.Stat(cidPath); os.IsNotExist(err) {
 				existed = false
@@ -717,7 +671,6 @@ func OffLineSyncData(db *Sql, path string) {
 		// delete remote file and read remote file content cid
 		// write the content to this local file.
 		sugar.Log.Info(" Open file defaltPath : ", defaltPath)
-
 		local_f, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file.
 		if err1 != nil {
 			sugar.Log.Error(" Open file is failed.Err:", err1)
@@ -728,27 +681,21 @@ func OffLineSyncData(db *Sql, path string) {
 		}
 		sugar.Log.Info(" Write remote content to this local file is successful!! ")
 		sugar.Log.Info(" Start delete file ")
-
-		fmt.Println(" 开始 删除 remote 文件")
+		sugar.Log.Info(" Delete file path:", defaltPath+"remote")
 		existed := true
 		if _, err := os.Stat(defaltPath + "remote"); os.IsNotExist(err) {
 			existed = false
 		}
 		if existed {
+			sugar.Log.Info(" Delete file path:", defaltPath+"remote")
 			err := os.Remove(defaltPath + "remote")
-
 			if err != nil {
-				fmt.Println(" 删除失败 cidPath 文件 ", defaltPath+"remote")
-				// 删除失败
+				sugar.Log.Error(" Delete file path is failed.Err:", err)
 			} else {
-				fmt.Println(" 删除成功 cidPath ", defaltPath+"remote")
-				// 删除成功
+				sugar.Log.Info(" Delete file path is successful! ", defaltPath+"remote")
 			}
 		}
-		//  删除文件
-
-		sugar.Log.Info("-----------------------   执行sql 成功  ---------------")
-
+		sugar.Log.Info("-----------Execute sql is successful. ---------------")
 		// f, err := os.Open("./output")
 		// if err != nil {
 		// 	panic(err)
@@ -804,19 +751,11 @@ func OffLineSyncData(db *Sql, path string) {
 		// 	fmt.Println("文件不存在")
 		// 	if err1 != nil {
 		// 		fmt.Println("err", err1)
-
-		// 	}
-
-		// }
-
 	}
-
-	//
-	fmt.Println(" 开始 执行  更新 本地 数据  到 ipns ")
+	//ipns
+	sugar.Log.Info(" Start upload cid to gateway.io ipns. ")
 	UploadFile(path, hash)
-
-	fmt.Println("远程和本地相等，不执行任何操作，直接返回。")
-
+	sugar.Log.Info(" Because local  =====   remote.  ")
 }
 func checkFileIsExist(filename string) bool {
 	var exist = true
@@ -827,7 +766,6 @@ func checkFileIsExist(filename string) bool {
 }
 func difference(slice1 []string, slice2 []string) []string {
 	var diff []string
-
 	// Loop two times, first to find slice1 strings not in slice2,
 	// second loop to find slice2 strings not in slice1
 	for i := 0; i < 2; i++ {
@@ -849,104 +787,105 @@ func difference(slice1 []string, slice2 []string) []string {
 			slice1, slice2 = slice2, slice1
 		}
 	}
-
 	return diff
 }
 
-//  本地更新文件
+// local update file
 
 func UploadFile(path string, hash string) {
-	//  解析 k5 id  然后 拉取对应的 remote 数据
+	// resolve k5 => /ipfs/cid , then pull the remote file.
+	sugar.Log.Info(" Start resolve k5 => /ipfs/cid  ")
+	sugar.Log.Info(" Exist update file state .")
 
 	var updateCid string
 	b := Exist(path + "update")
 	if !b {
-		//创建文件
+		//create the update file.
+		sugar.Log.Info(" Update file is exist,so create it and open at the same time.")
 		_, err1 := os.OpenFile(path+"update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
 		if err1 != nil {
-			fmt.Println("创建失败")
+			sugar.Log.Error(" Create update is failed .Err:", err1)
 		}
-
-		// } else {
 	} else {
+		//read the update file.
+		sugar.Log.Info(" Read update file to get the content. ")
 		bytes1, err := ioutil.ReadFile(path + "update")
 
 		if err != nil {
-			fmt.Println("读取内容失败", err)
-
+			sugar.Log.Error(" Read update file to get the content is failed.Err:", err)
 		}
-		// 上传 ipfs
+		// upload the file to ipfs.
 		hash_local, err := sh.Add(bytes.NewBufferString(string(bytes1)))
 		if err != nil {
-			fmt.Println("上传ipfs时错误：", err)
+			sugar.Log.Error(" Upload the file to ipfs is failed.Err:", err)
 		}
-		fmt.Println("这是上传的时候 hash_local == ", hash_local)
+		sugar.Log.Info(" THe hash value what upload file to create a hash by ipfs. ", hash_local)
 		updateCid = hash_local
 	}
-	// 默认的文件 hash
-	// hash := "QmYntasS515q9oF2LC6Boka2aWAGs1EHnSdRfQzBYipH8j"
-	// hash := result
-	fmt.Println("  测试 更新  文件 上传")
-	//读出  远程 文件
+
+	//read remote file.
+	sugar.Log.Infof(" Cat remote %s to get content by ipfs. \n", hash)
 	read, err := sh.Cat(hash)
 	if err != nil {
-		fmt.Println(err)
+		sugar.Log.Error(" Cat remote hash is failed.Err:", err)
 	}
 	remote1, err := ioutil.ReadAll(read)
-	fmt.Println("  这是 读出的 remote 远程文件的信息内容：", remote1)
-	//  检查本地是否有 更新文件
-	//  读出本地 local 文件 信息内容
+	if err != nil {
+		sugar.Log.Error(" Read all remote cid content is failed.Err:", err)
+	}
+	sugar.Log.Info(" remote file info :", string(remote1))
+	//  update file.
+	//  read local file info.
+	//
+
 	var defaltPath = path + "local"
+	sugar.Log.Info(" Local file path :", defaltPath)
+	sugar.Log.Info(" Exist local file ")
 
 	lfile := Exist(defaltPath)
+	sugar.Log.Info(" All cid info = local cid + _ + cid(update)")
 
 	var upInfo string = string(remote1) + "_" + updateCid
-	if lfile == false {
-		//创建
-		_, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
+	if !lfile {
+		//create file
+		sugar.Log.Info(" No find local file , and create it. ")
+
+		_, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file
 		if err1 != nil {
-			fmt.Println("创建失败")
+			sugar.Log.Errorf(" Create %s file is failed.Err:", err1)
 		}
-		fmt.Println("  ----- 本地 local 文件 存在  ----")
 
-	} else {
-		f1, err := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
+	}
+	sugar.Log.Info(" Local file is exist,and open it. ")
 
-		var all = string(remote1) + "_" + updateCid
-		//upInfo = all
-		fmt.Println("  ----- 上传的 信息 upInfo  ----", upInfo)
-
-		_, err = f1.WriteString(all)
-		if err != nil {
-			fmt.Println(" 写入 local 文件 错误：", err)
-		}
+	f1, err := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file
+	if err != nil {
+		sugar.Log.Errorf(" Open %s file is failed.Err:", err)
+	}
+	var all = string(remote1) + "_" + updateCid
+	//upInfo = all
+	sugar.Log.Info(" Upload All cid info,all : ", all)
+	sugar.Log.Info(" Upload All cid info,upInfoCid: ", upInfo)
+	_, err = f1.WriteString(all)
+	if err != nil {
+		sugar.Log.Error(" Write file is failed. Err:", err)
 	}
 
-	//	在上传remote 文件到 ipfs.
-	fmt.Println("  ----- 开始上传 remote 文件 到 ipfs   ----", upInfo)
+	//	upload remote file to ipfs .
+	sugar.Log.Info(" start upload allcid to ipfs . ")
 	hash1, err := sh.Add(bytes.NewBufferString(upInfo))
 	if err != nil {
-		fmt.Println("上传ipfs时错误：", err)
+		sugar.Log.Error(" upload file to ipfs is failed.Err: ", err)
 	}
-	fmt.Println("这是上传的时候 hash1 == ", hash1)
-	// 上传本地 update 文件到 ipfs 生成cid
-	// 需要将 remote cid  ipns 到 一个地方。
+	sugar.Log.Info(" all ipfs hash :  ", hash1)
+	// upload local update file to ipfs ,return a hash cid.
+	// then need use ipns name publish -key=dbkey  to publish .
 	ctx := context.Background()
 	ksys, _ := sh.KeyList(ctx)
-	fmt.Println(" keys 的 集合 ：", ksys)
+	sugar.Log.Info("  About all ipns key : ", ksys)
 	// // fmt.Println(" keys 的 2集合 ：", ksys[2].Id)
 	// // fmt.Println(" keys 的 2集合 ：", ksys[2].Name)
-
-	// fmt.Println(" keys 的 1集合 ：", ksys[0].Id)
-	// fmt.Println(" keys 的 1集合 ：", ksys[0].Name)
-	// // puberr := sh.Publish("", "/ipfs/QmYSctvKQMjZ51RybBcXzht2GRME6aXvvgeBUV8QFJLoBr")
-	// // if puberr != nil {
-	// // 	fmt.Println(" pubsub ipns 失败 =", puberr)
-	// // }
-
-	fmt.Println("----完成 ---- =")
-	//查看 本地 是否有 dbkey 这个秘钥 如果没有 就 加入 如果有 就直接上传
-	fmt.Println(" keys 的 集合 ：", ksys)
+	sugar.Log.Info(" Look for the  db-key is exist in local keys array. ")
 	var dbexist bool
 	if len(ksys) > 0 {
 		for _, v := range ksys {
@@ -955,72 +894,66 @@ func UploadFile(path string, hash string) {
 				break
 			}
 		}
-		if dbexist == false {
-			fmt.Println(" ----- 因为  里面  没有 dbkey  所以 添加 秘钥 -----")
+		if !dbexist {
+			sugar.Log.Info(" Because the dbkey is inexist,then add it to local serct keys .")
+			sugar.Log.Info(" dbkey path : ", path)
 			postFormDataWithSingleFile(path)
 		}
 	}
-
-	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
-	// if err != nil {
-	// 	fmt.Println(" 解析 k5 id 失败 =", err)
-	// }
-	// fmt.Println(" 解析 k5 id 结果 =", result)
-
+	sugar.Log.Info(" Use ipns publish cid to public gateway.io ")
+	//time duration
 	t := time.Duration(time.Hour * 24)
-	fmt.Println("-----  开始 执行 pubsbu ipns -----")
+	sugar.Log.Infof(" -- Excute ipns name publish -key=%s /ipfs/%s . --\n", "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v", hash1)
 	pubresp, err := sh.PublishWithDetails("/ipfs/"+hash1, "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v", t, t, true)
 	if err != nil {
-		fmt.Println(" pubsub content 失败  =", err)
+		sugar.Log.Error(" PublishWithDetails is failed.Err: ", err)
 	}
-
-	fmt.Println("pubresp =", pubresp)
-
-	//http 请求 ipns
+	sugar.Log.Info(" Pubresp := ", pubresp)
+	sugar.Log.Info(" Off Line  Sync is Successful !!!! ")
 
 }
 
-// 请求 ipns
+// request ipns
 
 func postFormDataWithSingleFile(path string) {
-	fmt.Println("------  开始 导入 dbkey ------")
+	sugar.Log.Info("  Start import dbkey.  ")
+	sugar.Log.Info("  Import dbkey path :", path)
 	client := http.Client{}
 	bodyBuf := &bytes.Buffer{}
 	bodyWrite := multipart.NewWriter(bodyBuf)
-
-	//路径  传进来。。
-	//todo
-
 	file, err := os.Open(path + "db-key")
-	defer file.Close()
 	if err != nil {
-		log.Println("err")
+		sugar.Log.Error("  Open dbkey path is failed.Err: ", err)
 	}
-	// file 为key
+	// file as key
 	fileWrite, err := bodyWrite.CreateFormFile("file", "db-key")
+	if err != nil {
+		sugar.Log.Error("  CreateFormFile is failed.Err: ", err)
+	}
 	_, err = io.Copy(fileWrite, file)
 	if err != nil {
-		log.Println("err")
+		sugar.Log.Error(" Copy is failed.Err: ", err)
 	}
-	bodyWrite.Close() //要关闭，会将w.w.boundary刷写到w.writer中
-	// 创建请求
+	bodyWrite.Close() //will closed, 会将w.w.boundary刷写到w.writer中
+	// create requet.
 	contentType := bodyWrite.FormDataContentType()
 	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:5001/api/v0/key/import?arg=dbkey&ipns-base=base36", bodyBuf)
 	if err != nil {
-		log.Println("err")
+		sugar.Log.Error(" NewRequestpy is failed.Err: ", err)
 	}
-	// 设置头
+	// set request header.
 	req.Header.Set("Content-Type", contentType)
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("err")
+		sugar.Log.Error(" NewRequestpy is failed.Err: ", err)
+
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("err")
+		sugar.Log.Error(" ReadAll resp result is failed.Err: ", err)
 	}
-	fmt.Println(string(b))
-	fmt.Println("------  开始 导入 dbkey  成功------")
-
+	sugar.Log.Info(" Response restult: ", string(b))
+	sugar.Log.Info(" Import dbkey is successful !!! ")
+	defer file.Close()
 }
