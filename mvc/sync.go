@@ -375,8 +375,9 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	// Topicmp["/db-online-sync"] = tp
 	// sugar.Log.Info("主题map :", Topicmp)
 	tp, ok := TopicJoin.Load(topic)
+	var err error
 	if !ok {
-		tp, err := ipfsNode.PubSub.Join(topic)
+		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
 			sugar.Log.Error("PubSub.Join .Err is", err)
 			return err

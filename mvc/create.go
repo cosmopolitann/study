@@ -701,10 +701,8 @@ func (db *Sql) OfflineSync(path string) {
 
 	})
 	c.Start()
-
 	select {}
 	// OffLineSyncData(db, path)
-
 }
 
 /*
