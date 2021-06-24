@@ -560,38 +560,42 @@ func OffLineSyncData(db *Sql, path string) {
 	// log.Println(string(body))
 
 	// 创建 local 文件。
-	fmt.Println(" ------------- 开始 执行 离线 任务  ------------")
+	sugar.Log.Info("--- Start excute offline task ---")
 	var defaltPath = path + "local"
-	fmt.Println(" 本地 local 路径 ： ", defaltPath)
-
+	sugar.Log.Info(" Local Path :", defaltPath)
 	b := Exist(defaltPath)
-
-	if b == false {
+	if !b {
 		//创建
+		sugar.Log.Info(" Local File is exist and create local file. ")
 		_, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
 		if err1 != nil {
-			fmt.Println("创建失败")
+			sugar.Log.Error(" Create Local File Is Failed.Err: ", err1)
 		}
 	}
 
 	//拉取 cid 文件
 
 	//按行读文件
-
 	// var remote123 = "/Users/apple/winter/offline/remote"
 	// ipfs 拉取 文件cid  固定位置
 	sh = shell.NewShell("localhost:5001")
 	// hash := "QmYntasS515q9oF2LC6Boka2aWAGs1EHnSdRfQzBYipH8j"
 	//  解析 远程 remote ipns 的 cid 数据  并且 拉取内容
-	fmt.Println(" --- 开始 解析 ipns 取出来 对应 的  远程 cid ")
-	result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
+	sugar.Log.Info(" ---  Start resolve remote ipns data.  ---")
+
+	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
+	// RemoteIpnsAddr
+	sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
+
+	result, err := sh.Resolve(RemoteIpnsAddr)
+
 	if err != nil {
-		fmt.Println(" 解析 k5 id 失败 =", err)
+		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
 	}
-	fmt.Println(" ---  取出来 对应 的  远程 cid = ", result)
+	sugar.Log.Info("The result what ipfs cat remote cid. ", result)
 
 	hash := result
-	fmt.Println(" ---  取出来 对应 的  远程 cid hash= ", hash)
+	sugar.Log.Info("Remote ipns addr cid : ", hash)
 
 	// err := sh.Get(hash, remote123)
 	// if err != nil {
@@ -601,122 +605,130 @@ func OffLineSyncData(db *Sql, path string) {
 
 	//读出  本地 文件
 	log.Println(" ----- 开始  读取 本地 文件 local  信息 ----- ")
+	sugar.Log.Info(" Read local file content. ")
 	local, err := ioutil.ReadFile(path + "local") // just pass the file name
 	if err != nil {
-		fmt.Print(err)
+		sugar.Log.Error(" Read local file content is failed. ", err)
+
 	}
-	log.Println("这是 读出的 本地 文件 local 内容 : ", string(local))
+	sugar.Log.Info(" Read local file content. ", string(local))
 
 	//读出  远程 文件
+	sugar.Log.Info(" Start read remote file content to use remote cid. ")
+
 	read, err := sh.Cat(hash)
 	if err != nil {
 		fmt.Println(err)
 	}
-	remote1, err := ioutil.ReadAll(read)
 
-	log.Println("这是 读出的 远程 文件 remote cid 的 内容 : ", string(remote1))
+	remote1, Errremote := ioutil.ReadAll(read)
+	if Errremote != nil {
+		sugar.Log.Error("  Read remote file content is failed.Err: ", Errremote)
+
+	}
+	sugar.Log.Info("  Read remote file content: ", string(remote1))
 
 	if strings.ToLower(string(local)) == strings.ToLower(string(remote1)) {
-		fmt.Println("远程 和  本地 相等")
+		sugar.Log.Info(" Remote equal Local ")
+
 	} else {
-		fmt.Println(" ------  远程 和 本地  不相等  -----")
+		sugar.Log.Info(" Remote not equal Local ")
 
-		// 循环 拉取 不相等  的 cid
-		// 切割 找出 不相等的文件
+		// loop pull not equal cid
+		// string split by  _
+		sugar.Log.Info(" Split remote and local file user _  ")
 
-		// 字符串分割 _
 		remoteStr1 := strings.Split(string(remote1), "_")
 		localStr1 := strings.Split(string(local), "_")
-		// 找出 两个 字符串里面 不相等的 cid
 
 		diff := difference(localStr1, remoteStr1)
-		//拉取 diff 数组中的cid  执行sql 语句
-		fmt.Println(" --- 打印   diff  ----- ", diff)
-		fmt.Println(" --- 打印   diff长度   ----- ", len(diff))
+
+		sugar.Log.Info(" This is diff array: ", diff)
+		sugar.Log.Info(" This is diff array lenth: ", len(diff))
 
 		for i := 1; i < len(diff); i++ {
-			fmt.Println(" --- 开始 遍历 数组  diff  ----- ")
-			fmt.Println(" --- 开始 遍历 数组  v ==  ----- ", diff[i])
-			fmt.Println(" --- 开始 遍历 数组  diff[0] ==  ----- ", diff[0])
-			fmt.Println(" --- 开始 遍历 数组  string(diff[1]) ==  ----- ", string(diff[1]))
-			fmt.Println(" --- 开始 遍历 数组  string(diff[2]) ==  ----- ", string(diff[2]))
+			sugar.Log.Info(" --- loop  diff array ---- ", i)
+			sugar.Log.Info(" --- diff array value ---- ", diff[i])
 
-			// 获取 cid
 			cidPath := path + string(diff[i])
+			sugar.Log.Info(" cidPath : ", cidPath)
+			sugar.Log.Info(" Ipfs get cidpath  : ", cidPath)
+			sugar.Log.Info(" Ipfs get cid hash :", string(diff[i]))
 			err := sh.Get(string(diff[i]), cidPath)
 			if err != nil {
 				fmt.Println(err)
+				sugar.Log.Error(" Ipfs get cid hash is failed.Err:", err)
 			}
-
-			//按行读取
-			fmt.Println(" 打开 cid  文件 : ", diff[i])
-			fmt.Println(" 打开 cidPath   文件 : ", cidPath)
-
+			sugar.Log.Info(" Read diff cid file by line .")
+			sugar.Log.Info(" Open cidPath file : ", cidPath)
 			f1, err := os.Open(cidPath)
 			if err != nil {
-				fmt.Println(" 打开 cidPath   错误  : ", err)
+				sugar.Log.Error(" Open cidPath is failed.Err:", err)
 			}
-			defer f1.Close()
-
+			f1.Close()
 			rd1 := bufio.NewReader(f1)
-
 			for {
-				fmt.Println(" ---- 开始 按行 读取 文件  ----cidPath :", cidPath)
-
-				line, err := rd1.ReadString('\n') //以'\n'为结束符读入一行
+				sugar.Log.Info(" Start loop read cidPath file by line util end. ")
+				line, err := rd1.ReadString('\n') // by '\n' as end sign of closure.
 				if err != nil || io.EOF == err {
-					fmt.Println(" ----- break  ----- ")
-					fmt.Println(" ----- err  ----- ", err)
-
+					sugar.Log.Info(" --- break ----")
+					sugar.Log.Info(" ---ReadString is failed.Err:", err)
 					break
 				}
-				fmt.Println("读出每一行的数据 :", line)
-				fmt.Printf("类型 是 %T\n ", line)
-				// 执行 sql 语句 试试
-				fmt.Println("----- 开始 执行  sql 语句 -----")
+				sugar.Log.Info(" Data for each line:", line)
+				sugar.Log.Infof(" Data type for each line is %T .\n", line)
+				// exec sql read cidPath file by line.
+				sugar.Log.Info(" Start excute sql  by read cidpath file content. ", line)
 				stmt, err := db.DB.Prepare(string(line))
 				if err != nil {
-					sugar.Log.Error("Insert into cloud_file table is failed.", err)
+					sugar.Log.Error("Insert data into table is failed.", err)
 					continue
 				}
 				res, err := stmt.Exec()
 				if err != nil {
-					sugar.Log.Error("Insert into file  is Failed.", err)
+					sugar.Log.Error("Insert data into  is Failed.", err)
 					continue
 				}
-				l, _ := res.RowsAffected()
+				l, err := res.RowsAffected()
 				if l == 0 {
-					sugar.Log.Error("执行sql 失败 原因:", err)
+					sugar.Log.Error("Excute sql is failed.Err:", err)
 					continue
 				}
 			}
-			// 	// 删除文件
+			// 	delete cidPath file.
+			sugar.Log.Info(" Start delete cidPath file.")
+
 			existed := true
 			if _, err := os.Stat(cidPath); os.IsNotExist(err) {
 				existed = false
 			}
 			if existed {
 				err := os.Remove(cidPath)
+				sugar.Log.Info(" delete cidPath file:", cidPath)
 
 				if err != nil {
-					fmt.Println(" 删除失败 cidPath 文件 ", cidPath)
-					// 删除失败
+					sugar.Log.Error(" delete cidPath file is failed.Err:", err)
+					sugar.Log.Error(" Delete cidPath file is failed.Err:", err)
 				} else {
-					fmt.Println(" 删除成功 cidPath ", cidPath)
-					// 删除成功
+					sugar.Log.Error(" Delete cidPath file is successful !!! ", cidPath)
 				}
 			}
 		}
-		// 删除 remote 文件  将remote文件的信息 写入 local 里面。
+		// delete remote file and read remote file content cid
+		// write the content to this local file.
+		sugar.Log.Info(" Open file defaltPath : ", defaltPath)
 
-		local_f, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
+		local_f, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file.
 		if err1 != nil {
-			fmt.Println("创建失败")
+			sugar.Log.Error(" Open file is failed.Err:", err1)
 		}
 		_, err = local_f.WriteString(string(remote1))
 		if err != nil {
-			log.Println("写入本地文件失败：", err)
+			sugar.Log.Error(" Write remote content to this local file is failed.Err: ", err)
 		}
+		sugar.Log.Info(" Write remote content to this local file is successful!! ")
+		sugar.Log.Info(" Start delete file ")
+
 		fmt.Println(" 开始 删除 remote 文件")
 		existed := true
 		if _, err := os.Stat(defaltPath + "remote"); os.IsNotExist(err) {
@@ -963,8 +975,7 @@ func UploadFile(path string, hash string) {
 	}
 
 	fmt.Println("pubresp =", pubresp)
-	fmt.Println("pubresp Name=", pubresp.Name)
-	fmt.Println("pubresp Value=", pubresp.Value)
+
 	//http 请求 ipns
 
 }

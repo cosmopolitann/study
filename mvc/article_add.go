@@ -49,16 +49,25 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 	}
 
 	//--------------- publish msg ----------------
-	var ok bool
+	// var ok bool
 	topic := "/db-online-sync"
 	var tp *pubsub.Topic
 	ctx := context.Background()
-	if tp, ok = Topicmp["/db-online-sync"]; ok == false {
+	// if tp, ok = Topicmp["/db-online-sync"]; ok == false {
+	// 	tp, err = ipfsNode.PubSub.Join(topic)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	Topicmp[topic] = tp
+	// }
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
 		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
 			return err
 		}
-		Topicmp[topic] = tp
+		TopicJoin.Store(topic, tp)
 	}
 	sugar.Log.Info("Publish topic name :", "/db-online-sync")
 	//step 1

@@ -13,7 +13,6 @@ import (
 	"github.com/cosmopolitann/clouddb/utils"
 	"github.com/cosmopolitann/clouddb/vo"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
-	pubsub "github.com/libp2p/go-libp2p-pubsub"
 )
 
 func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (vo.UserLoginRespParams, error) {
@@ -77,16 +76,25 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	sugar.Log.Info("发布主题:", "/db-online-sync")
 	sugar.Log.Info("发布消息:", value)
 	//判断是否弃用
-	var tp *pubsub.Topic
-	var ok bool
+	// var tp *pubsub.Topic
+	// var ok bool
 	ctx := context.Background()
-	if tp, ok = Topicmp["/db-online-sync"]; ok == false {
+	// if tp, ok = Topicmp["/db-online-sync"]; ok == false {
+	// 	tp, err = ipfsNode.PubSub.Join(topic)
+	// 	if err != nil {
+	// 		return resp, err
+	// 	}
+	// 	Topicmp[topic] = tp
+
+	// }
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
 		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
 			return resp, err
 		}
-		Topicmp[topic] = tp
-
+		TopicJoin.Store(topic, tp)
 	}
 	sugar.Log.Info("--- 开始 发布的消息 ---")
 

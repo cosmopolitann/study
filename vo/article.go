@@ -34,8 +34,8 @@ type ArticleResp struct {
 	Phone          string `json:"phone"`
 	Sex            int64  `json:"sex"`
 	NickName       string `json:"nickName"`
-	LikeNum         int64  `json:"likeNum"`
-	Islike          int64  `json:"isLike"`
+	LikeNum        int64  `json:"likeNum"`
+	Islike         int64  `json:"isLike"`
 }
 
 //1文本 2图片 3视频 4音乐
@@ -52,9 +52,10 @@ tag            string     require    标签
 /// article/category
 
 type ArticleCategoryParams struct {
-	PageSize       int64 `json:"pageSize"`
-	PageNum        int64 `json:"pageNum"`
-	AccesstoryType int64 `json:"accesstoryType"`
+	Token          string `json:"token"`
+	PageSize       int64  `json:"pageSize"`
+	PageNum        int64  `json:"pageNum"`
+	AccesstoryType int64  `json:"accesstoryType"`
 }
 
 //我发布的文章
