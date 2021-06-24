@@ -671,7 +671,6 @@ func OffLineSyncData(db *Sql, path string) {
 				}
 				res, err := stmt.Exec()
 				sugar.Log.Info(" --- 开始插入数据 ---  ", string(line))
-				time.Sleep(time.Second)
 				if err != nil {
 					sugar.Log.Error("Insert data into  is Failed.", err)
 					continue
