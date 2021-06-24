@@ -70,8 +70,9 @@ type ChatWithdrawMsgParams struct {
 }
 
 type ChatSwapWithdrawMsgParams struct {
-	MsgId  string `json:"id"`     //require     消息ID
-	FromId string `json:"fromId"` //require     发送者ID
-	ToId   string `json:"toId"`   //require     发送者ID
-	Token  string `json:"token"`  //token
+	RecordId string `json:"recordId"` //require     coment 消息记录id
+	MsgId    string `json:"id"`       //require     消息ID
+	FromId   string `json:"fromId"`   //require     发送者ID
+	ToId     string `json:"toId"`     //require     发送者ID
+	Token    string `json:"token"`    //token
 }
