@@ -18,7 +18,7 @@ func del(db *Sql, parent_id string, userId string) {
 		log.Println("parent_id = ", parent_id)
 		var f File
 		var f1 []File
-		rows, _ := db.DB.Query("SELECT * FROM cloud_file where parent_id=? and user_id=?", parent_id, userId)
+		rows, _ := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0) FROM cloud_file where parent_id=? and user_id=?", parent_id, userId)
 		for rows.Next() {
 			err := rows.Scan(&f.Id, &f.UserId, &f.FileName, &f.ParentId, &f.Ptime, &f.FileCid, &f.FileSize, &f.FileType, &f.IsFolder)
 			if err != nil {
@@ -59,7 +59,7 @@ func Delete(db *Sql, value string) error {
 	//如果 是  文件夹  就 递归删除  如果 是文件 就直接删除
 	//查询 id 判断类型
 	for _, v := range d.Ids {
-		rows, err := db.DB.Query("select * from cloud_file where id=?", v)
+		rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0) from cloud_file where id=?", v)
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 			return errors.New("查询下载列表信息失败")

@@ -2,20 +2,26 @@ package mvc
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"
 	"github.com/cosmopolitann/clouddb/vo"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
-	"strconv"
-	"time"
 )
 
-func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
+func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) error {
 	sugar.Log.Info(" ----  AddArticle Method ----")
+	sugar.Log.Info(" ----  Path :", path)
+
 	var art vo.ArticleAddParams
 	err := json.Unmarshal([]byte(value), &art)
 	if err != nil {
@@ -25,7 +31,7 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 	sugar.Log.Info("Marshal article params data : ", art)
 	id := utils.SnowId()
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values (?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.Err: ", err)
 		return errors.New(" Insert into article table is failed. ")
@@ -42,59 +48,87 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode,db *Sql, value string) error {
 		return errors.New(" Insert into article table is failed. ")
 	}
 
-	// publish msg
+	//--------------- publish msg ----------------
 	var ok bool
-	topic:="/db-online-sync"
+	topic := "/db-online-sync"
 	var tp *pubsub.Topic
 	ctx := context.Background()
-	if tp,ok = Topicmp["/db-online-sync"];ok == false {
+	if tp, ok = Topicmp["/db-online-sync"]; ok == false {
 		tp, err = ipfsNode.PubSub.Join(topic)
 		if err != nil {
 			return err
 		}
 		Topicmp[topic] = tp
 	}
-	sugar.Log.Info("Publish topic name :","/db-online-sync")
-    //step 1
- 	//query a article data
+	sugar.Log.Info("Publish topic name :", "/db-online-sync")
+	//step 1
+	//query a article data
 	var dl vo.ArticleResp
-	rows, err := db.DB.Query("SELECT * from article where id=?;",sid)
-	if err != nil {
-		sugar.Log.Error("Query data is failed.Err is ", err)
-		return errors.New(" Sync query article table is failed. ")
-	}
-	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.ShareNum, &dl.PlayNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
-		if err != nil {
-			sugar.Log.Error("Query scan data is failed.The err is ", err)
-			return err
-		}
+	//rows, err := db.DB.Query("SELECT * from article where id=?;",sid)
+	//if err != nil {
+	//	sugar.Log.Error("Query data is failed.Err is ", err)
+	//	return errors.New(" Sync query article table is failed. ")
+	//}
+	//for rows.Next() {
+	//	err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.ShareNum, &dl.PlayNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+	//	if err != nil {
+	//		sugar.Log.Error("Query scan data is failed.The err is ", err)
+	//		return err
+	//	}
+	//}
+	//
+	err = db.DB.QueryRow("SELECT id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) from article where id=?;", sid).Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+	if err != nil && err != sql.ErrNoRows {
+		sugar.Log.Error("Query article failed.Err is", err)
+		return err
 	}
 	var g PubSyncArticle
 	g.Data = dl
 	g.Type = "receiveArticleAdd"
-	g.FromId=ipfsNode.Identity.String()
-   //struct => json
+	g.FromId = ipfsNode.Identity.String()
+	//struct => json
 	jsonBytes, err := json.Marshal(g)
 	if err != nil {
 		sugar.Log.Error("Marshal struct => json is failed.")
-	return err
+		return err
 	}
-	sugar.Log.Info("Forward the data to the public gateway.data:=",string(jsonBytes))
-	err = tp.Publish(ctx,jsonBytes)
+	sugar.Log.Info("Forward the data to the public gateway.data:=", string(jsonBytes))
+	err = tp.Publish(ctx, jsonBytes)
 	if err != nil {
 		sugar.Log.Error("Publish info failed.Err:", err)
 		return err
 	}
 	sugar.Log.Info("---  Publish to other device  ---")
+	//
+
+	// 写入文件
+	sugar.Log.Info("---  sql语句 写入文件  ---")
+	//
+	f1, err1 := os.OpenFile(path+"update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
+	if err1 != nil {
+		sugar.Log.Error("创建失败update :", err1)
+	}
+
+	sugar.Log.Info("----- 本地 local 文件 存在  ----")
+
+	// 拼接字符串 sql 语句
+	sql := fmt.Sprintf("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('%s','%s','%s',%d,'%s','%s',%d,%d,%d,'%s','%s','%s','%s')\n", sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+
+	_, err = f1.WriteString(sql)
+	if err != nil {
+		sugar.Log.Error("-----  写入 update 文件 错误：  ----", err)
+	}
+	sugar.Log.Info("-----  写入 update 文件 成功 ----", err)
 	sugar.Log.Info(" ----  AddArticle Method  End ----")
 	return nil
 }
+
 type PubSyncArticle struct {
-	Type string `json:"type"`
-	Data vo.ArticleResp `json:"data"`
-	FromId string `json:"from"`
+	Type   string         `json:"type"`
+	Data   vo.ArticleResp `json:"data"`
+	FromId string         `json:"from"`
 }
+
 //
 
 func ArticleList(db *Sql, value string) ([]Article, error) {
@@ -104,7 +138,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 	err := json.Unmarshal([]byte(value), &result)
 	if err != nil {
 		sugar.Log.Error("Marshal is failed.Err:", err)
-		return art,err
+		return art, err
 	}
 	//校验 token 是否 满足
 	claim, b := jwt.JwtVeriyToken(result.Token)
@@ -120,7 +154,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 	sugar.Log.Info("PageNum:= ", result.PageNum)
 	sugar.Log.Info("PageSize:= ", result.PageSize)
 	//这里 要修改   加上 where  参数 判断
-	rows, err := db.DB.Query("SELECT * FROM article where user_id=? order by ptime Desc limit ?,?",userid,r,result.PageSize)
+	rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) FROM article where user_id=? order by ptime Desc limit ?,?", userid, r, result.PageSize)
 	if err != nil {
 		sugar.Log.Error("Query article table is failed.Err:", err)
 		return art, errors.New(" Query article list is failed.")
@@ -128,16 +162,16 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 	for rows.Next() {
 		var dl Article
 		var userId interface{}
-		var k=""
+		var k = ""
 		err = rows.Scan(&dl.Id, &userId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err
 		}
-		if userId==nil{
-			dl.UserId=k
-		}else {
-			dl.UserId=userId.(string)
+		if userId == nil {
+			dl.UserId = k
+		} else {
+			dl.UserId = userId.(string)
 		}
 		sugar.Log.Info("Query a data from article once.", dl)
 		art = append(art, dl)
@@ -152,8 +186,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 
 }
 
-
-func ArticleAddTest(db *Sql, value string) error{
+func ArticleAddTest(db *Sql, value string) error {
 	sugar.Log.Info(" ----  AddArticle Method ----")
 	var art vo.ArticleAddParams
 	err := json.Unmarshal([]byte(value), &art)
@@ -180,5 +213,5 @@ func ArticleAddTest(db *Sql, value string) error{
 	if l == 0 {
 		return errors.New(" Insert into article table is failed. ")
 	}
-	return  nil
+	return nil
 }

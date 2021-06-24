@@ -36,7 +36,6 @@ type ArticleResp struct {
 	NickName       string `json:"nickName"`
 	LikeNum         int64  `json:"likeNum"`
 	Islike          int64  `json:"isLike"`
-
 }
 
 //1文本 2图片 3视频 4音乐

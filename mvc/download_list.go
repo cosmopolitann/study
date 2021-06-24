@@ -27,14 +27,14 @@ func DownloadList(db *Sql, value string) (data []DownLoad, e error) {
 		return d, errors.New("token 失效")
 	}
 	sugar.Log.Info("claim := ", claim)
-	rows, err := db.DB.Query("select * from cloud_transfer where user_id=?", claim["UserId"].(string))
+	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(down_path,'null'),IFNULL(file_type,0),IFNULL(transfer_type,0),IFNULL(upload_parent_id,0),IFNULL(upload_file_id,0) from cloud_transfer where user_id=?", claim["UserId"].(string))
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return d, errors.New("查询下载列表信息失败")
 	}
 	for rows.Next() {
 		var dl DownLoad
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.DownPath, &dl.FileType)
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.DownPath, &dl.FileType,&dl.TransferType,&dl.UploadParentId,&dl.UploadFileId)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return d, err

@@ -3,9 +3,11 @@ package mvc
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
+	"github.com/robfig/cron"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
@@ -31,8 +33,8 @@ func (db *Sql) Ping() error {
 
 //  用户注册
 
-func (db *Sql) UserRegister(ipfsNode *ipfsCore.IpfsNode, user string) string {
-	data,err := AddUser(ipfsNode, db, user)
+func (db *Sql) UserRegister(ipfsNode *ipfsCore.IpfsNode, user string, path string) string {
+	data, err := AddUser(ipfsNode, db, user, path)
 	//返回封装成方法
 	// 返回的时候 要改东西
 	if err != nil {
@@ -288,8 +290,8 @@ func (db *Sql) CloudSearch(dInfo string) string {
 
 //  添加 朋友圈文章
 
-func (db *Sql) ArticleAdd(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
-	e := AddArticle(ipfsNode, db, dInfo)
+func (db *Sql) ArticleAdd(ipfsNode *ipfsCore.IpfsNode, dInfo, path string) string {
+	e := AddArticle(ipfsNode, db, dInfo, path)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
@@ -674,6 +676,40 @@ func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 /*
 ------------------------------------------------------
 |                    Sync   End                      |
+------------------------------------------------------
+*/
+
+/*
+------------------------------------------------------
+|                   OffLine     Sync                 |
+------------------------------------------------------
+*/
+
+func (db *Sql) OfflineSync(path string) {
+
+	sugar.Log.Info("---- 开始  离线  同步 消息 ------")
+	// i := 0
+	c := cron.New()
+	// spec := "*/5 * * * * ?"
+	spec := "0 */2 * * * ?"
+	c.AddFunc(spec, func() {
+		//0 */1 * * * ?
+		log.Println("cron running:")
+		log.Println("path :", path)
+
+		OffLineSyncData(db, path)
+
+	})
+	c.Start()
+
+	select {}
+	// OffLineSyncData(db, path)
+
+}
+
+/*
+------------------------------------------------------
+|             OffLine     Sync   End                 |
 ------------------------------------------------------
 */
 

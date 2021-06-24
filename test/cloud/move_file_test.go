@@ -25,8 +25,8 @@ func TestMoveFile(t *testing.T) {
 	//插入数据
 	value := `{
 "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTE1ODA1MTE1ODUwNDY1MjgiLCJleHAiOjE2MjY0MjY1NTh9.RkTxabtz3HMEEzD8wPc8la0M3bEn5TQZ1EES92tAjLg",
-    "parentId":"2",
-    "ids":["411634526041673728"]
+    "parentId":"5",
+    "ids":["sdfa1"]
 }`
 	//b1, e := json.Marshal(fi)
 	//fmt.Println(ss)

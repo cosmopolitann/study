@@ -9,6 +9,7 @@ require (
 	github.com/goinggo/mapstructure v0.0.0-20140717182941-194205d9b4a9
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/ipfs/go-ipfs v0.8.0
+	github.com/ipfs/go-ipfs-api v0.2.0
 	github.com/ipfs/go-ipfs-config v0.14.0
 	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/interface-go-ipfs-core v0.4.0
@@ -23,6 +24,7 @@ require (
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/polydawn/refmt v0.0.0-20201211092308-30ac6d18308e // indirect
+	github.com/robfig/cron v1.2.0
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/goleak v1.1.10 // indirect
 	go.uber.org/zap v1.17.0

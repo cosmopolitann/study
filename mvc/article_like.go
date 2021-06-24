@@ -32,7 +32,7 @@ func AddArticleLike(db *Sql, value string) error {
 	userid := claim["UserId"].(string)
 	sugar.Log.Info("claim := ", claim)
 	//查询数据
-	rows, err := db.DB.Query("SELECT * FROM article_like where article_id=? and user_id=?", art.Id, userid)
+	rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(article_id,'null'),IFNULL(is_like,0) FROM article_like where article_id=? and user_id=?", art.Id, userid)
 	if err != nil {
 		sugar.Log.Error("Query article_like is failed.Err is ", err)
 		return err
@@ -49,7 +49,7 @@ func AddArticleLike(db *Sql, value string) error {
 	if dl.Id == "" {
 		//插入新的一条记录
 		id := utils.SnowId()
-		stmt, err := db.DB.Prepare("INSERT INTO article_like values(?,?,?,?)")
+		stmt, err := db.DB.Prepare("INSERT INTO article_like (id,user_id,article_id,is_like) values(?,?,?,?)")
 		if err != nil {
 			sugar.Log.Error("Insert into article table is failed.", err)
 			return err

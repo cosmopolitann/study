@@ -17,28 +17,31 @@ type SysUser struct {
 
 //cloud_file
 type File struct {
-	Id       string `json:"id"`       //id
-	UserId   string `json:"userId"`   //用户userid
-	FileName string `json:"fileName"` //文件名字
-	ParentId string `json:"parentId"` //父id
-	FileCid  string `json:"fileCid"`  //文件cid
-	FileSize int64  `json:"fileSize"` //文件大小
-	FileType int64  `json:"fileType"` //文件类型
-	IsFolder int64  `json:"isFolder"` //是否是文件or 文件夹  0文件 1文件夹
-	Ptime    int64  `json:"ptime"`    //时间
+	Id        string `json:"id"`        //id
+	UserId    string `json:"userId"`    //用户userid
+	FileName  string `json:"fileName"`  //文件名字
+	ParentId  string `json:"parentId"`  //父id
+	FileCid   string `json:"fileCid"`   //文件cid
+	FileSize  int64  `json:"fileSize"`  //文件大小
+	FileType  int64  `json:"fileType"`  //文件类型
+	IsFolder  int64  `json:"isFolder"`  //是否是文件or 文件夹  0文件 1文件夹
+	Ptime     int64  `json:"ptime"`     //时间
+	Thumbnail string `json:"thumbnail"` //缩略图
 }
 
 //DownLoadList
 type DownLoad struct {
-	Id           string    `json:"id"`           //id
-	UserId       string    `json:"userId"`       //用户uersid
-	FileName     string    `json:"fileName"`     //文件名字
-	Ptime        int64 `json:"ptime"`        //时间
-	FileCid      string    `json:"fileCid"`      //文件cid
-	FileSize     int64     `json:"fileSize"`     //文件大小
-	DownPath     string    `json:"downPath"`     //下载路径
-	FileType     int64     `json:"fileType"`     //文件类型
-	TransferType int64     `json:"transferType"` //传输类型 1 上传 2 下载
+	Id             string `json:"id"`             //id
+	UserId         string `json:"userId"`         //用户uersid
+	FileName       string `json:"fileName"`       //文件名字
+	Ptime          int64  `json:"ptime"`          //时间
+	FileCid        string `json:"fileCid"`        //文件cid
+	FileSize       int64  `json:"fileSize"`       //文件大小
+	DownPath       string `json:"downPath"`       //下载路径
+	FileType       int64  `json:"fileType"`       //文件类型
+	TransferType   int64  `json:"transferType"`   //传输类型 1 上传 2 下载
+	UploadParentId string `json:"uploadParentId"` //下载父id
+	UploadFileId   string `json:"uploadFileId"`   //下载文件的id
 }
 
 //
@@ -66,15 +69,14 @@ type Article struct {
 	AccesstoryType int64  `json:"accesstoryType"`
 	Text           string `json:"text"`
 	Tag            string `json:"tag"`
-	//Ptime          time.Time `json:"ptime"`
-	Ptime     int64  `json:"ptime"`
-	PlayNum   int64  `json:"playNum"`
-	ShareNum  int64  `json:"shareNum"`
-	Title     string `json:"title"`
-	Thumbnail string `json:"thumbnail"`
-	FileName  string `json:"fileName"`
-	FileSize  string `json:"fileSize"`
-	Count    int64   `json:"count"`
+	Ptime          int64  `json:"ptime"`
+	PlayNum        int64  `json:"playNum"`
+	ShareNum       int64  `json:"shareNum"`
+	Title          string `json:"title"`
+	Thumbnail      string `json:"thumbnail"`
+	FileName       string `json:"fileName"`
+	FileSize       string `json:"fileSize"`
+	Count          int64  `json:"count"`
 }
 
 //article like
@@ -147,3 +149,7 @@ type DeleteManyDirParams struct {
 type DeleteParams struct {
 	DropFile []File
 }
+	//sql := fmt.Sprintf("INSERT INTO article (id,  user_id      ,accesstory,    accesstory_type,    text,      tag,     ptime,   play_num,share_num,title,     thumbnail,file_name,file_size) values 
+	//                                        ('%s','%s',        '%s'           ,%d,                  '%s',  '    %s'    ,%d,          %d     ,%d,     '%s',   '     %s','    %s',     %d)\n", 
+	//                                         sid, art.UserId,  art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t,           0,       0,    art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	
