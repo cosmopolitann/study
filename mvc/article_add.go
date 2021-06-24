@@ -121,12 +121,16 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 	sugar.Log.Info("----- 本地 local 文件 存在  ----")
 
 	// 拼接字符串 sql 语句
+	sugar.Log.Info("----- sql 语句 写入 文件   ----")
+
 	sql := fmt.Sprintf("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('%s','%s','%s',%d,'%s','%s',%d,%d,%d,'%s','%s','%s','%s')\n", sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
 
 	_, err = f1.WriteString(sql)
 	if err != nil {
 		sugar.Log.Error("-----  写入 update 文件 错误：  ----", err)
 	}
+	sugar.Log.Info("----- 写入的 语句 sql:", sql)
+
 	sugar.Log.Info("-----  写入 update 文件 成功 ----", err)
 	sugar.Log.Info(" ----  AddArticle Method  End ----")
 	return nil

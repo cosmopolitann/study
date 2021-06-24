@@ -159,6 +159,8 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	if err != nil {
 		sugar.Log.Error("-----  写入 local 文件 错误：  ----", err)
 	}
+	sugar.Log.Info("---  sql语句 写入文件 sql:", sql)
+
 	sugar.Log.Info("-----  写入 local 文件 成功 ----", err)
 	//
 	return resp, nil
