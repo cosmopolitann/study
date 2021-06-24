@@ -3,9 +3,11 @@ package mvc
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
+	"github.com/robfig/cron"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
@@ -687,21 +689,21 @@ func (db *Sql) OfflineSync(path string) {
 
 	sugar.Log.Info("---- 开始  离线  同步 消息 ------")
 	// // i := 0
-	// c := cron.New()
-	// // spec := "*/5 * * * * ?"
-	// spec := "0 */2 * * * ?"
-	// c.AddFunc(spec, func() {
-	// 	//0 */1 * * * ?
-	// 	log.Println("cron running:")
-	// 	log.Println("path :", path)
+	c := cron.New()
+	// spec := "*/5 * * * * ?"
+	spec := "0 */5 * * * ?"
+	c.AddFunc(spec, func() {
+		//0 */1 * * * ?
+		log.Println("cron running:")
+		log.Println("path :", path)
 
-	// 	OffLineSyncData(db, path)
+		OffLineSyncData(db, path)
 
-	// })
-	// c.Start()
+	})
+	c.Start()
 
-	// select {}
-	OffLineSyncData(db, path)
+	select {}
+	// OffLineSyncData(db, path)
 
 }
 
