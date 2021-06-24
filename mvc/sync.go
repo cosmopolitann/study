@@ -556,6 +556,15 @@ func Exist(filename string) bool {
 	return err == nil || os.IsExist(err)
 }
 func OffLineSyncData(db *Sql, path string) {
+	defer func() {
+		if err := recover(); err != nil {
+			sugar.Log.Info("  捕捉恐慌 ~~~~~~~~~~~~1:", err)
+		} else {
+			sugar.Log.Info("   正常 ~~~~~~~~~~~~2")
+
+		}
+
+	}()
 	sugar.Log.Info("--- Start excute offline task ---")
 	var defaltPath = path + "local"
 	sugar.Log.Info(" Local Path :", defaltPath)
@@ -573,10 +582,13 @@ func OffLineSyncData(db *Sql, path string) {
 	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	// RemoteIpnsAddr
 	// sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
+
 	result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
+
 	if err != nil {
 		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
 	}
+
 	sugar.Log.Info("The result what ipfs cat remote cid. ", result)
 	hash := result
 	sugar.Log.Info("Remote ipns addr cid : ", hash)
