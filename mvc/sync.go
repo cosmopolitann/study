@@ -351,6 +351,11 @@ var Topicmp map[string]*pubsub.Topic
 
 func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	//监听topic
+	defer func() {
+		if err := recover(); err != nil {
+			sugar.Log.Infof("这是恐慌信息:", err)
+		}
+	}()
 	topic := "/db-online-sync"
 	sugar.Log.Info("开始监听主题 : ", topic)
 	sugar.Log.Info("subscrib topic: ", topic)
@@ -639,23 +644,27 @@ func OffLineSyncData(db *Sql, path string) {
 					break
 				}
 				sugar.Log.Info(" Data for each line:", line)
+				sugar.Log.Info(" 读出每一行的数据信息 :", line)
+
 				sugar.Log.Infof(" Data type for each line is %T .\n", line)
 				// exec sql read cidPath file by line.
 				sugar.Log.Info(" Start excute sql  by read cidpath file content. ", line)
 				stmt, err := db.DB.Prepare(string(line))
 				if err != nil {
 					sugar.Log.Error("Insert data into table is failed.", err)
-					continue
+					//continue
 				}
 				res, err := stmt.Exec()
+				sugar.Log.Info(" --- 开始插入数据 ---  ", string(line))
+				time.Sleep(time.Second)
 				if err != nil {
 					sugar.Log.Error("Insert data into  is Failed.", err)
-					continue
+					//continue
 				}
 				l, err := res.RowsAffected()
 				if l == 0 {
 					sugar.Log.Error("Excute sql is failed.Err:", err)
-					continue
+					//continue
 				}
 			}
 			// 	delete cidPath file.
@@ -672,7 +681,7 @@ func OffLineSyncData(db *Sql, path string) {
 					sugar.Log.Error(" delete cidPath file is failed.Err:", err)
 					sugar.Log.Error(" Delete cidPath file is failed.Err:", err)
 				} else {
-					sugar.Log.Error(" Delete cidPath file is successful !!! ", cidPath)
+					sugar.Log.Info(" Delete cidPath file is successful !!! ", cidPath)
 				}
 			}
 		}
