@@ -3,6 +3,7 @@ package mvc
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
@@ -40,7 +41,7 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 	}
 	sugar.Log.Info("claim := ", claim)
 	userid := claim["UserId"]
-	rows, err := db.DB.Query("SELECT b.id,IFNULL(b.user_id,'null'),IFNULL(b.accesstory,'null'),IFNULL(b.accesstory_type,0),IFNULL(b.text,'null'),IFNULL(b.tag,'null'),IFNULL(b.ptime,0),IFNULL(b.play_num,0),IFNULL(b.share_num,0),IFNULL(b.title,'null'),IFNULL(b.thumbnail,'null'),IFNULL(b.file_name,'null'),IFNULL(b.file_size,0),( SELECT COUNT( * ) FROM article_like AS c WHERE c.article_id = a.article_id ) as sum from article_like as a LEFT JOIN article as b on a.article_id=b.id WHERE a.is_like=1 and a.user_id=? ORDER BY ptime LIMIT ?,?", userid, r, result.PageSize)
+	rows, err := db.DB.Query("SELECT a.is_like,b.id,IFNULL(b.user_id,'null'),IFNULL(b.accesstory,'null'),IFNULL(b.accesstory_type,0),IFNULL(b.text,'null'),IFNULL(b.tag,'null'),IFNULL(b.ptime,0),IFNULL(b.play_num,0),IFNULL(b.share_num,0),IFNULL(b.title,'null'),IFNULL(b.thumbnail,'null'),IFNULL(b.file_name,'null'),IFNULL(b.file_size,0),( SELECT COUNT( * ) FROM article_like AS c WHERE c.article_id = a.article_id ) as sum from article_like as a LEFT JOIN article as b on a.article_id=b.id WHERE a.is_like=1 and a.user_id=? ORDER BY ptime LIMIT ?,?", userid, r, result.PageSize)
 
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
@@ -55,7 +56,7 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 		//var sex interface{}
 		//var NickName interface{}
 		//var islike interface{}PlayNum
-		err = rows.Scan(&id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize,&dl.Count)
+		err = rows.Scan(&dl.IsLike, &id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.Count)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err
@@ -66,7 +67,7 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 
 		sugar.Log.Info("Query a entire data is ", dl)
 		if dl.UserId == "" {
-			dl.UserId = "anonymity"
+			dl.UserId = ""
 		}
 		art = append(art, dl)
 	}
