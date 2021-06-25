@@ -2,6 +2,7 @@ package mvc
 
 import (
 	"database/sql"
+
 	"github.com/cosmopolitann/clouddb/sugar"
 )
 
@@ -16,8 +17,6 @@ type NewTestNode struct {
 func NTestNode(path string) *NewTestNode {
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
-	sugar.Log.Info("创建数据库 完成")
-	//
 	sql := Newdb(path)
 
 	return &NewTestNode{db: sql}
@@ -27,12 +26,10 @@ func (n *NewTestNode) Add() error {
 	//
 	err := n.db.Ping()
 	if err != nil {
-		sugar.Log.Error("打开 数据库 失败 err is ", err)
+		sugar.Log.Error("Open db is failed. Err: ", err)
 	}
 	return err
 }
-
-
 
 func (n *NewTestNode) UserLogin(value string) string {
 	//
@@ -41,8 +38,6 @@ func (n *NewTestNode) UserLogin(value string) string {
 }
 
 func Newdb(path string) Sql {
-	sugar.Log.Info("---- ===== ------")
-
 	return Sql{DB: InitDB(path)}
 }
 
@@ -52,7 +47,7 @@ func InitDB(path string) *sql.DB {
 	if path == "" {
 		path = "../tables/foo.db"
 	}
-	sugar.Log.Info(" 数据库路径  = ", path)
+	sugar.Log.Info(" Db path := ", path)
 	sugar.Log.Info("Start Open Sqlite3 Database.")
 	db, err := sql.Open("sqlite3", path)
 	checkErr(err)

@@ -661,7 +661,8 @@ func (db *Sql) SyncArticleShareAdd(dInfo string) error {
 //  同步数据
 
 func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
-	sugar.Log.Info("---- 开始 同步 消息 ------")
+	sugar.Log.Info("---- Start  OnLine   Sync  ------")
+
 	e := SyncTopicData(ipfsNode, db, dInfo)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
@@ -685,7 +686,7 @@ func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 
 func (db *Sql) OfflineSync(path string) {
 
-	sugar.Log.Info("---- 开始  离线  同步 消息 ------")
+	sugar.Log.Info("---- Start OffLine Sync  ------")
 	// i := 0
 	// c := cron.New()
 	// // spec := "*/5 * * * * ?"

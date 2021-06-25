@@ -13,6 +13,7 @@ import (
 
 //MoveFile
 func MoveFile(db *Sql, value string) error {
+	sugar.Log.Info(" ~~~~  Start   MoveFile  ~~~~~ ")
 	//move file or  copy dir
 	var mvFile vo.MoveFileParams
 	err := json.Unmarshal([]byte(value), &mvFile)
@@ -24,23 +25,12 @@ func MoveFile(db *Sql, value string) error {
 	//校验 token 是否 满足
 	claim, b := jwt.JwtVeriyToken(mvFile.Token)
 	if !b {
-		return errors.New("token 失效")
+		return errors.New(" Token is invaild.")
 	}
 	sugar.Log.Info("解析token 参数值 ： ", claim)
 	//userid:=claim["UserId"].(string)
 	for _, v := range mvFile.Ids {
-		//开启事务
-		//rows1, _ := db.DB.Query("SELECT * FROM cloud_file where id=?",v)
-		//var m File
-		//
-		//for rows1.Next() {
-		//	err := rows1.Scan(&m.Id, &m.UserId, &m.FileName, &m.ParentId, &m.Ptime, &m.FileCid,&m.FileSize,&m.FileType,&m.IsFolder)
-		//
-		//	if err != nil {
-		//		fmt.Println("query err is ",err)
-		//		return  err
-		//	}
-		//}
+	
 		log.Println("这是要移动的文件id：", v)
 		rows, _ := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file as b WHERE (b.file_name,b.user_id,b.is_folder) in (SELECT a.file_name,a.user_id,a.is_folder from cloud_file as a WHERE a.id=?) and b.parent_id=?;", v, mvFile.ParentId)
 		var s File
@@ -84,5 +74,6 @@ func MoveFile(db *Sql, value string) error {
 			}
 		}
 	}
+	sugar.Log.Info(" ~~~~  Start   MoveFile  End ~~~~~ ")
 	return nil
 }

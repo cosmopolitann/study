@@ -13,8 +13,8 @@ type ChatListenHandler interface {
 }
 
 type ChatListenParams struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
+	Type string      `json:"type"` //类型
+	Data interface{} `json:"data"` //数据
 }
 
 type ChatSendMsgParams struct {

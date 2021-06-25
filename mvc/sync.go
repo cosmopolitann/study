@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -27,75 +26,43 @@ import (
 )
 
 func SyncUser(db *Sql, value string) error {
-
-	//var user SysUser
-	//err := json.Unmarshal([]byte(value), &user)
-	//if err != nil {
-	//	sugar.Log.Error("---同步 解析 数据 失败 ---:", err)
-	//	return err
-	//}
-	//sugar.Log.Info("params ：= ", user)
-	//
-	//
-	//t := time.Now().Unix()
-	//stmt, err := db.DB.Prepare("INSERT INTO sys_user values(?,?,?,?,?,?,?,?)")
-	//if err != nil {
-	//	sugar.Log.Error("同步 Insert data to sys_user is failed.")
-	//	return err
-	//}
-	//
-	////sid := strconv.FormatInt(user.Id, 10)
-	//res, err := stmt.Exec(user.Id, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName)
-	//if err != nil {
-	//	sugar.Log.Error("同步 Insert data to sys_user is failed.", res)
-	//	return err
-	//}
-	//c, _ := res.RowsAffected()
-	//sugar.Log.Info("~~~~~  同步   into sys_user data is Successful ~~~~~~", c)
-	////生成 token
-	//// 手机号
-	////token,err:=jwt.GenerateToken(user.Phone,60)
-	//
-	//return nil
+	sugar.Log.Info("---Start Sync User ---- ")
 	var user SysUser
 	err := json.Unmarshal([]byte(value), &user)
 	if err != nil {
-
+		sugar.Log.Error("Sync User Unmarshal is failed.Err:", err)
+		return err
 	}
-	sugar.Log.Info("params ：= ", user)
-
+	sugar.Log.Info("params:= ", user)
 	l, e := FindIsExistUser(db, user)
 	if e != nil {
 		sugar.Log.Error("FindIsExistUser info is Failed.")
 	}
 	// l > 0 user is exist.
-	sugar.Log.Error("-----------1")
-
 	if l > 0 {
 		sugar.Log.Error("user is exist.")
-		return errors.New("user is exist.")
+		return errors.New(" User is already exist. ")
 	}
-
 	//inExist insert into sys_user.
-
-	sugar.Log.Info("-----------用户 信息 ", user)
-
-	//id := utils.SnowId()
 	//create now time
-	//t:=time.Now().Format("2006-01-02 15:04:05")
 	t := time.Now().Unix()
 	stmt, err := db.DB.Prepare("INSERT INTO sys_user values(?,?,?,?,?,?,?,?,?)")
 	if err != nil {
-		sugar.Log.Error("Insert data to sys_user is failed.")
+		sugar.Log.Error("Insert data to sys_user is failed.Err:", err)
 		return err
 	}
 	//sid := strconv.FormatInt(user.Id, 10)
 	res, err := stmt.Exec(user.Id, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
 	if err != nil {
-		sugar.Log.Error("Insert data to sys_user is failed.", res)
+		sugar.Log.Error("Insert data to sys_user is failed.Err:", err)
 		return err
 	}
 	c, _ := res.RowsAffected()
+	if c == 0 {
+		return errors.New(" Insert into sys_user is failed. ")
+	}
+	sugar.Log.Info("---Start Sync User End---- ")
+
 	sugar.Log.Info("~~~~~   Insert into sys_user data is Successful ~~~~~~", c)
 	return nil
 }
@@ -103,11 +70,13 @@ func SyncUser(db *Sql, value string) error {
 // 文章
 
 func SyncArticle(db *Sql, value string) error {
+	sugar.Log.Info("---Start Sync  Article ---- ")
+
 	var art vo.ArticleAddParams
 	err := json.Unmarshal([]byte(value), &art)
 	if err != nil {
 		sugar.Log.Error("Marshal is failed.Err is ", err)
-		return errors.New("解析字段错误")
+		return errors.New(" SyncArticle marshal is failed. ")
 	}
 	sugar.Log.Info("Marshal data is  ", art)
 	id := utils.SnowId()
@@ -115,27 +84,30 @@ func SyncArticle(db *Sql, value string) error {
 	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.", err)
-		return errors.New("插入article 表数据 失败")
+		return err
 	}
 	sid := strconv.FormatInt(id, 10)
 	stmt.QueryRow()
 	res, err := stmt.Exec(sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
 	if err != nil {
 		sugar.Log.Error("Insert into article  is Failed.", err)
-		return errors.New("插入数据失败")
+		return err
 	}
 	l, _ := res.RowsAffected()
 	if l == 0 {
-		return errors.New("插入数据失败")
+		return errors.New(" SyncArticle insert into article is failed. ")
 	}
+	sugar.Log.Info("---Start Sync  Article  End---- ")
 	return nil
 }
 
 // 同步 文章 播放量
 
 func SyncAticlePlay(db *Sql, value string) error {
+	sugar.Log.Info("---Start Sync  AticlePlay ---- ")
 	var dl Article
 	var art vo.ArticlePlayAddParams
+	//marshal request params.
 	err := json.Unmarshal([]byte(value), &art)
 	if err != nil {
 		sugar.Log.Error("Marshal is failed.Err is ", err)
@@ -147,25 +119,22 @@ func SyncAticlePlay(db *Sql, value string) error {
 		return err
 	}
 	//select the data is exist.
-	rows, err := db.DB.Query("select * from article where id=?", art.Id)
+	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) from article where id=?", art.Id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
 	}
-	vl, _ := rows.Columns()
-	sugar.Log.Info("vl ", vl)
-
+	//scan data.
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return err
 		}
-
 		sugar.Log.Info("Query a entire data is ", dl)
 	}
 	if dl.Id == "" {
-		return errors.New(" update is failed .")
+		return errors.New(" Update is failed . ")
 	}
 	//update play num + 1
 	stmt, err := db.DB.Prepare("update article set play_num=? where id=?")
@@ -175,119 +144,126 @@ func SyncAticlePlay(db *Sql, value string) error {
 	}
 	res, err := stmt.Exec(int64(dl.PlayNum+1), art.Id)
 	if err != nil {
-		sugar.Log.Error("Update  is failed.The err is ", err)
+		sugar.Log.Error("Exec update is failed.The err is ", err)
 		return err
 	}
-
+	//if affect equal zreo,it meant update is failed.
 	affect, err := res.RowsAffected()
 	if err != nil {
-		sugar.Log.Error("Update  is failed.The err is ", err)
+		sugar.Log.Error("RowsAffected  is failed.The err is ", err)
 		return err
 	}
 	if affect == 0 {
 		sugar.Log.Error("Update  is failed.The err is ", err)
 		return err
 	}
+	sugar.Log.Info("---Start Sync  AticlePlay  End ---- ")
 	return nil
 }
+
+// 同步用户分享数量
+
 func SyncArticleShareAdd(db *Sql, value string) error {
+	sugar.Log.Info("---Start Sync ArticleShareAdd   ---- ")
 	var dl Article
 	var art vo.ArticlePlayAddParams
+	//unmarshal request params.
 	err := json.Unmarshal([]byte(value), &art)
-
 	if err != nil {
-		sugar.Log.Error("同步 Marshal is failed.Err is ", err)
-	}
-	sugar.Log.Info("同步 Marshal data is  ", art)
-	if err != nil {
-		sugar.Log.Error("同步 Insert into article table is failed.", err)
+		sugar.Log.Error(" Sync articleShare Add Marshal is failed.Err is ", err)
 		return err
 	}
-	//select the data is exist.
-	rows, err := db.DB.Query("select * from article where id=?", art.Id)
+	sugar.Log.Info("SyncArticleShareAdd Marshal data:", art)
+	//Query whether the data exists.
+	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) from article where id=?", art.Id)
 	if err != nil {
-		sugar.Log.Error("同步 Query data is failed.Err is ", err)
+		sugar.Log.Error("SyncArticleShareAdd Query data is failed.Err is ", err)
 		return err
 	}
-
+	//scan data => article.
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
-			sugar.Log.Error("同步 Query scan data is failed.The err is ", err)
+			sugar.Log.Error("Sync Query scan data is failed.Err: ", err)
 			return err
 		}
-
-		sugar.Log.Info("同步 Query a entire data is ", dl)
+		sugar.Log.Info(" Query a entire data is : ", dl)
 	}
 	if dl.Id == "" {
-		return errors.New(" update is failed .")
+		return errors.New(" Update is failed . ")
 	}
 	//update play num + 1
 	stmt, err := db.DB.Prepare("update article set share_num=? where id=?")
 	if err != nil {
-		sugar.Log.Error("同步 Update  data is failed.The err is ", err)
+		sugar.Log.Error(" Sync Update  data is failed.Err: ", err)
 		return err
 	}
 	res, err := stmt.Exec(int64(dl.ShareNum+1), art.Id)
 	if err != nil {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error("Sync Update  is failed.Err: ", err)
 		return err
 	}
-
+	//rowsAffect.
 	affect, err := res.RowsAffected()
 	if err != nil {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error("Sync Update  is failed.Err: ", err)
 		return err
 	}
 	if affect == 0 {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error("Sync Update  is failed.Err: ", err)
 		return err
 	}
-
+	sugar.Log.Info("---Start Sync ArticleShareAdd   End ---- ")
 	return nil
 }
 
+// 同步用户注册
+// 最开始写的  不会用。错误。
 func SyncUserRegister(db *Sql, value string) error {
+	//
+	sugar.Log.Info("---Start   Sync   UserRegister    ---- ")
+
 	var dl Article
 	var art vo.ArticlePlayAddParams
+	//unmarshal request params.
 	err := json.Unmarshal([]byte(value), &art)
-
 	if err != nil {
-		sugar.Log.Error("同步 Marshal is failed.Err is ", err)
-	}
-	sugar.Log.Info("同步 Marshal data is  ", art)
-	if err != nil {
-		sugar.Log.Error("同步 Insert into article table is failed.", err)
+		sugar.Log.Error(" Sync Marshal is failed.Err is ", err)
 		return err
 	}
-	//select the data is exist.
+	sugar.Log.Info(" Marshal data is:", art)
+	if err != nil {
+		sugar.Log.Error(" Insert into article table is failed.", err)
+		return err
+	}
+	//Query whether the data exists
 	rows, err := db.DB.Query("select * from article where id=?", art.Id)
 	if err != nil {
-		sugar.Log.Error("同步 Query data is failed.Err is ", err)
+		sugar.Log.Error(" Query data is failed.Err is ", err)
 		return err
 	}
 
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
-			sugar.Log.Error("同步 Query scan data is failed.The err is ", err)
+			sugar.Log.Error("Sync Query scan data is failed.The err is ", err)
 			return err
 		}
 
-		sugar.Log.Info("同步 Query a entire data is ", dl)
+		sugar.Log.Info("Sync Query a entire data is ", dl)
 	}
 	if dl.Id == "" {
-		return errors.New(" 同步 update is failed .")
+		return errors.New(" Sync update is failed .")
 	}
 	//update play num + 1
 	stmt, err := db.DB.Prepare("update article set share_num=? where id=?")
 	if err != nil {
-		sugar.Log.Error("同步 Update  data is failed.The err is ", err)
+		sugar.Log.Error(" Sync Update  data is failed.The err is ", err)
 		return err
 	}
 	res, err := stmt.Exec(int64(dl.ShareNum+1), art.Id)
 	if err != nil {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error("Sync Update  is failed.The err is ", err)
 		return err
 	}
 
@@ -300,7 +276,7 @@ func SyncUserRegister(db *Sql, value string) error {
 		sugar.Log.Error("同步 Update  is failed.The err is ", err)
 		return err
 	}
-
+	sugar.Log.Info("---Start   Sync   UserRegister   End ---- ")
 	return nil
 
 }
@@ -308,7 +284,6 @@ func SyncUserRegister(db *Sql, value string) error {
 // // 同步 文章 播放量
 
 func SyncArticleShare(db *Sql, value string) error {
-
 	var dl Article
 	var art vo.ArticlePlayAddParams
 	err := json.Unmarshal([]byte(value), &art)
@@ -317,7 +292,6 @@ func SyncArticleShare(db *Sql, value string) error {
 		sugar.Log.Error("Marshal is failed.Err is ", err)
 	}
 	sugar.Log.Info("Marshal data is  ", art)
-
 	//update play num + 1
 	stmt, err := db.DB.Prepare("update article set share_num=? where id=?")
 	if err != nil {
@@ -329,7 +303,6 @@ func SyncArticleShare(db *Sql, value string) error {
 		sugar.Log.Error("Update  is failed.The err is ", err)
 		return err
 	}
-
 	affect, err := res.RowsAffected()
 	if err != nil {
 		sugar.Log.Error("Update  is failed.The err is ", err)
@@ -343,37 +316,28 @@ func SyncArticleShare(db *Sql, value string) error {
 }
 
 func SyncUserUpdate(db *Sql, value string) error {
-
 	return nil
 }
 
 var Topicmp map[string]*pubsub.Topic
 
 func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
-	//监听topic
+	sugar.Log.Info("----  Start Sync Data ----")
+	//Listening to the topic.
 	defer func() {
 		if err := recover(); err != nil {
-			sugar.Log.Infof("这是恐慌信息:", err)
+			sugar.Log.Errorf("This is recover info:", err)
 		}
 	}()
+	//The first step.
 	topic := "/db-online-sync"
-	sugar.Log.Info("开始监听主题 : ", topic)
-	sugar.Log.Info("subscrib topic: ", topic)
-
+	sugar.Log.Info("Topic Name: ", topic)
+	sugar.Log.Info("Subscrib Topic: ", topic)
 	ctx := context.Background()
-	sugar.Log.Info("加入 主题 房间  : ", topic)
-	// 判断 map 是否存在 当前 主题
-
-	// tp, err := ipfsNode.PubSub.Join(topic)
-	// if err != nil {
-	// 	sugar.Log.Error("subscribe Join failed.", err)
-	// 	return err
-	// }
-	// //
-	// sugar.Log.Info("将tp 加入 到 map中  : ", topic)
-	// Topicmp = make(map[string]*pubsub.Topic)
-	// Topicmp["/db-online-sync"] = tp
-	// sugar.Log.Info("主题map :", Topicmp)
+	sugar.Log.Info("Join Topic Room: ", topic)
+	// join topic.
+	// if topic is exist, use it (tp),otherwise join it.
+	// ok true exist  false inexist.
 	tp, ok := TopicJoin.Load(topic)
 	var err error
 	if !ok {
@@ -385,165 +349,177 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		TopicJoin.Store(topic, tp)
 	}
 	sugar.Log.Info(" Subscribe topic  tp :", tp)
-
+	// start subscribe topic.
 	sub, err := tp.Subscribe()
 	if err != nil {
 		sugar.Log.Error("subscribe failed.", err)
 		return err
 	}
 	for {
-		sugar.Log.Info("------------------------------------------------")
-		sugar.Log.Info("开始 同步 消息")
-
+		sugar.Log.Info("-----  Start Subscribe ------")
 		data, err := sub.Next(ctx)
 		if err != nil {
 			sugar.Log.Error("subscribe failed.", err)
 			continue
 		}
+		sugar.Log.Info("~~~  Recieve Data  ~~~~")
 		msg := data.Message
-		log.Println("------ 收到的消息的内容---", msg.Data)
-
-		log.Printf("------ 收到的消息的类型 %T\n----", msg.Data)
 		fromId := msg.From
-		sugar.Log.Info("-----来自谁的消息-----:", string(fromId))
 		peerId := ipfsNode.Identity.String()
-		sugar.Log.Info("本地节点peerId:", peerId)
-		//
+		sugar.Log.Info(" Recieve Data :", msg.Data)
+		sugar.Log.Infof(" Recieve Data Type : %T\n", msg.Data)
+		sugar.Log.Info(" Recieve FromId : ", string(fromId))
+		sugar.Log.Info(" Local PeerId : ", peerId)
+		//marshal recieve data.
 		var recieve vo.SyncMsgParams
 		err = json.Unmarshal(msg.Data, &recieve)
 		if err != nil {
-			sugar.Log.Error("解析失败:", err)
+			sugar.Log.Error("Marshal recieve data is failed.Err:", err)
 			continue
 		}
 		wayId := "12D3KooWDoBhdQwGT6oq2EG8rsduRCmyTZtHaBCowFZ7enwP4i8J"
-		sugar.Log.Info("----公共网关节点 id =---:", wayId)
+		sugar.Log.Info("----Public gateway peerId ----:", wayId)
+		sugar.Log.Info("----Encode base58 fromId ----")
 		FromID := base58.Encode(fromId)
-		sugar.Log.Info("-----来自谁的消息 转码的FromID-----:", string(FromID))
+		sugar.Log.Info("----- Encode base58 fromId -----:", string(FromID))
+
+		sugar.Log.Info("----- Judge FromId == or != wayId -----")
 
 		if FromID == wayId {
-			sugar.Log.Info("---- 因为 公共网关 节点id 等于 i8j 所以满足条件进来 ---:", peerId)
+			//if fromid == wayid ,then judge peerid ==reciece.fromid .
+			//Satisfy one condition
+			sugar.Log.Info(" FromId == wayId ")
 
 			if peerId == recieve.FromId {
-				sugar.Log.Info("---- 因为 本地 节点id 等于 recieve fromId  所以不满足 ---:")
+				sugar.Log.Info(" PeerId   !=   recieve.FromId")
+				sugar.Log.Info(" PeerId :=", peerId)
+				sugar.Log.Info(" recieve.FromId :=", recieve.FromId)
+				sugar.Log.Info(" ~~~~  continue ~~~~ ")
 				continue
 			} else {
-
+				sugar.Log.Info(" PeerId   ==   recieve.FromId")
+				sugar.Log.Info(" PeerId :=", peerId)
+				sugar.Log.Info(" recieve.FromId :=", recieve.FromId)
+				sugar.Log.Info(" recieve.Method :=", recieve.Method)
 				if recieve.Method == "receiveArticleAdd" {
-					//  添加 文章  入库
-					//第一步 解析
+					sugar.Log.Info("~~~  Start add  article   ~~~")
+					//  add article into table.
+					sugar.Log.Info("~~~ Because Method == receiveArticleAdd ~~~~")
+					sugar.Log.Info(" recieve.Method :=", recieve.Method)
+					//unmarshal params.
 					var syn vo.SyncRecieveArticleParams
 					err = json.Unmarshal(msg.Data, &syn)
 					if err != nil {
-						sugar.Log.Error("同步 解析 用户字段 错误:", err)
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
 						continue
 					}
 					// string
+					// marshal syn.data => userInfo.
 					userInfo, err := json.Marshal(syn.Data)
 					if err != nil {
-						sugar.Log.Error("同步添加文章失败:", err)
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
 						continue
 					}
-					sugar.Log.Info("解析收到 同步消息的receiveArticleAdd 消息是", recieve.Method)
+					//start sync article.
 					err = db.SyncArticle(string(userInfo))
 					if err != nil {
-						sugar.Log.Error("同步添加文章失败:", err)
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
 						continue
 					}
-					sugar.Log.Info("同步添加文章成功")
+					sugar.Log.Info("~~~  Sync add article is successful!  ~~~")
+					sugar.Log.Info("~~~   Add  article  End ~~~")
 				} else if recieve.Method == "receiveArticlePlayAdd" {
-
-					//第一步 解析
+					sugar.Log.Info("~~~  Start ReceiveArticlePlayAdd   ~~~")
+					//  add article into table.
+					sugar.Log.Info("~~~ Because Method == receiveArticlePlayAdd ~~~~")
+					sugar.Log.Info(" recieve.Method :=", recieve.Method)
+					//unmarshal params.
 					var syn vo.SyncRecievePlayParams
 					err = json.Unmarshal(msg.Data, &syn)
 					if err != nil {
-						sugar.Log.Error("同步 解析 用户字段 错误:", err)
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
 						continue
 					}
 					// string
+					// marshal syn.data => userInfo.
 					userInfo, err := json.Marshal(syn.Data)
 					if err != nil {
-						sugar.Log.Error("同步 播放 数量 失败:", err)
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
 						continue
 					}
-					sugar.Log.Info("解析收到 receiveArticlePlayAdd 消息类型是", recieve.Method)
-
-					sugar.Log.Info("解析收到 receiveArticlePlayAdd 消息内容是", string(userInfo))
-
+					//sync articlplay
 					err = db.SyncArticlePlay(string(userInfo))
 					if err != nil {
-						sugar.Log.Error("-----  同步增加播放次数 失败  -----", err)
+						sugar.Log.Error("Sync article  add  play is failed.Err:", err)
 						continue
 					}
-
+					sugar.Log.Info("~~~  Sync Article  Add Play is successful!  ~~~")
+					sugar.Log.Info("~~~    Article  add  play  End   ~~~")
 				} else if recieve.Method == "receiveArticleShareAdd" {
-					//  增加 分享 次数
-
-					sugar.Log.Info("-----  同步  增加 分享 次数  -----")
-
-					sugar.Log.Info("-----  同步  增加 分享 次数  的数据  -----", value)
-					//--
-					//第一步 解析
+					sugar.Log.Info("~~~  Start receiveArticleShareAdd   ~~~")
+					//  add article into table.
+					sugar.Log.Info("~~~ Because Method == receiveArticleShareAdd ~~~~")
+					sugar.Log.Info(" recieve.Method :=", recieve.Method)
+					//unmarshal params.
 					var syn vo.SyncRecievePlayParams
 					err = json.Unmarshal(msg.Data, &syn)
 					if err != nil {
-						sugar.Log.Error("同步 解析 用户字段 错误:", err)
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
 						continue
 					}
 					// string
+					// marshal syn.data => userInfo.
 					userInfo, err := json.Marshal(syn.Data)
 					if err != nil {
-						sugar.Log.Error("同步 播放 数量 失败:", err)
+						sugar.Log.Error("Marshal params is failed.Err:", err)
 						continue
 					}
-					sugar.Log.Info("解析收到 receiveArticlePlayAdd 消息是", recieve.Method)
-
-					//----
+					// start sync ArticleShareAdd
 					err = db.SyncArticleShareAdd(string(userInfo))
 					if err != nil {
-						sugar.Log.Error("-----  同步  增加 分享 次数  失败  -----", err)
+						sugar.Log.Error("-Sync articleshareadd is failed.Err:", err)
 						continue
 					}
-					sugar.Log.Info(" 增加 分享 次数")
-
+					sugar.Log.Info("~~~  Sync articleshareadd is successful!  ~~~")
+					sugar.Log.Info("~~~   Add  articleshareadd  End ~~~")
 				} else if recieve.Method == "receiveUserRegister" {
-					// 添加用户 信息
-					sugar.Log.Info("-----  同步  添加用户 信息  -----")
-
-					sugar.Log.Info("-----  同步  添加用户 信息  -----", value)
-
-					//----
-
-					//第一步 解析
-
+					sugar.Log.Info("~~~  Start receiveUserRegister   ~~~")
+					//  add article into table.
+					sugar.Log.Info("~~~ Because Method == receiveUserRegister ~~~~")
+					sugar.Log.Info(" recieve.Method :=", recieve.Method)
+					//unmarshal params.
 					var syn vo.SyncRecieveUsesrParams
 					err = json.Unmarshal(msg.Data, &syn)
 					if err != nil {
-						sugar.Log.Error("同步 解析 用户字段 错误:", err)
+						sugar.Log.Error("Marshal params is failed.Err:", err)
 						continue
 					}
 					// string
+					// marshal syn.data => userInfo.
 					userInfo, err := json.Marshal(syn.Data)
 					if err != nil {
-						sugar.Log.Error("同步 播放 数量 失败:", err)
+						sugar.Log.Error("Marshal params is failed.Err:", err)
 						continue
 					}
-					sugar.Log.Info("解析收到 receiveArticlePlayAdd 消息是", recieve.Method)
-
-					//-------
+					//start sync user.
 					err = db.SyncUser(string(userInfo))
 					if err != nil {
-						sugar.Log.Error("----- 添加用户 信息 失败  -----", err)
+						sugar.Log.Error("Sync user is failed.Err:", err)
 						continue
 					}
-					sugar.Log.Info(" 添加用户 信息 成功")
+					sugar.Log.Info("~~~  Sync user is successful!  ~~~")
+					sugar.Log.Info("~~~   Add  user  End ~~~")
 				} else {
-					sugar.Log.Info("不满足条件，继续:")
+					sugar.Log.Info("~~~~~  No ~~~~~ ")
+					sugar.Log.Info("~~~~~  Continue ~~~~~ ")
+					sugar.Log.Info("~~~~~  Don't match ~~~~~ ")
 					continue
 				}
 			}
 		} else {
-			sugar.Log.Info("不满足条件，继续:")
-
+			sugar.Log.Info("~~~~~  No ~~~~~ ")
+			sugar.Log.Info("~~~~~  Continue ~~~~~ ")
+			sugar.Log.Info("~~~~~  Don't match ~~~~~ ")
 			continue
 		}
 
@@ -633,7 +609,6 @@ func OffLineSyncData(db *Sql, path string) {
 		for i := 1; i < len(diff); i++ {
 			sugar.Log.Info(" --- loop  diff array ---- ", i)
 			sugar.Log.Info(" --- diff array value ---- ", diff[i])
-
 			cidPath := path + string(diff[i])
 			sugar.Log.Info(" cidPath : ", cidPath)
 			sugar.Log.Info(" Ipfs get cidpath  : ", cidPath)
@@ -660,8 +635,6 @@ func OffLineSyncData(db *Sql, path string) {
 					break
 				}
 				sugar.Log.Info(" Data for each line:", line)
-				sugar.Log.Info(" 读出每一行的数据信息 :", line)
-
 				sugar.Log.Infof(" Data type for each line is %T .\n", line)
 				// exec sql read cidPath file by line.
 				sugar.Log.Info(" Start excute sql  by read cidpath file content. ", line)
@@ -706,7 +679,6 @@ func OffLineSyncData(db *Sql, path string) {
 		if err1 != nil {
 			sugar.Log.Error(" Open file is failed.Err:", err1)
 		}
-		//
 
 		dupremoteStr := SplitArray(dupremote)
 		sugar.Log.Info(" DupremoteStr data : ", dupremoteStr)
@@ -731,61 +703,6 @@ func OffLineSyncData(db *Sql, path string) {
 			}
 		}
 		sugar.Log.Info("-----------Execute sql is successful. ---------------")
-		// f, err := os.Open("./output")
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// defer f.Close()
-
-		// rd := bufio.NewReader(f)
-		// for {
-		// 	line, err := rd.ReadString('\n') //以'\n'为结束符读入一行
-		// 	if err != nil || io.EOF == err {
-		// 		break
-		// 	}
-		// 	fmt.Println(line)
-		// 	fmt.Printf("类型 是 %T\n ", line)
-		// 	// 执行 sql 语句 试试
-		// 	fmt.Println("----- 开始 执行  sql 语句 -----")
-		// 	stmt, err := db.DB.Prepare(string(line))
-		// 	if err != nil {
-		// 		sugar.Log.Error("Insert into cloud_file table is failed.", err)
-		// 		continue
-		// 	}
-		// 	res, err := stmt.Exec()
-		// 	if err != nil {
-		// 		sugar.Log.Error("Insert into file  is Failed.", err)
-		// 		continue
-		// 	}
-		// 	l, _ := res.RowsAffected()
-		// 	if l == 0 {
-		// 		sugar.Log.Error("执行sql 失败 原因:", err)
-		// 		continue
-		// 	}
-		// }
-
-		// // 完成之后 删除 output 文件
-		// // 新建一个 cid 文件 拼接字符串
-		// if checkFileIsExist("./version") { //如果文件存在
-		// 	f, err1 := os.OpenFile("./version", os.O_RDONLY|os.O_CREATE|os.O_APPEND, 0666) //打开文件
-		// 	if err1 != nil {
-		// 		fmt.Println("err", err1)
-
-		// 	}
-		// 	fmt.Println("文件存在")
-		// 	//读文件 写文件信息
-		// 	_, err = f.WriteString("writeString : " + "_"+)
-		// 	if err != nil {
-		// 		log.Println(err)
-		// 		return
-		// 	}
-
-		// }
-		// } else {
-		// 	f, err1 := os.Create("./version") //创建文件
-		// 	fmt.Println("文件不存在")
-		// 	if err1 != nil {
-		// 		fmt.Println("err", err1)
 	}
 	//ipns
 	sugar.Log.Info(" Start upload cid to gateway.io ipns. ")
@@ -803,7 +720,6 @@ func SplitArray(a []string) string {
 		} else {
 			result += v + "_"
 		}
-
 	}
 	return result
 }
@@ -853,7 +769,6 @@ func RemoveDuplicationArray(arr []string) []string {
 		arr[j] = v
 		j++
 	}
-
 	return arr[:j]
 }
 
@@ -863,7 +778,6 @@ func UploadFile(path string, hash string) {
 	// resolve k5 => /ipfs/cid , then pull the remote file.
 	sugar.Log.Info(" Start resolve k5 => /ipfs/cid  ")
 	sugar.Log.Info(" Exist update file state .")
-
 	var updateCid string
 	b := Exist(path + "update")
 	if !b {
@@ -889,7 +803,6 @@ func UploadFile(path string, hash string) {
 		sugar.Log.Info(" THe hash value what upload file to create a hash by ipfs. ", hash_local)
 		updateCid = hash_local
 	}
-
 	//read remote file.
 	sugar.Log.Infof(" Cat remote %s to get content by ipfs. \n", hash)
 	read, err := sh.Cat(hash)
@@ -904,27 +817,21 @@ func UploadFile(path string, hash string) {
 	//  update file.
 	//  read local file info.
 	//
-
 	var defaltPath = path + "local"
 	sugar.Log.Info(" Local file path :", defaltPath)
 	sugar.Log.Info(" Exist local file ")
-
 	lfile := Exist(defaltPath)
 	sugar.Log.Info(" All cid info = local cid + _ + cid(update)")
-
 	// var upInfo string = string(remote1) + "_" + updateCid
 	if !lfile {
 		//create file
 		sugar.Log.Info(" No find local file , and create it. ")
-
 		_, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file
 		if err1 != nil {
 			sugar.Log.Errorf(" Create %s file is failed.Err:", err1)
 		}
-
 	}
 	sugar.Log.Info(" Local file is exist,and open it. ")
-
 	f1, err := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file
 	if err != nil {
 		sugar.Log.Errorf(" Open %s file is failed.Err:", err)
@@ -935,9 +842,7 @@ func UploadFile(path string, hash string) {
 	remoteresp := SplitArray(reduplication)
 	sugar.Log.Info(" 这是 去重 之后 返回的数据 remoteresp : ", remoteresp)
 	sugar.Log.Info(" 这是 长度 : ", len(reduplication))
-
 	var all = remoteresp + "_" + updateCid
-
 	// dup
 	sugar.Log.Info(" 这是 all : ", all)
 
@@ -948,7 +853,6 @@ func UploadFile(path string, hash string) {
 	if err != nil {
 		sugar.Log.Error(" Write file is failed. Err:", err)
 	}
-
 	//	upload remote file to ipfs .
 	sugar.Log.Info(" start upload allcid to ipfs . ")
 	hash1, err := sh.Add(bytes.NewBufferString(all))
@@ -987,8 +891,7 @@ func UploadFile(path string, hash string) {
 		sugar.Log.Error(" PublishWithDetails is failed.Err: ", err)
 	}
 	sugar.Log.Info(" Pubresp := ", pubresp)
-	sugar.Log.Info(" Off Line  Sync is Successful !!!! ")
-
+	sugar.Log.Info("~~~~~ Off Line  Sync is Successful !!!! ~~~~~")
 }
 
 // request ipns
@@ -1012,7 +915,7 @@ func postFormDataWithSingleFile(path string) {
 	if err != nil {
 		sugar.Log.Error(" Copy is failed.Err: ", err)
 	}
-	bodyWrite.Close() //will closed, 会将w.w.boundary刷写到w.writer中
+	bodyWrite.Close() //will closed, 会将w.w.boundary copy => w.writer
 	// create requet.
 	contentType := bodyWrite.FormDataContentType()
 	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:5001/api/v0/key/import?arg=dbkey&ipns-base=base36", bodyBuf)
@@ -1024,7 +927,6 @@ func postFormDataWithSingleFile(path string) {
 	resp, err := client.Do(req)
 	if err != nil {
 		sugar.Log.Error(" NewRequestpy is failed.Err: ", err)
-
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)

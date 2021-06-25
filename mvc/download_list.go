@@ -3,25 +3,23 @@ package mvc
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
 )
 
 func DownloadList(db *Sql, value string) (data []DownLoad, e error) {
-	//查询下载用户信息
-	//userid  就是 sys_user 表的  雪花id
+	sugar.Log.Info("~~~ Start   DownloadList  ~~~")
 	var d []DownLoad
 	var tl vo.TransferListParams
-	//解析
-
+	//marshal params.
 	err := json.Unmarshal([]byte(value), &tl)
 	if err != nil {
 		return d, err
 	}
-	//
 
-	//校验 token 是否 满足
+	//check token.
 	claim, b := jwt.JwtVeriyToken("")
 	if !b {
 		return d, errors.New("token 失效")
@@ -34,7 +32,7 @@ func DownloadList(db *Sql, value string) (data []DownLoad, e error) {
 	}
 	for rows.Next() {
 		var dl DownLoad
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.DownPath, &dl.FileType,&dl.TransferType,&dl.UploadParentId,&dl.UploadFileId)
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.DownPath, &dl.FileType, &dl.TransferType, &dl.UploadParentId, &dl.UploadFileId)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return d, err

@@ -1,35 +1,34 @@
 package vo
 
-
 //同步 文章
 
 type SyncArticleAddParams struct {
-	Method string           `json:"method"`
-	Data   ArticleAddParams `json:"data"`
+	Method string           `json:"method"` //同步方法
+	Data   ArticleAddParams `json:"data"`   //同步数据
 }
 
 // 同步 用户
 
 type SyncUserParams struct {
-	Method string           `json:"method"`
-	Data   ArticleAddParams `json:"data"`
+	Method string           `json:"method"` //同步方法
+	Data   ArticleAddParams `json:"data"`   //同步数据
 }
 type SyncParams struct {
-	Method string           `json:"type"`
-	Data   ArticleAddParams `json:"data"`
+	Method string           `json:"type"` //同步方法
+	Data   ArticleAddParams `json:"data"` //同步数据
 }
 
 type SyncMsgParams struct {
-	Method string           `json:"type"`
-	Data   interface{}     `json:"data"`
-	FromId string         `json:"from"`
+	Method string      `json:"type"` //同步方法
+	Data   interface{} `json:"data"` //同步数据
+	FromId string      `json:"from"` //发送者 PeerId
 }
 
 //用户
 
 type SyncRecieveUsesrParams struct {
-	Method string           `json:"type"`
-	Data    SyncSysUser    `json:"data"`
+	Method string      `json:"type"` //同步方法
+	Data   SyncSysUser `json:"data"` //同步数据
 }
 
 type SyncSysUser struct {
@@ -44,22 +43,24 @@ type SyncSysUser struct {
 	Img      string `json:"img"`      //头像
 
 }
+
 //播放次数
 
 type SyncRecievePlayParams struct {
-	Method string           `json:"type"`
-	Data    ArticlePlayAddParams    `json:"data"`
+	Method string               `json:"type"` //同步方法
+	Data   ArticlePlayAddParams `json:"data"` //同步数据
 }
+
 //分享次数
 
 type SyncRecieveShareAddParams struct {
-	Method string           `json:"type"`
-	Data    ArticlePlayAddParams    `json:"data"`
+	Method string               `json:"type"` //同步方法
+	Data   ArticlePlayAddParams `json:"data"` //同步数据
 }
 
 // article
 
 type SyncRecieveArticleParams struct {
-	Method string            `json:"type"`
-	Data    ArticleAddParams    `json:"data"`
+	Method string           `json:"type"` //同步方法
+	Data   ArticleAddParams `json:"data"` //同步数据
 }

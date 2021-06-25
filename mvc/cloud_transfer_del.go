@@ -3,29 +3,33 @@ package mvc
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
 )
 
-func TransferDel(db *Sql, value string) error {
+// 删除传输信息
 
+func TransferDel(db *Sql, value string) error {
+	sugar.Log.Info(" ~~~~  Start   TransferDel ~~~~~ ")
 	var dFile vo.TransferDelParams
+	//marshal params.
 	err := json.Unmarshal([]byte(value), &dFile)
 	if err != nil {
+		sugar.Log.Error(" Marshal is failed.Err:", err)
 		return err
 	}
-	//
-	//校验 token 是否 满足
+	//check token.
 	claim, b := jwt.JwtVeriyToken(dFile.Token)
 	if !b {
 		return err
 	}
 	sugar.Log.Info("claim := ", claim)
-
+	// open the transaction.
 	for _, v := range dFile.Ids {
 		tx, _ := db.DB.Begin()
-		//  这里 表名 要改一下
+
 		//todo
 		stmt, err := db.DB.Prepare("delete from cloud_transfer where id=?")
 		if err != nil {
@@ -46,6 +50,7 @@ func TransferDel(db *Sql, value string) error {
 		tx.Commit()
 	}
 	sugar.Log.Info("Insert into file  is successful.")
+	sugar.Log.Info(" ~~~~  Start   TransferDel   End ~~~~~ ")
 
 	return nil
 
