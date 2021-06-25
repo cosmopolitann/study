@@ -564,9 +564,7 @@ func OffLineSyncData(db *Sql, path string) {
 			sugar.Log.Info("  捕捉恐慌 ~~~~~~~~~~~~1:", err)
 		} else {
 			sugar.Log.Info("   正常 ~~~~~~~~~~~~2")
-
 		}
-
 	}()
 	sugar.Log.Info("--- Start excute offline task ---")
 	var defaltPath = path + "local"
@@ -585,9 +583,7 @@ func OffLineSyncData(db *Sql, path string) {
 	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	// RemoteIpnsAddr
 	// sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
-
 	result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
-
 	if err != nil {
 		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
 	}
@@ -620,11 +616,16 @@ func OffLineSyncData(db *Sql, path string) {
 		// loop pull not equal cid
 		// string split by  _
 		sugar.Log.Info(" Split remote and local file user _  ")
-
+		//removeDuplication
 		remoteStr1 := strings.Split(string(remote1), "_")
 		localStr1 := strings.Split(string(local), "_")
 
-		diff := difference(localStr1, remoteStr1)
+		dupremote := RemoveDuplicationArray(remoteStr1)
+		duplocal := RemoveDuplicationArray(localStr1)
+		sugar.Log.Info(" Duplication remote  array: ", dupremote)
+		sugar.Log.Info(" Duplication local  array: ", duplocal)
+
+		diff := difference(duplocal, dupremote)
 
 		sugar.Log.Info(" This is diff array: ", diff)
 		sugar.Log.Info(" This is diff array lenth: ", len(diff))
@@ -670,7 +671,6 @@ func OffLineSyncData(db *Sql, path string) {
 					continue
 				}
 				res, err := stmt.Exec()
-				sugar.Log.Info(" --- 开始插入数据 ---  ", string(line))
 				if err != nil {
 					sugar.Log.Error("Insert data into  is Failed.", err)
 					continue
@@ -706,7 +706,11 @@ func OffLineSyncData(db *Sql, path string) {
 		if err1 != nil {
 			sugar.Log.Error(" Open file is failed.Err:", err1)
 		}
-		_, err = local_f.WriteString(string(remote1))
+		//
+
+		dupremoteStr := SplitArray(dupremote)
+		sugar.Log.Info(" DupremoteStr data : ", dupremoteStr)
+		_, err = local_f.WriteString(string(dupremoteStr))
 		if err != nil {
 			sugar.Log.Error(" Write remote content to this local file is failed.Err: ", err)
 		}
@@ -788,6 +792,21 @@ func OffLineSyncData(db *Sql, path string) {
 	UploadFile(path, hash)
 	sugar.Log.Info(" Because local  =====   remote.  ")
 }
+
+//split
+
+func SplitArray(a []string) string {
+	var result string
+	for k, v := range a {
+		if k == len(a)-1 {
+			result += v
+		} else {
+			result += v + "_"
+		}
+
+	}
+	return result
+}
 func checkFileIsExist(filename string) bool {
 	var exist = true
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
@@ -819,6 +838,23 @@ func difference(slice1 []string, slice2 []string) []string {
 		}
 	}
 	return diff
+}
+
+// find same data in array.
+func RemoveDuplicationArray(arr []string) []string {
+	set := make(map[string]struct{}, len(arr))
+	j := 0
+	for _, v := range arr {
+		_, ok := set[v]
+		if ok {
+			continue
+		}
+		set[v] = struct{}{}
+		arr[j] = v
+		j++
+	}
+
+	return arr[:j]
 }
 
 // local update file
@@ -876,7 +912,7 @@ func UploadFile(path string, hash string) {
 	lfile := Exist(defaltPath)
 	sugar.Log.Info(" All cid info = local cid + _ + cid(update)")
 
-	var upInfo string = string(remote1) + "_" + updateCid
+	// var upInfo string = string(remote1) + "_" + updateCid
 	if !lfile {
 		//create file
 		sugar.Log.Info(" No find local file , and create it. ")
@@ -893,10 +929,21 @@ func UploadFile(path string, hash string) {
 	if err != nil {
 		sugar.Log.Errorf(" Open %s file is failed.Err:", err)
 	}
-	var all = string(remote1) + "_" + updateCid
+	//
+	remoteStr1 := strings.Split(string(remote1), "_")
+	reduplication := RemoveDuplicationArray(remoteStr1)
+	remoteresp := SplitArray(reduplication)
+	sugar.Log.Info(" 这是 去重 之后 返回的数据 remoteresp : ", remoteresp)
+	sugar.Log.Info(" 这是 长度 : ", len(reduplication))
+
+	var all = remoteresp + "_" + updateCid
+
+	// dup
+	sugar.Log.Info(" 这是 all : ", all)
+
 	//upInfo = all
 	sugar.Log.Info(" Upload All cid info,all : ", all)
-	sugar.Log.Info(" Upload All cid info,upInfoCid: ", upInfo)
+	//sugar.Log.Info(" Upload All cid info,upInfoCid: ", upInfo)
 	_, err = f1.WriteString(all)
 	if err != nil {
 		sugar.Log.Error(" Write file is failed. Err:", err)
@@ -904,7 +951,7 @@ func UploadFile(path string, hash string) {
 
 	//	upload remote file to ipfs .
 	sugar.Log.Info(" start upload allcid to ipfs . ")
-	hash1, err := sh.Add(bytes.NewBufferString(upInfo))
+	hash1, err := sh.Add(bytes.NewBufferString(all))
 	if err != nil {
 		sugar.Log.Error(" upload file to ipfs is failed.Err: ", err)
 	}
