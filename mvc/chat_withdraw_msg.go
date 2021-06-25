@@ -77,6 +77,7 @@ func ChatWithdrawMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 
 	msgBytes, err := json.Marshal(map[string]interface{}{
 		"type": vo.MSG_TYPE_WITHDRAW,
+		"from": ipfsNode.Identity.String(),
 		"data": swapMsg,
 	})
 	if err != nil {

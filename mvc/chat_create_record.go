@@ -104,6 +104,7 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 
 	msgBytes, err := json.Marshal(map[string]interface{}{
 		"type": vo.MSG_TYPE_RECORD,
+		"from": ipfsNode.Identity.String(),
 		"data": swapMsg,
 	})
 	if err != nil {
