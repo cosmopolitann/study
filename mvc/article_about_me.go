@@ -9,8 +9,8 @@ import (
 	"github.com/cosmopolitann/clouddb/vo"
 )
 
-func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
-	var art []Article
+func ArticleAboutMe(db *Sql, value string) ([]ArticleAboutMeResp, error) {
+	var art []ArticleAboutMeResp
 	var result vo.ArticleAboutMeParams
 	err := json.Unmarshal([]byte(value), &result)
 	if err != nil {
@@ -41,14 +41,14 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 	}
 	sugar.Log.Info("claim := ", claim)
 	userid := claim["UserId"]
-	rows, err := db.DB.Query("SELECT a.is_like,b.id,IFNULL(b.user_id,'null'),IFNULL(b.accesstory,'null'),IFNULL(b.accesstory_type,0),IFNULL(b.text,'null'),IFNULL(b.tag,'null'),IFNULL(b.ptime,0),IFNULL(b.play_num,0),IFNULL(b.share_num,0),IFNULL(b.title,'null'),IFNULL(b.thumbnail,'null'),IFNULL(b.file_name,'null'),IFNULL(b.file_size,0),( SELECT COUNT( * ) FROM article_like AS c WHERE c.article_id = a.article_id ) as sum from article_like as a LEFT JOIN article as b on a.article_id=b.id WHERE a.is_like=1 and a.user_id=? ORDER BY ptime LIMIT ?,?", userid, r, result.PageSize)
+	rows, err := db.DB.Query("SELECT a.is_like,b.id,IFNULL(b.user_id,'null'),IFNULL(b.accesstory,'null'),IFNULL(b.accesstory_type,0),IFNULL(b.text,'null'),IFNULL(b.tag,'null'),IFNULL(b.ptime,0),IFNULL(b.play_num,0),IFNULL(b.share_num,0),IFNULL(b.title,'null'),IFNULL(b.thumbnail,'null'),IFNULL(b.file_name,'null'),IFNULL(b.file_size,0),IFNULL(c.img,''),IFNULL(c.name,''),IFNULL(c.nickname,''),IFNULL(c.peer_id,''),IFNULL(c.phone,''),IFNULL(c.sex,0),( SELECT COUNT( * ) FROM article_like AS c WHERE c.article_id = a.article_id ) as sum from article_like as a LEFT JOIN article as b on a.article_id=b.id LEFT JOIN sys_user as c on c.id=b.user_id where a.user_id=? and a.is_like=1 ORDER BY b.ptime LIMIT ?,?", userid, r, result.PageSize)
 
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return art, errors.New("查询下载列表信息失败")
 	}
 	for rows.Next() {
-		var dl Article
+		var dl ArticleAboutMeResp
 		var id interface{}
 		//var peerId interface{}
 		//var name interface{}
@@ -56,7 +56,7 @@ func ArticleAboutMe(db *Sql, value string) ([]Article, error) {
 		//var sex interface{}
 		//var NickName interface{}
 		//var islike interface{}PlayNum
-		err = rows.Scan(&dl.IsLike, &id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.Count)
+		err = rows.Scan(&dl.IsLike, &id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.Img, &dl.Name, &dl.NickName, &dl.PeerId, &dl.Phone, &dl.Sex, &dl.Sum)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err

@@ -79,6 +79,30 @@ type Article struct {
 	Count          int64  `json:"count"`          //数量
 	IsLike         int64  `json:"is_like"`        //是否点赞
 }
+type ArticleAboutMeResp struct {
+	Id             string `json:"id"`             //id
+	UserId         string `json:"userId"`         //用户id
+	Accesstory     string `json:"accesstory"`     //附件
+	AccesstoryType int64  `json:"accesstoryType"` //附件类型
+	Text           string `json:"text"`           //文本信息
+	Tag            string `json:"tag"`            //标签
+	Ptime          int64  `json:"ptime"`          //创建时间
+	PlayNum        int64  `json:"playNum"`        //播放数量
+	ShareNum       int64  `json:"shareNum"`       //分享次数
+	Title          string `json:"title"`          //标题
+	Thumbnail      string `json:"thumbnail"`      //缩略图
+	FileName       string `json:"fileName"`       //文件名字
+	FileSize       string `json:"fileSize"`       //文件大小
+	Count          int64  `json:"count"`          //数量
+	IsLike         int64  `json:"is_like"`        //是否点赞
+	PeerId         string `json:"peerId"`         //节点id
+	Name           string `json:"name"`           //用户名字
+	Phone          string `json:"phone"`          //手机号
+	Sex            int64  `json:"sex"`            //性别 0 未知  1 男  2 女
+	NickName       string `json:"nickName"`       //昵称
+	Img            string `json:"img"`            //头像
+	Sum            int64  `json:"sum"`
+}
 
 //article like
 type ArticleLike struct {
