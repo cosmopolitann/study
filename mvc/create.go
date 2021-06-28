@@ -416,6 +416,18 @@ func (db *Sql) ArticleAboutMe(dInfo string) string {
 	return vo.ResponseSuccess(data)
 }
 
+//
+
+func (db *Sql) ArticleSearchCagetory(dInfo string) string {
+
+	data, e := ArticleSearchCagetory(db, dInfo)
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+
+	return vo.ResponseSuccess(data)
+}
+
 // 推荐  待定  随机10条
 func (db *Sql) ArticleRecommend(dInfo string) string {
 

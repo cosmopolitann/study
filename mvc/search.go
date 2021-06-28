@@ -111,3 +111,42 @@ func ARticleSearch(db *Sql, value string) (data []Article, e error) {
 	sugar.Log.Info("~~~   ARticleSearch  data  End~~~~")
 	return arrfile, nil
 }
+
+//
+// 文章查询
+
+func ArticleSearchCagetory(db *Sql, value string) (data []Article, e error) {
+	sugar.Log.Info("~~~ Start   ArticleSearchCagetory  data  ~~~~")
+	var s vo.ArticleSearchCategoryParams
+	var arrfile []Article
+	//marshal params.
+	err := json.Unmarshal([]byte(value), &s)
+	if err != nil {
+		sugar.Log.Error("Marshal is failed.Err is ", err)
+	}
+	sugar.Log.Info("Marshal data is :  ", s)
+	r := (s.PageNum - 1) * 3
+	str := strconv.FormatInt(r, 10)
+	pageSize := strconv.FormatInt(s.PageSize, 10)
+	AccesstoryType := strconv.FormatInt(s.AccesstoryType, 10)
+
+	sql := "select id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) from article where accesstory_type=" + AccesstoryType + " limit " + str + "," + pageSize
+	rows, err := db.DB.Query(sql)
+	if err != nil {
+		sugar.Log.Error("Query data is failed.Err is ", err)
+		return arrfile, errors.New("查询下载列表信息失败")
+	}
+	for rows.Next() {
+		var dl Article
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+		if err != nil {
+			sugar.Log.Error("ARticleSearch scan data is failed.The err is ", err)
+			return arrfile, err
+		}
+		sugar.Log.Info("ARticleSearch a entire data is ", dl)
+		arrfile = append(arrfile, dl)
+	}
+	sugar.Log.Info("ARticleSearch all data is ", arrfile)
+	sugar.Log.Info("~~~   ARticleSearch  data  End~~~~")
+	return arrfile, nil
+}

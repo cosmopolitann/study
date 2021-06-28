@@ -128,3 +128,11 @@ type ArticleSearchParams struct {
 	//Token    string   `json:"token"`
 	Title string `json:"title"`
 }
+
+//
+type ArticleSearchCategoryParams struct {
+	PageSize int64 `json:"pageSize"` // 一次多少条
+	PageNum  int64 `json:"pageNum"`  // 第几页
+	//Token    string   `json:"token"`
+	AccesstoryType int64 `json:"accesstoryType"`
+}
