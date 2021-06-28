@@ -178,6 +178,7 @@ func walk(user_id, id string, d *Sql, node *FileNode) {
 		//adds the current file to the folder as a child node.
 		child := FileNode{dl.Id, dl.ParentId, []*FileNode{}}
 		node.FileNodes = append(node.FileNodes, &child)
+
 		//if it's a folder, use recurses method to query all.
 		//0 file  1 folder.
 		if dl.IsFolder == 1 {
