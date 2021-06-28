@@ -79,16 +79,16 @@ func SyncArticle(db *Sql, value string) error {
 		return errors.New(" SyncArticle marshal is failed. ")
 	}
 	sugar.Log.Info("Marshal data is  ", art)
-	id := utils.SnowId()
+	// id := utils.SnowId()
 	t := time.Now().Unix()
 	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.", err)
 		return err
 	}
-	sid := strconv.FormatInt(id, 10)
+	// sid := strconv.FormatInt(id, 10)
 	stmt.QueryRow()
-	res, err := stmt.Exec(sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	res, err := stmt.Exec(art.Id, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
 	if err != nil {
 		sugar.Log.Error("Insert into article  is Failed.", err)
 		return err
@@ -269,11 +269,11 @@ func SyncUserRegister(db *Sql, value string) error {
 
 	affect, err := res.RowsAffected()
 	if err != nil {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error(" Sync Update  is failed.The err is ", err)
 		return err
 	}
 	if affect == 0 {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error(" Sync Update  is failed.The err is ", err)
 		return err
 	}
 	sugar.Log.Info("---Start   Sync   UserRegister   End ---- ")
@@ -378,14 +378,16 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 			continue
 		}
 		wayId := "12D3KooWDoBhdQwGT6oq2EG8rsduRCmyTZtHaBCowFZ7enwP4i8J"
-		sugar.Log.Info("----Public gateway peerId ----:", wayId)
+		wayId2 := "12D3KooW9tijGFxQnN88QotdNfb77hGh3sXEiLc3NWPU4zWbN9WQ"
+		wayId3 := "12D3KooWRxvZGzeMcAbxXuomztAwn344EkmiRusF7x5H3U4RtkNN"
+		sugar.Log.Info("----Public gateway peerId1 ----:", wayId)
+		sugar.Log.Info("----Public gateway peerId2 ----:", wayId2)
+		sugar.Log.Info("----Public gateway peerId3 ----:", wayId3)
 		sugar.Log.Info("----Encode base58 fromId ----")
 		FromID := base58.Encode(fromId)
 		sugar.Log.Info("----- Encode base58 fromId -----:", string(FromID))
-
 		sugar.Log.Info("----- Judge FromId == or != wayId -----")
-
-		if FromID == wayId {
+		if FromID == wayId || FromID == wayId2 || FromID == wayId3 {
 			//if fromid == wayid ,then judge peerid ==reciece.fromid .
 			//Satisfy one condition
 			sugar.Log.Info(" FromId == wayId ")
@@ -524,7 +526,6 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		}
 
 	}
-	return nil
 }
 
 var sh *shell.Shell
@@ -537,9 +538,9 @@ func Exist(filename string) bool {
 func OffLineSyncData(db *Sql, path string) {
 	defer func() {
 		if err := recover(); err != nil {
-			sugar.Log.Info("  捕捉恐慌 ~~~~~~~~~~~~1:", err)
+			sugar.Log.Info(" ~~~~~~~~~ Capture the panic ~~~~~~~~~~~~Err: ", err)
 		} else {
-			sugar.Log.Info("   正常 ~~~~~~~~~~~~2")
+			sugar.Log.Info("~~~~~~~~~~~~~~~   Normal ~~~~~~~~~~~~")
 		}
 	}()
 	sugar.Log.Info("--- Start excute offline task ---")
@@ -840,11 +841,11 @@ func UploadFile(path string, hash string) {
 	remoteStr1 := strings.Split(string(remote1), "_")
 	reduplication := RemoveDuplicationArray(remoteStr1)
 	remoteresp := SplitArray(reduplication)
-	sugar.Log.Info(" 这是 去重 之后 返回的数据 remoteresp : ", remoteresp)
-	sugar.Log.Info(" 这是 长度 : ", len(reduplication))
+	sugar.Log.Info(" Duplicate removal remoteresp : ", remoteresp)
+	sugar.Log.Info(" Duplicate removal len : ", len(reduplication))
 	var all = remoteresp + "_" + updateCid
 	// dup
-	sugar.Log.Info(" 这是 all : ", all)
+	sugar.Log.Info(" This is  all : ", all)
 
 	//upInfo = all
 	sugar.Log.Info(" Upload All cid info,all : ", all)

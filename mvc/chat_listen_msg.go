@@ -18,10 +18,10 @@ import (
 
 func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
 
-	//校验 token 是否 满足
+	//check token is vaild
 	claim, b := jwt.JwtVeriyToken(token)
 	if !b {
-		return errors.New("token 失效")
+		return errors.New(" Token is invaild. ")
 	}
 	sugar.Log.Info("claim := ", claim)
 	userId := claim["UserId"].(string)

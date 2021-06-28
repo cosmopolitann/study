@@ -21,7 +21,6 @@ import (
 func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) error {
 	sugar.Log.Info(" ----  AddArticle Method ----")
 	sugar.Log.Info(" ----  Path :", path)
-
 	var art vo.ArticleAddParams
 	err := json.Unmarshal([]byte(value), &art)
 	if err != nil {

@@ -15,7 +15,7 @@ import (
 
 func AddFolder(db *Sql, value string) error {
 	//add folder
-	sugar.Log.Info("---- 开始执行 新建文件夹 方法 ---- ")
+	sugar.Log.Info("---- AddFolder   Method  ---- ")
 
 	var f vo.CloudAddFolderParams
 	f1 := ConvertString(value, f)
@@ -66,7 +66,7 @@ func AddFolder(db *Sql, value string) error {
 	if c == 0 {
 		count, in := InsertIntoData(db, f, userId)
 		if in != nil || count == 0 {
-			return errors.New("创建文件夹失败")
+			return errors.New(" Create folder is failed. ")
 		}
 	}
 
@@ -78,11 +78,10 @@ func AddFolder(db *Sql, value string) error {
 		f.FileName = f.FileName + "_" + timeUnixStr
 		count, in := InsertIntoData(db, f, userId)
 		if in != nil || count == 0 {
-			return errors.New("创建文件夹失败")
+			return errors.New(" Create folder is failed. ")
 		}
 	}
-	sugar.Log.Info("--  新建 文件夹 成功  返回  ---")
-
+	sugar.Log.Info("---- AddFolder   Method  End ---- ")
 	return nil
 }
 func InsertIntoData(db *Sql, f vo.CloudAddFolderParams, userId string) (c int64, e error) {
