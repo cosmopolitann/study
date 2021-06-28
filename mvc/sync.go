@@ -559,7 +559,7 @@ func OffLineSyncData(db *Sql, path string) {
 	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	// RemoteIpnsAddr
 	// sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
-	result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
+	result, err := sh.Resolve("k2k4r8nzb4pahkhkvojnx3rtd0j9b432wjdcdjkogau637ix3zhmv1pe")
 	if err != nil {
 		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
 	}
@@ -871,7 +871,7 @@ func UploadFile(path string, hash string) {
 	var dbexist bool
 	if len(ksys) > 0 {
 		for _, v := range ksys {
-			if v.Name == "dbkey" && v.Id == "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v" {
+			if v.Name == "dbkey" && v.Id == "k2k4r8nzb4pahkhkvojnx3rtd0j9b432wjdcdjkogau637ix3zhmv1pe" {
 				dbexist = true
 				break
 			}
@@ -885,8 +885,8 @@ func UploadFile(path string, hash string) {
 	sugar.Log.Info(" Use ipns publish cid to public gateway.io ")
 	//time duration
 	t := time.Duration(time.Hour * 24)
-	sugar.Log.Infof(" -- Excute ipns name publish -key=%s /ipfs/%s . --\n", "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v", hash1)
-	pubresp, err := sh.PublishWithDetails("/ipfs/"+hash1, "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v", t, t, true)
+	sugar.Log.Infof(" -- Excute ipns name publish -key=%s /ipfs/%s . --\n", "k2k4r8nzb4pahkhkvojnx3rtd0j9b432wjdcdjkogau637ix3zhmv1pe", hash1)
+	pubresp, err := sh.PublishWithDetails("/ipfs/"+hash1, "k2k4r8nzb4pahkhkvojnx3rtd0j9b432wjdcdjkogau637ix3zhmv1pe", t, t, true)
 	if err != nil {
 		sugar.Log.Error(" PublishWithDetails is failed.Err: ", err)
 	}

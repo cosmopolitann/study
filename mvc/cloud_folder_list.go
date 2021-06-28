@@ -27,9 +27,10 @@ func CloudFolderList(db *Sql, value string) (data []File, e error) {
 		return arrfile, errors.New("token 验证不通过")
 	}
 	sugar.Log.Info("claim := ", claim)
+	userid := claim["UserId"]
 
 	// 查询
-	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where parent_id=? and is_folder=? and user_id=?", list.ParentId, 1, claim["UserId"].(string))
+	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where parent_id=? and is_folder=? and user_id=?", list.ParentId, 1, userid)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, errors.New("查询下载列表信息失败")
