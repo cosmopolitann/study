@@ -24,14 +24,32 @@ func InitLogger() {
 	Log = logger.Sugar()
 }
 
-func InitLogger1(path string) {
+func InitLogger1(path, env string) {
+
+	var level zapcore.Level
+
+	if path == "" {
+		path = "./test.log"
+	}
+
+	switch env {
+	case "development":
+		level = zap.DebugLevel
+	case "test":
+		level = zap.WarnLevel
+	case "production":
+		level = zap.ErrorLevel
+	default:
+		level = zap.DebugLevel
+	}
+
 	writeSyncer := getLogWriter1(path)
 	atomicLevel := zap.NewAtomicLevel()
-	atomicLevel.SetLevel(zap.DebugLevel)
+	atomicLevel.SetLevel(level)
 	var writes = []zapcore.WriteSyncer{zapcore.AddSync(writeSyncer)}
 	encoder := getEncoder()
 	writes = append(writes, zapcore.AddSync(os.Stdout))
-	core := zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writes...), zapcore.DebugLevel)
+	core := zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writes...), level)
 	logger := zap.New(core, zap.AddCaller(), zap.Development())
 	Log = logger.Sugar()
 }

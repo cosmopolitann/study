@@ -14,10 +14,13 @@ type NewTestNode struct {
 	db Sql
 }
 
-func NTestNode(path string) *NewTestNode {
-	sugar.InitLogger()
+// dbPath  - /path/to/foo.db
+// logPath - /path/to/log.txt
+// env     - development、test、production
+func NTestNode(dbPath, logPath, env string) *NewTestNode {
+	sugar.InitLogger1(logPath, env)
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
-	sql := Newdb(path)
+	sql := Newdb(dbPath)
 
 	return &NewTestNode{db: sql}
 }
