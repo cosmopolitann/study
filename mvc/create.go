@@ -75,6 +75,16 @@ func (db *Sql) UserQuery(user string) string {
 	return vo.ResponseSuccess(data)
 }
 
+// 其他 用户 信息 查询
+
+func (db *Sql) OtherUserQuery(user string) string {
+	data, e := OtherUserQuery(db, user)
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+	return vo.ResponseSuccess(data)
+}
+
 //用户 更新
 
 func (db *Sql) UserUpdate(user string) string {
@@ -240,7 +250,7 @@ func (db *Sql) MoveFile(dInfo string) string {
 	return vo.ResponseSuccess()
 }
 
-//删除
+//  删除文件
 
 func (db *Sql) DeleteAll(dInfo string) string {
 

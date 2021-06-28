@@ -54,7 +54,5 @@ func ArticleRecommend(db *Sql, value string) ([]Article, error) {
 		return art, err
 	}
 	sugar.Log.Info("Query article  is successful.")
-
 	return art, nil
-
 }
