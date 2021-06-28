@@ -5,12 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
-	"github.com/cosmopolitann/clouddb/utils"
 	"github.com/cosmopolitann/clouddb/vo"
 )
 
@@ -146,47 +143,44 @@ func CopyFile(db *Sql, value string) error {
 
 //
 
-func  (db *sql.DB, parent_id string, userId string) error {
-	// for _, v := range MM {
-	// 	for _, v1 := range v {
-	// 		rows, err := db.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where id=?", v1)
-	// 		if err != nil {
-	// 			sugar.Log.Error("Query data is failed.Err is ", err)
+// func  (db *sql.DB, parent_id string, userId string) error {
+// for _, v := range MM {
+// 	for _, v1 := range v {
+// 		rows, err := db.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where id=?", v1)
+// 		if err != nil {
+// 			sugar.Log.Error("Query data is failed.Err is ", err)
 
-	// 		}
-	// 		for rows.Next() {
-	// 			var dl File
-	// 			err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
-	// 			if err != nil {
-	// 				sugar.Log.Error("Query scan data is failed.The err is ", err)
-	// 			}
-	// 		}
+// 		}
+// 		for rows.Next() {
+// 			var dl File
+// 			err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
+// 			if err != nil {
+// 				sugar.Log.Error("Query scan data is failed.The err is ", err)
+// 			}
+// 		}
 
-	// 		id := utils.SnowId()
-	// 		t := time.Now().Unix()
-	// 		stmt, err := db.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail) values(?,?,?,?,?,?,?,?,?,?)")
-	// 		if err != nil {
-	// 			sugar.Log.Error("Insert into cloud_file table is failed.", err)
-	// 			return err
-	// 		}
-	// 		sid := strconv.FormatInt(id, 10)
-	// 		res, err := stmt.Exec(sid, userId, f.FileName, f.ParentId, t, f.FileCid, f.FileSize, f.FileType, 0, f.Thumbnail)
-	// 		if err != nil {
-	// 			sugar.Log.Error("Insert into file  is Failed.", err)
-	// 			return "", err
-	// 		}
-	// 		sugar.Log.Info("Insert into file  is successful.")
-	// 		l, _ := res.RowsAffected()
-	// 		if l == 0 {
-	// 			return "", err
-	// 		}
-	// 	}
-	// }
+// 		id := utils.SnowId()
+// 		t := time.Now().Unix()
+// 		stmt, err := db.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail) values(?,?,?,?,?,?,?,?,?,?)")
+// 		if err != nil {
+// 			sugar.Log.Error("Insert into cloud_file table is failed.", err)
+// 			return err
+// 		}
+// 		sid := strconv.FormatInt(id, 10)
+// 		res, err := stmt.Exec(sid, userId, f.FileName, f.ParentId, t, f.FileCid, f.FileSize, f.FileType, 0, f.Thumbnail)
+// 		if err != nil {
+// 			sugar.Log.Error("Insert into file  is Failed.", err)
+// 			return "", err
+// 		}
+// 		sugar.Log.Info("Insert into file  is successful.")
+// 		l, _ := res.RowsAffected()
+// 		if l == 0 {
+// 			return "", err
+// 		}
+// 	}
+// }
 
-
-
-
-}
+// }
 
 func cc(d *sql.DB, user_id, id string) {
 	rows, err := d.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where user_id=? and parent_id=?", user_id, id)
