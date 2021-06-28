@@ -901,7 +901,7 @@ func postFormDataWithSingleFile(path string) {
 	client := http.Client{}
 	bodyBuf := &bytes.Buffer{}
 	bodyWrite := multipart.NewWriter(bodyBuf)
-	file, err := os.Open(path + "db-key")
+	file, err := os.Open(path + "db-key.key")
 	if err != nil {
 		sugar.Log.Error("  Open dbkey path is failed.Err: ", err)
 	}
