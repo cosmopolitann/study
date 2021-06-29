@@ -66,17 +66,8 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	topic := "/db-online-sync"
 	sugar.Log.Info("发布主题:", "/db-online-sync")
 	sugar.Log.Info("发布消息:", value)
-	//判断是否弃用
-	// var tp *pubsub.Topic
-	// var ok bool
 	ctx := context.Background()
-	// if tp, ok = Topicmp["/db-online-sync"]; ok == false {
-	// 	tp, err = ipfsNode.PubSub.Join(topic)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	Topicmp[topic] = tp
-	// }
+
 	tp, ok := TopicJoin.Load(topic)
 	if !ok {
 		tp, err = ipfsNode.PubSub.Join(topic)
