@@ -24,7 +24,7 @@ func InitLogger() {
 	Log = logger.Sugar()
 }
 
-func InitLogger1(path, env string) {
+func InitLogger1(path, env1 string) {
 
 	var level zapcore.Level
 
@@ -32,7 +32,7 @@ func InitLogger1(path, env string) {
 		path = "./test.log"
 	}
 
-	switch env {
+	switch env1 {
 	case "development":
 		level = zap.DebugLevel
 	case "test":
