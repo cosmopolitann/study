@@ -101,7 +101,7 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		sugar.Log.Info("Query a entire data is ", dl)
 	}
 	if dl.Id == "" {
-		return errors.New(" update is failed .")
+		return errors.New(" File is inexist.")
 	}
 	sugar.Log.Info("--- 开始 发布的消息 ---")
 

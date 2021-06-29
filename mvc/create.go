@@ -706,7 +706,7 @@ func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 ------------------------------------------------------
 */
 
-func (db *Sql) OfflineSync(path string) {
+func (db *Sql) OfflineSync(path string) string {
 
 	sugar.Log.Info("---- Start OffLine Sync  ------")
 	// i := 0
@@ -723,7 +723,12 @@ func (db *Sql) OfflineSync(path string) {
 	// })
 	// c.Start()
 	// select {}
-	OffLineSyncData(db, path)
+	err := OffLineSyncData(db, path)
+	if err != nil {
+		return vo.ResponseErrorMsg(400, err.Error())
+	}
+	return vo.ResponseSuccess()
+
 }
 
 /*

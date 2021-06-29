@@ -533,7 +533,7 @@ func Exist(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
-func OffLineSyncData(db *Sql, path string) {
+func OffLineSyncData(db *Sql, path string) error {
 	defer func() {
 		if err := recover(); err != nil {
 			sugar.Log.Info(" ~~~~~~~~~ Capture the panic ~~~~~~~~~~~~Err: ", err)
@@ -553,7 +553,7 @@ func OffLineSyncData(db *Sql, path string) {
 			sugar.Log.Error(" Create Local File Is Failed.Err: ", err1)
 		}
 	}
-	sh = shell.NewShell("localhost:5001")
+	sh = shell.NewShell("127.0.0.1:5001")
 	sugar.Log.Info(" ---  Start resolve remote ipns data.  ---")
 	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	// RemoteIpnsAddr
@@ -561,6 +561,7 @@ func OffLineSyncData(db *Sql, path string) {
 	result, err := sh.Resolve("k51qzi5uqu5dkpvez606vzl81y5pir2j2k98s37z5dc4bw1wbk182kmos8c3lo")
 	if err != nil {
 		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
+		return err
 	}
 
 	sugar.Log.Info("The result what ipfs cat remote cid. ", result)
@@ -571,6 +572,8 @@ func OffLineSyncData(db *Sql, path string) {
 	local, err := ioutil.ReadFile(path + "local") // just pass the file name
 	if err != nil {
 		sugar.Log.Error(" Read local file content is failed. ", err)
+		return err
+
 	}
 	sugar.Log.Info(" Read local file content : ", string(local))
 	//read remote file.
@@ -578,12 +581,17 @@ func OffLineSyncData(db *Sql, path string) {
 	sugar.Log.Info(" Cat hash:= ", hash)
 
 	read, err := sh.Cat(hash)
+
 	if err != nil {
 		fmt.Println(err)
+		return err
 	}
+	//
 	remote1, Errremote := ioutil.ReadAll(read)
 	if Errremote != nil {
 		sugar.Log.Error("  Read remote file content is failed.Err: ", Errremote)
+		return err
+
 	}
 	sugar.Log.Info("  Read remote file content: ", string(remote1))
 	if strings.ToLower(string(local)) == strings.ToLower(string(remote1)) {
@@ -618,12 +626,16 @@ func OffLineSyncData(db *Sql, path string) {
 			if err != nil {
 				fmt.Println(err)
 				sugar.Log.Error(" Ipfs get cid hash is failed.Err:", err)
+				return err
+
 			}
 			sugar.Log.Info(" Read diff cid file by line .")
 			sugar.Log.Info(" Open cidPath file : ", cidPath)
 			f1, err := os.Open(cidPath)
 			if err != nil {
 				sugar.Log.Error(" Open cidPath is failed.Err:", err)
+				return err
+
 			}
 			defer f1.Close()
 			rd1 := bufio.NewReader(f1)
@@ -679,6 +691,8 @@ func OffLineSyncData(db *Sql, path string) {
 		local_f, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file.
 		if err1 != nil {
 			sugar.Log.Error(" Open file is failed.Err:", err1)
+			return err
+
 		}
 
 		dupremoteStr := SplitArray(dupremote)
@@ -709,6 +723,7 @@ func OffLineSyncData(db *Sql, path string) {
 	sugar.Log.Info(" Start upload cid to gateway.io ipns. ")
 	UploadFile(path, hash)
 	sugar.Log.Info(" Because local  =====   remote.  ")
+	return nil
 }
 
 //split
