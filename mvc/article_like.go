@@ -1,7 +1,6 @@
 package mvc
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"strconv"
@@ -68,71 +67,6 @@ func AddArticleLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		if l == 0 {
 			return errors.New(" Insert data into article_like table is failed. ")
 		}
-		//publish msg
-		//publish msg
-		topic := "/db-online-sync"
-		sugar.Log.Info("发布主题:", "/db-online-sync")
-		sugar.Log.Info("发布消息:", value)
-
-		var dl ArticleLike
-
-		ctx := context.Background()
-
-		tp, ok := TopicJoin.Load(topic)
-		if !ok {
-			tp, err = ipfsNode.PubSub.Join(topic)
-			if err != nil {
-				sugar.Log.Error("PubSub.Join .Err is", err)
-				return err
-			}
-			TopicJoin.Store(topic, tp)
-		}
-		rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(article_id,'null'),IFNULL(is_like,0) FROM article_like where id=?", dl.Id)
-		if err != nil {
-			sugar.Log.Error("Query article_like is failed.Err is ", err)
-			return err
-		}
-		for rows.Next() {
-			err = rows.Scan(&dl.Id, &dl.UserId, &dl.ArticleId, &dl.IsLike)
-			if err != nil {
-				sugar.Log.Error("Query scan data is failed.The err is ", err)
-				return err
-			}
-		}
-		sugar.Log.Info("--- 开始 发布的消息 ---")
-
-		sugar.Log.Info("发布的消息:", value)
-		//
-		//第一步
-		var s3 ArticleCanCelLike
-		s3.Type = "receiveArticleLike"
-		s3.Data = dl
-		s3.FromId = ipfsNode.Identity.String()
-
-		jsonBytes, err := json.Marshal(s3)
-		if err != nil {
-			sugar.Log.Info("--- 开始 发布的消息 ---")
-			return err
-		}
-		sugar.Log.Info("--- 解析后的数据 返回给 转接服务器 ---", string(jsonBytes))
-
-		//============================
-		err = tp.Publish(ctx, jsonBytes)
-		if err != nil {
-			sugar.Log.Error("发布错误:", err)
-			return err
-		}
-		sugar.Log.Error("---  发布的消息  完成  ---")
-
-		//==
-		err = tp.Publish(ctx, jsonBytes)
-		if err != nil {
-			sugar.Log.Error("发布错误:", err)
-			return err
-		}
-		sugar.Log.Error("---  发布的消息  完成  ---")
-
-		//--
 		sugar.Log.Info("~~~~  AddArticleLike   Method   End ~~~~~")
 		return nil
 	} else {
@@ -152,71 +86,6 @@ func AddArticleLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 			sugar.Log.Error("update article_like  is Failed.", err)
 			return err
 		}
-		//publish msg
-		//publish msg
-		topic := "/db-online-sync"
-		sugar.Log.Info("发布主题:", "/db-online-sync")
-		sugar.Log.Info("发布消息:", value)
-
-		var dl ArticleLike
-
-		ctx := context.Background()
-
-		tp, ok := TopicJoin.Load(topic)
-		if !ok {
-			tp, err = ipfsNode.PubSub.Join(topic)
-			if err != nil {
-				sugar.Log.Error("PubSub.Join .Err is", err)
-				return err
-			}
-			TopicJoin.Store(topic, tp)
-		}
-		rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(article_id,'null'),IFNULL(is_like,0) FROM article_like where article_id=? and user_id=?", art.Id, userid)
-		if err != nil {
-			sugar.Log.Error("Query article_like is failed.Err is ", err)
-			return err
-		}
-		for rows.Next() {
-			err = rows.Scan(&dl.Id, &dl.UserId, &dl.ArticleId, &dl.IsLike)
-			if err != nil {
-				sugar.Log.Error("Query scan data is failed.The err is ", err)
-				return err
-			}
-		}
-		sugar.Log.Info("--- 开始 发布的消息 ---")
-
-		sugar.Log.Info("发布的消息:", value)
-		//
-		//第一步
-		var s3 ArticleCanCelLike
-		s3.Type = "receiveArticleLike"
-		s3.Data = dl
-		s3.FromId = ipfsNode.Identity.String()
-
-		jsonBytes, err := json.Marshal(s3)
-		if err != nil {
-			sugar.Log.Info("--- 开始 发布的消息 ---")
-			return err
-		}
-		sugar.Log.Info("--- 解析后的数据 返回给 转接服务器 ---", string(jsonBytes))
-
-		//============================
-		err = tp.Publish(ctx, jsonBytes)
-		if err != nil {
-			sugar.Log.Error("发布错误:", err)
-			return err
-		}
-		sugar.Log.Error("---  发布的消息  完成  ---")
-
-		//==
-		err = tp.Publish(ctx, jsonBytes)
-		if err != nil {
-			sugar.Log.Error("发布错误:", err)
-			return err
-		}
-		sugar.Log.Error("---  发布的消息  完成  ---")
-
-		//=--
 		sugar.Log.Info("~~~~  AddArticleLike   Method   End ~~~~~")
 		return nil
 	}
