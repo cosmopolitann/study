@@ -39,9 +39,8 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 
 func GetUser(db *Sql, userid string) vo.RespSysUser {
 	fmt.Println("获得用户,id:",userid)
-	
 	var s vo.RespSysUser
-	rows, err := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user ", userid)
+	rows, err := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user as a where id = ? ", userid)
 	if err != nil {
 		sugar.Log.Error("查找用户表失败,sql错误:", err.Error())
 		return s
