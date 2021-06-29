@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"strings"
+	"time"
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
@@ -51,7 +52,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 			}
 
 			msg := vo.ChatListenParams{
-				Type: "endListen",
+				Type: vo.MSG_TYPE_ENDLISTEN,
 				Data: map[string]string{
 					"message": fmt.Sprintf("%+v", r),
 				},
@@ -287,7 +288,7 @@ func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
 		Content:     msg.Content,
 		FromId:      msg.FromId,
 		ToId:        msg.ToId,
-		Ptime:       msg.Ptime,
+		Ptime:       time.Now().Unix(),
 		IsWithdraw:  msg.IsWithdraw,
 		IsRead:      msg.IsRead,
 		RecordId:    msg.RecordId,
