@@ -5,6 +5,7 @@ import (
 	bsql "database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"runtime/debug"
 	"strings"
 
@@ -51,7 +52,9 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 			msg := vo.ChatListenParams{
 				Type: "endListen",
-				Data: r,
+				Data: map[string]string{
+					"message": fmt.Sprintf("%+v", r),
+				},
 			}
 			jsonStr, _ := json.Marshal(msg)
 			clh.HandlerChat(string(jsonStr))
