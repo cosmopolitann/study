@@ -108,11 +108,11 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 
 	err = ipfsTopic.Publish(ctx, msgBytes)
 	if err != nil {
-		sugar.Log.Error("publish failed.", err)
+		sugar.Log.Error("ChatSendMsg failed.", err)
 		return ret, err
 	}
 
-	sugar.Log.Info("publish success")
+	sugar.Log.Info("ChatSendMsg success")
 
 	// 发布消息
 	return ret, nil
