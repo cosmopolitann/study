@@ -215,6 +215,70 @@ func SyncArticleShareAdd(db *Sql, value string) error {
 	return nil
 }
 
+//同步 点赞
+
+func SyncArticleLike(db *Sql, value string) error {
+	sugar.Log.Info("---Start   Sync   SyncArticleLike    ---- ")
+	var art ArticleLike
+	err := json.Unmarshal([]byte(value), &art)
+	if err != nil {
+		sugar.Log.Error(" Sync Marshal is failed.Err is ", err)
+		return err
+	}
+	sugar.Log.Info(" Marshal data is:", art)
+
+	stmt, err := db.DB.Prepare("insert or replace into article_like (id,user_id,article_id,is_like) values (?,?,?,?)")
+	if err != nil {
+		sugar.Log.Error(" Sync Update  data is failed.The err is ", err)
+		return err
+	}
+	res, err := stmt.Exec(art.Id, art.UserId, art.ArticleId, art.IsLike)
+	if err != nil {
+		sugar.Log.Error("Sync Update  is failed.The err is ", err)
+		return err
+	}
+	c, _ := res.RowsAffected()
+	if c == 0 {
+		sugar.Log.Error("Sync insert  replace is failed.The err is ", err)
+		return err
+	}
+	sugar.Log.Info("---Start   Sync   SyncArticleLike   End ---- ")
+
+	return nil
+}
+
+//用户取消点赞
+func SyncArticleCancelLike(db *Sql, value string) error {
+	sugar.Log.Info("---Start   Sync   SyncArticleCancelLike    ---- ")
+	var art ArticleLike
+	err := json.Unmarshal([]byte(value), &art)
+	if err != nil {
+		sugar.Log.Error(" Sync Marshal is failed.Err is ", err)
+		return err
+	}
+	sugar.Log.Info(" Marshal data is:", art)
+
+	stmt, err := db.DB.Prepare("insert or replace into article_like (id,user_id,article_id,is_like) values (id,user_id,article_id,is_like)")
+
+	if err != nil {
+		sugar.Log.Error(" Sync Update  data is failed.The err is ", err)
+		return err
+	}
+	res, err := stmt.Exec(art.Id, art.UserId, art.ArticleId, art.IsLike)
+	if err != nil {
+		sugar.Log.Error("Sync SyncArticleCancelLike  is failed.The err is ", err)
+		return err
+	}
+	c, _ := res.RowsAffected()
+	if c == 0 {
+		sugar.Log.Error("Sync insert  replace is failed.The err is ", err)
+		return err
+	}
+	sugar.Log.Info("---Start   Sync   SyncArticleCancelLike   End ---- ")
+
+	return nil
+}
+
 // 同步用户注册
 // 最开始写的  不会用。错误。
 func SyncUserRegister(db *Sql, value string) error {
@@ -509,6 +573,62 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 					}
 					sugar.Log.Info("~~~  Sync user is successful!  ~~~")
 					sugar.Log.Info("~~~   Add  user  End ~~~")
+				} else if recieve.Method == "receiveArticleLike" {
+					//
+					sugar.Log.Info("~~~  Start receiveArticleLike   ~~~")
+					//  add article into table.
+					sugar.Log.Info("~~~ Because Method == receiveArticleLike ~~~~")
+					sugar.Log.Info(" recieve.Method :=", recieve.Method)
+					//unmarshal params.
+					var syn vo.SyncRecieveLikeParams
+					err = json.Unmarshal(msg.Data, &syn)
+					if err != nil {
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
+						continue
+					}
+					// string
+					// marshal syn.data => userInfo.
+					userInfo, err := json.Marshal(syn.Data)
+					if err != nil {
+						sugar.Log.Error("Marshal params is failed.Err:", err)
+						continue
+					}
+					// start sync ArticleShareAdd
+					err = db.SyncArticleLike(string(userInfo))
+					if err != nil {
+						sugar.Log.Error("-Sync receiveArticleLike is failed.Err:", err)
+						continue
+					}
+					sugar.Log.Info("~~~  Sync receiveArticleLike is successful!  ~~~")
+					sugar.Log.Info("~~~   Add  receiveArticleLike  End ~~~")
+				} else if recieve.Method == "receiveArticleCancelLike" {
+					//
+					sugar.Log.Info("~~~  Start receiveArticleCancelLike   ~~~")
+					//  add article into table.
+					sugar.Log.Info("~~~ Because Method == receiveArticleLike ~~~~")
+					sugar.Log.Info(" recieve.Method :=", recieve.Method)
+					//unmarshal params.
+					var syn vo.SyncRecieveLikeParams
+					err = json.Unmarshal(msg.Data, &syn)
+					if err != nil {
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
+						continue
+					}
+					// string
+					// marshal syn.data => userInfo.
+					userInfo, err := json.Marshal(syn.Data)
+					if err != nil {
+						sugar.Log.Error("Marshal params is failed.Err:", err)
+						continue
+					}
+					// start sync ArticleShareAdd
+					err = db.SyncArticleCancelLikee(string(userInfo))
+					if err != nil {
+						sugar.Log.Error("-Sync receiveArticleCancelLike is failed.Err:", err)
+						continue
+					}
+					sugar.Log.Info("~~~  Sync receiveArticleCancelLike is successful!  ~~~")
+					sugar.Log.Info("~~~   Add  receiveArticleCancelLike  End ~~~")
 				} else {
 					sugar.Log.Info("~~~~~  No ~~~~~ ")
 					sugar.Log.Info("~~~~~  Continue ~~~~~ ")

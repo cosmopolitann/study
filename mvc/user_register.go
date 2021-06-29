@@ -165,3 +165,43 @@ func FindIsExistUser(db *Sql, user SysUser) (int64, error) {
 	}
 
 }
+func AddUserTest(db *Sql, value string) (vo.UserLoginRespParams, error) {
+	sugar.Log.Info(" ~~~ Start Add User  ~~~ ")
+	//user string ==> user struct
+	//Add sys_user
+	//create snow id
+	var resp vo.UserLoginRespParams
+	var user SysUser
+	err := json.Unmarshal([]byte(value), &user)
+	if err != nil {
+		return resp, err
+	}
+	sugar.Log.Info("params ：= ", user)
+	//create snowId
+	id := utils.SnowId()
+	//create now time
+	t := time.Now().Unix()
+	stmt, err := db.DB.Prepare("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values(?,?,?,?,?,?,?,?,?)")
+	if err != nil {
+		sugar.Log.Error("Insert data to sys_user is failed:", err.Error())
+		return resp, err
+	}
+	sid := strconv.FormatInt(id, 10)
+	user.Phone = sid //手机号注册不用了,phone字段直接用id来填,兼容老版本
+	user.Sex = 0
+	user.NickName = "dragon" + sid[len(sid)-5:]
+	res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+	if err != nil {
+		sugar.Log.Error("Insert data to sys_user is failed:", err.Error())
+		return resp, err
+	}
+	c, _ := res.RowsAffected()
+	sugar.Log.Info("~~~~~   Insert into sys_user data is Successful ~~~~~~", c)
+	//生成 token
+	// 手机号
+	//token,err:=jwt.GenerateToken(user.Phone,60)
+	resp.Token, _ = jwt.GenerateToken(sid, -1)
+	resp.UserInfo = GetUser(db, sid)
+
+	return resp, nil
+}

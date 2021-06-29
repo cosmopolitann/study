@@ -3,13 +3,11 @@ package user
 import (
 	"github.com/cosmopolitann/clouddb/sugar"
 
-	"github.com/cosmopolitann/clouddb/mvc"
-
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"testing"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestUserLogin(t *testing.T) {
@@ -31,26 +29,9 @@ func TestUserLogin(t *testing.T) {
 	e := d.Ping()
 	fmt.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
-	//插入数据
-	var fi = mvc.File{
-		Id:       "1",
-		UserId:   "408217533556985856",
-		FileName: "红楼梦",
-		ParentId: "0",
-		FileCid:  "Qmcid",
-		FileSize: 100,
-		FileType: 11,
-		IsFolder: 0,
-		Ptime:    12324,
-	}
-	b1, e := json.Marshal(fi)
-	fmt.Println(e)
-	fmt.Println(b1)
-
-	//这里 改成 穿 json 字符串，字段 要改成更新之后的数据。
 
 	//{"id":"4324","peerId":"124","name":"20","phone":1,"sex":"1","nickName":"nick"}
-	value := `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTQ4NTcwNTU4MjA1ODI5MTIifQ.QsM9REPsTmxUBZLw0Z_Uza8NadN1bmS0EzY-qUTCPO4`
+	value := `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTYzMzgyMjM0MjY0NDEyMTYifQ.0XcXav8J2pvo1Tp3S2y8GhIM5oNgZA7982l7FtNt1Yc`
 	//resp:= ss.UserAdd(string(b1)
 
 	resp := ss.UserLogin(value)

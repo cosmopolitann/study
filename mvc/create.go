@@ -40,6 +40,15 @@ func (db *Sql) UserRegister(ipfsNode *ipfsCore.IpfsNode, user string, path strin
 	}
 	return vo.ResponseSuccess(data)
 }
+func (db *Sql) AddUserTest(user string) string {
+	data, err := AddUserTest(db, user)
+	//返回封装成方法
+	// 返回的时候 要改东西
+	if err != nil {
+		return vo.ResponseErrorMsg(400, err.Error())
+	}
+	return vo.ResponseSuccess(data)
+}
 
 //  用户注销
 
@@ -358,9 +367,9 @@ func (db *Sql) ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, dInfo string) string
 
 //  朋友圈 点赞
 
-func (db *Sql) ArticleGiveLike(dInfo string) string {
+func (db *Sql) ArticleGiveLike(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 
-	e := AddArticleLike(db, dInfo)
+	e := AddArticleLike(ipfsNode, db, dInfo)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
@@ -370,9 +379,9 @@ func (db *Sql) ArticleGiveLike(dInfo string) string {
 
 // 取消点赞
 
-func (db *Sql) ArticleCancelLike(dInfo string) string {
+func (db *Sql) ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 
-	e := ArticleCancelLike(db, dInfo)
+	e := ArticleCancelLike(ipfsNode, db, dInfo)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
@@ -677,6 +686,17 @@ func (db *Sql) SyncArticlePlay(dInfo string) error {
 
 func (db *Sql) SyncArticleShareAdd(dInfo string) error {
 	e := SyncArticleShareAdd(db, dInfo)
+	return e
+}
+
+// 同步 点赞
+func (db *Sql) SyncArticleLike(dInfo string) error {
+	e := SyncArticleLike(db, dInfo)
+	return e
+}
+func (db *Sql) SyncArticleCancelLikee(dInfo string) error {
+
+	e := SyncArticleCancelLike(db, dInfo)
 	return e
 }
 

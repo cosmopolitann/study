@@ -64,3 +64,22 @@ type SyncRecieveArticleParams struct {
 	Method string           `json:"type"` //同步方法
 	Data   ArticleAddParams `json:"data"` //同步数据
 }
+
+// 点赞
+type SyncRecieveLikeParams struct {
+	Method string            `json:"type"` //同步方法
+	Data   ArticleLikeParams `json:"data"` //同步数据
+}
+
+// 取消点赞
+type SyncRecieveCancelLikeParams struct {
+	Method string            `json:"type"` //同步方法
+	Data   ArticleLikeParams `json:"data"` //同步数据
+}
+
+type ArticleLikeParams struct {
+	Id        string `json:"id"`        //id
+	UserId    string `json:"userId"`    //用户id
+	ArticleId string `json:"articleId"` //文章id
+	IsLike    int64  `json:"isLike"`    //是否点赞
+}
