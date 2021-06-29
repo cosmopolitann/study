@@ -1,7 +1,6 @@
 package user
 
 import (
-	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 
 	"github.com/cosmopolitann/clouddb/mvc"
@@ -14,10 +13,10 @@ import (
 )
 
 func TestUserLogin(t *testing.T) {
-	str := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIzMjczNzM2NTI2NDI0NzUwMDgiLCJjdGltZSI6MTYyNDM1Mjc2MTEwMCwiaWF0IjoxNjI0MzUyNzYxfQ.zduJoHT-qM6bvySnXWVImrieKx-MdO3bYH4PSjL-5wo"
-	a,_ := jwt.JwtVeriyToken(str)
-	fmt.Println("claim:",a)
-	return
+	//str := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIzMjczNzM2NTI2NDI0NzUwMDgiLCJjdGltZSI6MTYyNDM1Mjc2MTEwMCwiaWF0IjoxNjI0MzUyNzYxfQ.zduJoHT-qM6bvySnXWVImrieKx-MdO3bYH4PSjL-5wo"
+	//a,_ := jwt.JwtVeriyToken(str)
+	//fmt.Println("claim:",a)
+	//return
 	sugar.InitLogger()
 
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
@@ -51,7 +50,7 @@ func TestUserLogin(t *testing.T) {
 	//这里 改成 穿 json 字符串，字段 要改成更新之后的数据。
 
 	//{"id":"4324","peerId":"124","name":"20","phone":1,"sex":"1","nickName":"nick"}
-	value := `{"phone":"1223345"}`
+	value := `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTQ4NTcwNTU4MjA1ODI5MTIifQ.QsM9REPsTmxUBZLw0Z_Uza8NadN1bmS0EzY-qUTCPO4`
 	//resp:= ss.UserAdd(string(b1)
 
 	resp := ss.UserLogin(value)
