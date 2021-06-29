@@ -26,8 +26,8 @@ func TestCopyFile(t *testing.T) {
 	//插入数据
 	value := `{
 "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI",
-"parentId":"102",
-"ids":["414849335038054400","415161735163416576"]
+"parentId":"1",
+"ids":["415849595134808064"]
 }`
 	//b1, e := json.Marshal(fi)//
 	//fmt.Println(ss)//

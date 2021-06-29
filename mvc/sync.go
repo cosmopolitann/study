@@ -12,12 +12,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cosmopolitann/clouddb/sugar"
-	"github.com/cosmopolitann/clouddb/utils"
 	"github.com/cosmopolitann/clouddb/vo"
 	shell "github.com/ipfs/go-ipfs-api"
 	ipfsCore "github.com/ipfs/go-ipfs/core"
@@ -79,16 +77,16 @@ func SyncArticle(db *Sql, value string) error {
 		return errors.New(" SyncArticle marshal is failed. ")
 	}
 	sugar.Log.Info("Marshal data is  ", art)
-	id := utils.SnowId()
+	// id := utils.SnowId()
 	t := time.Now().Unix()
 	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.", err)
 		return err
 	}
-	sid := strconv.FormatInt(id, 10)
+	// sid := strconv.FormatInt(id, 10)
 	stmt.QueryRow()
-	res, err := stmt.Exec(sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	res, err := stmt.Exec(art.Id, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
 	if err != nil {
 		sugar.Log.Error("Insert into article  is Failed.", err)
 		return err
@@ -269,11 +267,11 @@ func SyncUserRegister(db *Sql, value string) error {
 
 	affect, err := res.RowsAffected()
 	if err != nil {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error(" Sync Update  is failed.The err is ", err)
 		return err
 	}
 	if affect == 0 {
-		sugar.Log.Error("同步 Update  is failed.The err is ", err)
+		sugar.Log.Error(" Sync Update  is failed.The err is ", err)
 		return err
 	}
 	sugar.Log.Info("---Start   Sync   UserRegister   End ---- ")
@@ -378,14 +376,16 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 			continue
 		}
 		wayId := "12D3KooWDoBhdQwGT6oq2EG8rsduRCmyTZtHaBCowFZ7enwP4i8J"
-		sugar.Log.Info("----Public gateway peerId ----:", wayId)
+		wayId2 := "12D3KooW9tijGFxQnN88QotdNfb77hGh3sXEiLc3NWPU4zWbN9WQ"
+		wayId3 := "12D3KooWRxvZGzeMcAbxXuomztAwn344EkmiRusF7x5H3U4RtkNN"
+		sugar.Log.Info("----Public gateway peerId1 ----:", wayId)
+		sugar.Log.Info("----Public gateway peerId2 ----:", wayId2)
+		sugar.Log.Info("----Public gateway peerId3 ----:", wayId3)
 		sugar.Log.Info("----Encode base58 fromId ----")
 		FromID := base58.Encode(fromId)
 		sugar.Log.Info("----- Encode base58 fromId -----:", string(FromID))
-
 		sugar.Log.Info("----- Judge FromId == or != wayId -----")
-
-		if FromID == wayId {
+		if FromID == wayId || FromID == wayId2 || FromID == wayId3 {
 			//if fromid == wayid ,then judge peerid ==reciece.fromid .
 			//Satisfy one condition
 			sugar.Log.Info(" FromId == wayId ")
@@ -524,7 +524,6 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		}
 
 	}
-	return nil
 }
 
 var sh *shell.Shell
@@ -534,12 +533,12 @@ func Exist(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
-func OffLineSyncData(db *Sql, path string) {
+func OffLineSyncData(db *Sql, path string) error {
 	defer func() {
 		if err := recover(); err != nil {
-			sugar.Log.Info("  捕捉恐慌 ~~~~~~~~~~~~1:", err)
+			sugar.Log.Info(" ~~~~~~~~~ Capture the panic ~~~~~~~~~~~~Err: ", err)
 		} else {
-			sugar.Log.Info("   正常 ~~~~~~~~~~~~2")
+			sugar.Log.Info("~~~~~~~~~~~~~~~   Normal ~~~~~~~~~~~~")
 		}
 	}()
 	sugar.Log.Info("--- Start excute offline task ---")
@@ -554,14 +553,15 @@ func OffLineSyncData(db *Sql, path string) {
 			sugar.Log.Error(" Create Local File Is Failed.Err: ", err1)
 		}
 	}
-	sh = shell.NewShell("localhost:5001")
+	sh = shell.NewShell("127.0.0.1:5001")
 	sugar.Log.Info(" ---  Start resolve remote ipns data.  ---")
 	// result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
 	// RemoteIpnsAddr
 	// sugar.Log.Info(" Ipns Addr: ", RemoteIpnsAddr)
-	result, err := sh.Resolve("k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v")
+	result, err := sh.Resolve("k51qzi5uqu5dkpvez606vzl81y5pir2j2k98s37z5dc4bw1wbk182kmos8c3lo")
 	if err != nil {
 		sugar.Log.Error(" Ipns Addr resolve is failed. Err:", err)
+		return err
 	}
 
 	sugar.Log.Info("The result what ipfs cat remote cid. ", result)
@@ -572,17 +572,26 @@ func OffLineSyncData(db *Sql, path string) {
 	local, err := ioutil.ReadFile(path + "local") // just pass the file name
 	if err != nil {
 		sugar.Log.Error(" Read local file content is failed. ", err)
+		return err
+
 	}
 	sugar.Log.Info(" Read local file content : ", string(local))
 	//read remote file.
 	sugar.Log.Info(" Start read remote file content to use remote cid. ")
+	sugar.Log.Info(" Cat hash:= ", hash)
+
 	read, err := sh.Cat(hash)
+
 	if err != nil {
 		fmt.Println(err)
+		return err
 	}
+	//
 	remote1, Errremote := ioutil.ReadAll(read)
 	if Errremote != nil {
 		sugar.Log.Error("  Read remote file content is failed.Err: ", Errremote)
+		return err
+
 	}
 	sugar.Log.Info("  Read remote file content: ", string(remote1))
 	if strings.ToLower(string(local)) == strings.ToLower(string(remote1)) {
@@ -617,12 +626,16 @@ func OffLineSyncData(db *Sql, path string) {
 			if err != nil {
 				fmt.Println(err)
 				sugar.Log.Error(" Ipfs get cid hash is failed.Err:", err)
+				return err
+
 			}
 			sugar.Log.Info(" Read diff cid file by line .")
 			sugar.Log.Info(" Open cidPath file : ", cidPath)
 			f1, err := os.Open(cidPath)
 			if err != nil {
 				sugar.Log.Error(" Open cidPath is failed.Err:", err)
+				return err
+
 			}
 			defer f1.Close()
 			rd1 := bufio.NewReader(f1)
@@ -678,6 +691,8 @@ func OffLineSyncData(db *Sql, path string) {
 		local_f, err1 := os.OpenFile(defaltPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file.
 		if err1 != nil {
 			sugar.Log.Error(" Open file is failed.Err:", err1)
+			return err
+
 		}
 
 		dupremoteStr := SplitArray(dupremote)
@@ -708,6 +723,7 @@ func OffLineSyncData(db *Sql, path string) {
 	sugar.Log.Info(" Start upload cid to gateway.io ipns. ")
 	UploadFile(path, hash)
 	sugar.Log.Info(" Because local  =====   remote.  ")
+	return nil
 }
 
 //split
@@ -840,11 +856,11 @@ func UploadFile(path string, hash string) {
 	remoteStr1 := strings.Split(string(remote1), "_")
 	reduplication := RemoveDuplicationArray(remoteStr1)
 	remoteresp := SplitArray(reduplication)
-	sugar.Log.Info(" 这是 去重 之后 返回的数据 remoteresp : ", remoteresp)
-	sugar.Log.Info(" 这是 长度 : ", len(reduplication))
+	sugar.Log.Info(" Duplicate removal remoteresp : ", remoteresp)
+	sugar.Log.Info(" Duplicate removal len : ", len(reduplication))
 	var all = remoteresp + "_" + updateCid
 	// dup
-	sugar.Log.Info(" 这是 all : ", all)
+	sugar.Log.Info(" This is  all : ", all)
 
 	//upInfo = all
 	sugar.Log.Info(" Upload All cid info,all : ", all)
@@ -871,7 +887,7 @@ func UploadFile(path string, hash string) {
 	var dbexist bool
 	if len(ksys) > 0 {
 		for _, v := range ksys {
-			if v.Name == "dbkey" && v.Id == "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v" {
+			if v.Name == "dbkey" && v.Id == "k51qzi5uqu5dkpvez606vzl81y5pir2j2k98s37z5dc4bw1wbk182kmos8c3lo" {
 				dbexist = true
 				break
 			}
@@ -885,8 +901,8 @@ func UploadFile(path string, hash string) {
 	sugar.Log.Info(" Use ipns publish cid to public gateway.io ")
 	//time duration
 	t := time.Duration(time.Hour * 24)
-	sugar.Log.Infof(" -- Excute ipns name publish -key=%s /ipfs/%s . --\n", "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v", hash1)
-	pubresp, err := sh.PublishWithDetails("/ipfs/"+hash1, "k51qzi5uqu5dl2hdjuvu5mqlxuvezwe5wbedi6uh7dgu1uiv61vh4p4b71b17v", t, t, true)
+	sugar.Log.Infof(" -- Excute ipns name publish -key=%s /ipfs/%s . --\n", "k51qzi5uqu5dkpvez606vzl81y5pir2j2k98s37z5dc4bw1wbk182kmos8c3lo", hash1)
+	pubresp, err := sh.PublishWithDetails("/ipfs/"+hash1, "k51qzi5uqu5dkpvez606vzl81y5pir2j2k98s37z5dc4bw1wbk182kmos8c3lo", t, t, true)
 	if err != nil {
 		sugar.Log.Error(" PublishWithDetails is failed.Err: ", err)
 	}
@@ -902,7 +918,7 @@ func postFormDataWithSingleFile(path string) {
 	client := http.Client{}
 	bodyBuf := &bytes.Buffer{}
 	bodyWrite := multipart.NewWriter(bodyBuf)
-	file, err := os.Open(path + "db-key")
+	file, err := os.Open(path + "db-key.key")
 	if err != nil {
 		sugar.Log.Error("  Open dbkey path is failed.Err: ", err)
 	}

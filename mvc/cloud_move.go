@@ -30,7 +30,7 @@ func MoveFile(db *Sql, value string) error {
 	sugar.Log.Info("解析token 参数值 ： ", claim)
 	//userid:=claim["UserId"].(string)
 	for _, v := range mvFile.Ids {
-	
+
 		log.Println("这是要移动的文件id：", v)
 		rows, _ := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file as b WHERE (b.file_name,b.user_id,b.is_folder) in (SELECT a.file_name,a.user_id,a.is_folder from cloud_file as a WHERE a.id=?) and b.parent_id=?;", v, mvFile.ParentId)
 		var s File
@@ -46,8 +46,11 @@ func MoveFile(db *Sql, value string) error {
 		log.Println(" 这是移动 查找出来的结果  move file  =", s)
 
 		if s.Id != "" {
-			log.Println("文件夹已经存在")
-			return errors.New("文件夹已经存在")
+			if s.IsFolder == 1 {
+				return errors.New("文件夹已经存在")
+			} else {
+				return errors.New("文件已经存在")
+			}
 		}
 		if s.Id == "" {
 			log.Println(" 这是移动 查找出来的结果  move file  =", s)

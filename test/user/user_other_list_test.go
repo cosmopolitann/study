@@ -1,4 +1,4 @@
-package article
+package user
 
 import (
 	"database/sql"
@@ -6,10 +6,9 @@ import (
 	"testing"
 
 	"github.com/cosmopolitann/clouddb/sugar"
-	_ "github.com/mattn/go-sqlite3"
 )
 
-func TestAddArticleLike(t *testing.T) {
+func TestOtherUserInfoList(t *testing.T) {
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
@@ -23,9 +22,7 @@ func TestAddArticleLike(t *testing.T) {
 	e := d.Ping()
 	fmt.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
-
-	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI","id":"414455797095862272"}
-`
-	resp := ss.ArticleGiveLike(value)
+	value := `{"userId":"414207114215428096"}`
+	resp := ss.OtherUserQuery(value)
 	fmt.Println("这是返回的数据 =", resp)
 }

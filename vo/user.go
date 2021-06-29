@@ -45,3 +45,8 @@ type UserUpdateParams struct {
 	NickName string `json:"nickName"` //昵称
 	Token    string `json:"token"`    //token
 }
+
+// Other User Info.
+type OtherUserInfoParams struct {
+	UserId string `json:"userid"` //userid
+}
