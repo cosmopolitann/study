@@ -63,41 +63,66 @@ type TransferDownLoadParams struct {
 //article
 
 type Article struct {
-	Id             string `json:"id"`
-	UserId         string `json:"userId"`
-	Accesstory     string `json:"accesstory"`
-	AccesstoryType int64  `json:"accesstoryType"`
-	Text           string `json:"text"`
-	Tag            string `json:"tag"`
-	Ptime          int64  `json:"ptime"`
-	PlayNum        int64  `json:"playNum"`
-	ShareNum       int64  `json:"shareNum"`
-	Title          string `json:"title"`
-	Thumbnail      string `json:"thumbnail"`
-	FileName       string `json:"fileName"`
-	FileSize       string `json:"fileSize"`
-	Count          int64  `json:"count"`
+	Id             string `json:"id"`             //id
+	UserId         string `json:"userId"`         //用户id
+	Accesstory     string `json:"accesstory"`     //附件
+	AccesstoryType int64  `json:"accesstoryType"` //附件类型
+	Text           string `json:"text"`           //文本信息
+	Tag            string `json:"tag"`            //标签
+	Ptime          int64  `json:"ptime"`          //创建时间
+	PlayNum        int64  `json:"playNum"`        //播放数量
+	ShareNum       int64  `json:"shareNum"`       //分享次数
+	Title          string `json:"title"`          //标题
+	Thumbnail      string `json:"thumbnail"`      //缩略图
+	FileName       string `json:"fileName"`       //文件名字
+	FileSize       string `json:"fileSize"`       //文件大小
+	Count          int64  `json:"count"`          //数量
+	IsLike         int64  `json:"is_like"`        //是否点赞
+}
+type ArticleAboutMeResp struct {
+	Id             string `json:"id"`             //id
+	UserId         string `json:"userId"`         //用户id
+	Accesstory     string `json:"accesstory"`     //附件
+	AccesstoryType int64  `json:"accesstoryType"` //附件类型
+	Text           string `json:"text"`           //文本信息
+	Tag            string `json:"tag"`            //标签
+	Ptime          int64  `json:"ptime"`          //创建时间
+	PlayNum        int64  `json:"playNum"`        //播放数量
+	ShareNum       int64  `json:"shareNum"`       //分享次数
+	Title          string `json:"title"`          //标题
+	Thumbnail      string `json:"thumbnail"`      //缩略图
+	FileName       string `json:"fileName"`       //文件名字
+	FileSize       string `json:"fileSize"`       //文件大小
+	Count          int64  `json:"count"`          //数量
+	IsLike         int64  `json:"is_like"`        //是否点赞
+	PeerId         string `json:"peerId"`         //节点id
+	Name           string `json:"name"`           //用户名字
+	Phone          string `json:"phone"`          //手机号
+	Sex            int64  `json:"sex"`            //性别 0 未知  1 男  2 女
+	NickName       string `json:"nickName"`       //昵称
+	Img            string `json:"img"`            //头像
+	Sum            int64  `json:"sum"`
 }
 
 //article like
 type ArticleLike struct {
-	Id        string `json:"id"`
-	UserId    string `json:"userId"`
-	ArticleId string `json:"articleId"`
-	IsLike    int64  `json:"isLike"`
+	Id        string `json:"id"`        //id
+	UserId    string `json:"userId"`    //用户id
+	ArticleId string `json:"articleId"` //文章id
+	IsLike    int64  `json:"isLike"`    //是否点赞
 }
 
 // chat_msg
 type ChatMsg struct {
-	Id          string `json:"id"`
-	ContentType int64  `json:"contentType"`
-	Content     string `json:"content"`
-	FromId      string `json:"fromId"`
-	ToId        string `json:"toId"`
-	Ptime       int64  `json:"ptime"`
-	IsWithdraw  int64  `json:"isWithdraw"` //require     coment 是否撤回         0 未撤回  1  撤回
-	IsRead      int64  `json:"isRead"`
-	RecordId    string `json:"recordId"`
+	Id          string `json:"id"`          //id
+	ContentType int64  `json:"contentType"` //内容类型
+	Content     string `json:"content"`     //内容
+	FromId      string `json:"fromId"`      //发送者
+	ToId        string `json:"toId"`        //接收者
+	Ptime       int64  `json:"ptime"`       //创建时间
+	IsWithdraw  int64  `json:"isWithdraw"`  //require     coment 是否撤回         0 未撤回  1  撤回
+	IsRead      int64  `json:"isRead"`      //是否已读
+	RecordId    string `json:"recordId"`    //房间id
 }
 
 // chat_record
@@ -149,7 +174,3 @@ type DeleteManyDirParams struct {
 type DeleteParams struct {
 	DropFile []File
 }
-	//sql := fmt.Sprintf("INSERT INTO article (id,  user_id      ,accesstory,    accesstory_type,    text,      tag,     ptime,   play_num,share_num,title,     thumbnail,file_name,file_size) values 
-	//                                        ('%s','%s',        '%s'           ,%d,                  '%s',  '    %s'    ,%d,          %d     ,%d,     '%s',   '     %s','    %s',     %d)\n", 
-	//                                         sid, art.UserId,  art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t,           0,       0,    art.Title, art.Thumbnail, art.FileName, art.FileSize)
-	

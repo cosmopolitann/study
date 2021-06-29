@@ -35,7 +35,6 @@ func TestUserRegister(t *testing.T) {
 	sugar.Log.Info("Db value is ", d)
 	e := d.Ping()
 	fmt.Println(" Ping is failed,err:=", e)
-	//ss := Testdb(d)
 	//插入数据
 	var fi = mvc.File{
 		Id:       "1",

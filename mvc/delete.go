@@ -3,10 +3,11 @@ package mvc
 import (
 	"encoding/json"
 	"errors"
+	"log"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
-	"log"
 )
 
 //递归删除文件夹下面所有的文件或者文件夹
@@ -35,29 +36,27 @@ func del(db *Sql, parent_id string, userId string) {
 			}
 		}
 	}
-	log.Println("删除的文件id数组信息:", delArray)
+	log.Println("All delete ids : ", delArray)
 }
 func Delete(db *Sql, value string) error {
-	//test
-	// parent_id ==  408293247874502656
-	//var parent_id string="408293247874502656"
-	//var delMap = []string{}
-	//del(db, parent_id)
+	sugar.Log.Info("~~~~ Start   delete file   ~~~~ ")
 	var d vo.CloudDeleteParams
 	err := json.Unmarshal([]byte(value), &d)
+	//marshal params.
 	if err != nil {
 		sugar.Log.Error("Marshal is failed.Err is ", err)
+		return err
 	}
-	sugar.Log.Info("解析数据  是 ", d)
-	//验证token 是否满足条件
-	//校验 token 是否 满足
+	sugar.Log.Info(" Marshal params :=", d)
+	//verify token.
 	claim, b := jwt.JwtVeriyToken(d.Token)
 	if !b {
 		return err
 	}
 	sugar.Log.Info("claim := ", claim)
-	//如果 是  文件夹  就 递归删除  如果 是文件 就直接删除
-	//查询 id 判断类型
+	// if it's a folder, delete it recursively.
+	// if it's a file,delete it directly.
+	// query for all ids to delete
 	for _, v := range d.Ids {
 		rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0) from cloud_file where id=?", v)
 		if err != nil {
@@ -77,36 +76,34 @@ func Delete(db *Sql, value string) error {
 		}
 		delArray = append(delArray, string(v))
 	}
-	//删除 所有的 id
-	// 开启事务
-	log.Println("删除的文件id数组信息:", delArray)
+	//delete all ids.
+	sugar.Log.Info("All ids := ", delArray)
+	// Open the transaction.
 	tx, err := db.DB.Begin()
 	if err != nil {
-		return errors.New("删除文件失败错误")
+		return errors.New(" Delete file or folder is failed. ")
 	}
 	for _, v := range delArray {
 		stmt, err := db.DB.Prepare("delete from cloud_file where id=?")
 		if err != nil {
-			sugar.Log.Error("删除文件失败，错误:", err)
+			sugar.Log.Error(" Delete file is failed.Err:", err)
 			tx.Rollback()
-			return errors.New("删除文件失败")
+			return errors.New(" Delete file is failed. ")
 		}
-
 		res, err := stmt.Exec(v)
 		if err != nil {
-			sugar.Log.Error("删除文件失败，错误:", err)
+			sugar.Log.Error("Delete file is failed.Err::", err)
 			tx.Rollback()
-
-			return errors.New("删除文件失败")
+			return errors.New(" Delete file is failed. ")
 		}
 		log.Println(res)
 	}
 	err = tx.Commit()
 	if err != nil {
-		sugar.Log.Info("删除文件失败，错误: ", err)
-		return errors.New("删除文件失败")
+		sugar.Log.Info("Delete file is failed.Err:", err)
+		return errors.New(" Delete file is failed. ")
 	}
-	log.Println("删除的文件id数组信息:", delArray)
+	sugar.Log.Info(" Array ids : ", delArray)
 	return nil
 
 }

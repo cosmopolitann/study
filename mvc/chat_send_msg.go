@@ -85,6 +85,7 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 
 	msgBytes, err := json.Marshal(map[string]interface{}{
 		"type": vo.MSG_TYPE_NEW,
+		"from": ipfsNode.Identity.String(),
 		"data": swapMsg,
 	})
 	if err != nil {

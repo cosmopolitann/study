@@ -22,7 +22,7 @@ func TestArticleRecommend(t *testing.T) {
 	ss := Testdb(d)
 	// request json  params
 	// test 1
-	value := `{"pageSize":3,"pageNum":1}
+	value := `{"pageSize":10,"pageNum":1}
 `
 	t.Log("request value :=", value)
 	resp := ss.ArticleRecommend(value)

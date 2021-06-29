@@ -12,20 +12,20 @@ import (
 //查询文件列表
 
 func TransferList(db *Sql, value string) (data []TransferDownLoadParams, e error) {
+	sugar.Log.Info(" ~~~~  Start   TransferList ~~~~~ ")
 	var list vo.TransferListParams
 	var arrfile []TransferDownLoadParams
-
+	//marshal params.
 	err := json.Unmarshal([]byte(value), &list)
 	if err != nil {
 		sugar.Log.Error("Marshal is failed.Err is ", err)
+		return arrfile, err
 	}
 	sugar.Log.Info("Marshal data is  ", list)
-	// 查询
-
-	//校验 token 是否 满足
+	//check token
 	claim, b := jwt.JwtVeriyToken(list.Token)
 	if !b {
-		return arrfile, errors.New("token失效")
+		return arrfile, errors.New(" Token is invaild. ")
 	}
 	sugar.Log.Info("claim := ", claim)
 
@@ -45,6 +45,7 @@ func TransferList(db *Sql, value string) (data []TransferDownLoadParams, e error
 		arrfile = append(arrfile, dl)
 	}
 	sugar.Log.Info("Query all data is ", arrfile)
+	sugar.Log.Info(" ~~~~  Start   TransferList  End ~~~~~ ")
 	return arrfile, nil
 
 }

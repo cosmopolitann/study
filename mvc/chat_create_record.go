@@ -15,22 +15,18 @@ import (
 )
 
 func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.ChatRecordInfo, error) {
-
+	sugar.Log.Info("~~~~~  ChatCreateRecord   Method   ~~~~~~~")
 	// 接收参数
 	var msg vo.ChatAddRecordParams
-
 	// 返回参数
 	var ret vo.ChatRecordInfo
-
 	sugar.Log.Info("Request Param:", value)
-
 	err := json.Unmarshal([]byte(value), &msg)
 	if err != nil {
 		sugar.Log.Error("Marshal is failed.Err is ", err)
 		return ret, err
 	}
 	sugar.Log.Info("Marshal data is  ", msg)
-
 	//校验 token 是否 满足
 	claim, b := jwt.JwtVeriyToken(msg.Token)
 	if !b {
@@ -104,6 +100,7 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 
 	msgBytes, err := json.Marshal(map[string]interface{}{
 		"type": vo.MSG_TYPE_RECORD,
+		"from": ipfsNode.Identity.String(),
 		"data": swapMsg,
 	})
 	if err != nil {
@@ -131,9 +128,8 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 		sugar.Log.Error("publish failed.", err)
 		return ret, err
 	}
-
 	sugar.Log.Info("publish success")
-
+	sugar.Log.Info("~~~~~  ChatCreateRecord   Method   End ~~~~~~~")
 	return ret, nil
 }
 

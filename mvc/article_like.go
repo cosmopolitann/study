@@ -3,17 +3,18 @@ package mvc
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"strconv"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/utils"
 	"github.com/cosmopolitann/clouddb/vo"
-	"strconv"
 )
 
 //朋友圈点赞
 
 func AddArticleLike(db *Sql, value string) error {
+	sugar.Log.Info("~~~~  AddArticleLike   Method  ~~~~~")
 	var dl ArticleLike
 	var art vo.ArticleGiveLikeParams
 	err := json.Unmarshal([]byte(value), &art)
@@ -23,15 +24,14 @@ func AddArticleLike(db *Sql, value string) error {
 	}
 	sugar.Log.Info("Marshal data is  ", art)
 	//
-	//查询是否存在记录
-	//校验 token 是否 满足
+	//check token is valid.
 	claim, b := jwt.JwtVeriyToken(art.Token)
 	if !b {
 		return errors.New("token 失效")
 	}
 	userid := claim["UserId"].(string)
 	sugar.Log.Info("claim := ", claim)
-	//查询数据
+	//query data.
 	rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(article_id,'null'),IFNULL(is_like,0) FROM article_like where article_id=? and user_id=?", art.Id, userid)
 	if err != nil {
 		sugar.Log.Error("Query article_like is failed.Err is ", err)
@@ -47,7 +47,7 @@ func AddArticleLike(db *Sql, value string) error {
 	}
 
 	if dl.Id == "" {
-		//插入新的一条记录
+		//insert a new entire.
 		id := utils.SnowId()
 		stmt, err := db.DB.Prepare("INSERT INTO article_like (id,user_id,article_id,is_like) values(?,?,?,?)")
 		if err != nil {
@@ -63,10 +63,10 @@ func AddArticleLike(db *Sql, value string) error {
 		}
 		sugar.Log.Info("Insert into article_like  is successful.")
 		l, _ := res.RowsAffected()
-		fmt.Println(" l =", l)
 		if l == 0 {
-			return errors.New("插入数据失败")
+			return errors.New(" Insert data into article_like table is failed. ")
 		}
+		sugar.Log.Info("~~~~  AddArticleLike   Method   End ~~~~~")
 		return nil
 	} else {
 		//更新字段  is_ike = 1
@@ -85,6 +85,8 @@ func AddArticleLike(db *Sql, value string) error {
 			sugar.Log.Error("update article_like  is Failed.", err)
 			return err
 		}
+		sugar.Log.Info("~~~~  AddArticleLike   Method   End ~~~~~")
 		return nil
 	}
+
 }

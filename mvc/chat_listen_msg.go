@@ -18,10 +18,10 @@ import (
 
 func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
 
-	//校验 token 是否 满足
+	//check token is vaild
 	claim, b := jwt.JwtVeriyToken(token)
 	if !b {
-		return errors.New("token 失效")
+		return errors.New(" Token is invaild. ")
 	}
 	sugar.Log.Info("claim := ", claim)
 	userId := claim["UserId"].(string)
@@ -246,6 +246,17 @@ func handleWithdrawMsg(db *Sql, msg vo.ChatSwapWithdrawMsgParams) (ChatMsg, erro
 			return ret, err
 		} else if num == 0 {
 			return ret, vo.ErrorAffectZero
+		}
+
+		msgStr := "撤回了一条消息"
+
+		res, err = db.DB.Exec("UPDATE chat_record SET last_msg = ? WHERE id = ?", msgStr, ret.RecordId)
+		if err != nil {
+			return ret, err
+		}
+		_, err = res.RowsAffected()
+		if err != nil {
+			return ret, err
 		}
 
 		ret.IsWithdraw = 1

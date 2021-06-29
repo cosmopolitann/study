@@ -42,8 +42,9 @@ func ChatWithdrawMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 
 	// 查询会话是否存在
 	var isWithdraw int64
+	var recordId string
 
-	err = db.DB.QueryRow("SELECT is_with_draw FROM chat_msg WHERE id = ? and from_id = ?", msg.MsgId, msg.FromId).Scan(&isWithdraw)
+	err = db.DB.QueryRow("SELECT is_with_draw, record_id FROM chat_msg WHERE id = ? and from_id = ?", msg.MsgId, msg.FromId).Scan(&isWithdraw, &recordId)
 	if err != nil {
 		sugar.Log.Error("Query chat_msg is failed.", err)
 		return err
@@ -67,14 +68,16 @@ func ChatWithdrawMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	}
 
 	swapMsg := vo.ChatSwapWithdrawMsgParams{
-		MsgId:  msg.MsgId,
-		FromId: msg.FromId,
-		ToId:   msg.ToId,
-		Token:  "",
+		RecordId: recordId,
+		MsgId:    msg.MsgId,
+		FromId:   msg.FromId,
+		ToId:     msg.ToId,
+		Token:    "",
 	}
 
 	msgBytes, err := json.Marshal(map[string]interface{}{
 		"type": vo.MSG_TYPE_WITHDRAW,
+		"from": ipfsNode.Identity.String(),
 		"data": swapMsg,
 	})
 	if err != nil {

@@ -19,14 +19,18 @@ PRAGMA foreign_keys = false;
 -- Table structure for chat_msg
 -- ----------------------------
 DROP TABLE IF EXISTS "chat_msg";
-CREATE TABLE IF NOT EXISTS chat_msg (
-                          id VARCHAR ( 64 ) PRIMARY KEY UNIQUE NOT NULL,--id
-                          content_type INT ( 10 ) NOT NULL,--文件内容类型
-                          content TEXT NOT NULL,--文件内容
-                          from_id VARCHAR ( 64 ) NOT NULL,--发送者id
-                          to_id VARCHAR ( 64 ) NOT NULL,--接收者id
-                          ptime DATE NOT NULL DEFAULT ( datetime( 'now', 'localtime' ) ),--创建时间
-                          revocation INTEGER ( 10 ) NOT NULL DEFAULT ( 1 ),--撤回
-                          is_read INT ( 10 ) NOT NULL DEFAULT ( 0 )--是否已读
+CREATE TABLE "main"."chat_msg" (
+  "id" VARCHAR (64) NOT NULL,--id
+  "content_type" INT (10) NOT NULL,--内容类型
+  "content" TEXT NOT NULL,--内容
+  "from_id" VARCHAR (64) NOT NULL,--fromid
+  "to_id" VARCHAR (64) NOT NULL,--toid
+  "ptime" integer(64) NOT NULL DEFAULT 0,--创建时间
+  "is_with_draw" INTEGER (10) NOT NULL DEFAULT (1),--是否撤回
+  "is_read" INT (10) NOT NULL DEFAULT (0),--是否已读
+  "record_id" VARCHAR (64) NOT NULL,--房间id
+  PRIMARY KEY ("id"),--主键 id
+  FOREIGN KEY ("record_id") REFERENCES "chat_record" ("id") ON DELETE CASCADE ON UPDATE NO ACTION,--外键关联 record_id chat_record 的id 级联删除
+  UNIQUE ("id" ASC)--唯一键 id
 );
 PRAGMA foreign_keys = true;

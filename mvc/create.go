@@ -3,11 +3,9 @@ package mvc
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
-	"github.com/robfig/cron"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
@@ -71,6 +69,16 @@ func (db *Sql) UserQuery(user string) string {
 
 	data, e := UserQuery(db, user)
 
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+	return vo.ResponseSuccess(data)
+}
+
+// 其他 用户 信息 查询
+
+func (db *Sql) OtherUserQuery(user string) string {
+	data, e := OtherUserQuery(db, user)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
@@ -242,7 +250,7 @@ func (db *Sql) MoveFile(dInfo string) string {
 	return vo.ResponseSuccess()
 }
 
-//删除
+//  删除文件
 
 func (db *Sql) DeleteAll(dInfo string) string {
 
@@ -401,6 +409,18 @@ func (db *Sql) ArticleSearch(dInfo string) string {
 func (db *Sql) ArticleAboutMe(dInfo string) string {
 
 	data, e := ArticleAboutMe(db, dInfo)
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+
+	return vo.ResponseSuccess(data)
+}
+
+//
+
+func (db *Sql) ArticleSearchCagetory(dInfo string) string {
+
+	data, e := ArticleSearchCagetory(db, dInfo)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
@@ -663,7 +683,8 @@ func (db *Sql) SyncArticleShareAdd(dInfo string) error {
 //  同步数据
 
 func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
-	sugar.Log.Info("---- 开始 同步 消息 ------")
+	sugar.Log.Info("---- Start  OnLine   Sync  ------")
+
 	e := SyncTopicData(ipfsNode, db, dInfo)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
@@ -687,24 +708,22 @@ func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 
 func (db *Sql) OfflineSync(path string) {
 
-	sugar.Log.Info("---- 开始  离线  同步 消息 ------")
+	sugar.Log.Info("---- Start OffLine Sync  ------")
 	// i := 0
-	c := cron.New()
-	// spec := "*/5 * * * * ?"
-	spec := "0 */2 * * * ?"
-	c.AddFunc(spec, func() {
-		//0 */1 * * * ?
-		log.Println("cron running:")
-		log.Println("path :", path)
+	// c := cron.New()
+	// // spec := "*/5 * * * * ?"
+	// spec := "0 */5 * * * ?"
+	// c.AddFunc(spec, func() {
+	// 	//0 */1 * * * ?
+	// 	log.Println("cron running:")
+	// 	log.Println("path :", path)
 
-		OffLineSyncData(db, path)
+	// 	OffLineSyncData(db, path)
 
-	})
-	c.Start()
-
-	select {}
-	// OffLineSyncData(db, path)
-
+	// })
+	// c.Start()
+	// select {}
+	OffLineSyncData(db, path)
 }
 
 /*
