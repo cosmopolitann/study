@@ -43,7 +43,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 	}
 
 	go func(userId string, ipfsTopic *pubsub.Topic) {
-		sugar.Log.Error("Start ChatListenMsg Goroutine...")
+		sugar.Log.Info("Start ChatListenMsg Goroutine...")
 		// 先定义错误捕获
 		defer func() {
 			sugar.Log.Error("End ChatListenMsg Goroutine...")
@@ -65,7 +65,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 		sub, err := ipfsTopic.Subscribe()
 		if err != nil {
-			sugar.Log.Error("subscribe failed.", err)
+			sugar.Log.Error("ChatListenMsg subscribe failed.", err)
 			return
 		}
 
@@ -73,10 +73,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 		for {
 			data, err := sub.Next(ctx)
-			sugar.Log.Errorf("Receive: %+v", data.Data)
-
 			if err != nil {
-				sugar.Log.Error("subscribe failed.", err)
+				sugar.Log.Error("ChatListenMsg subscribe failed2.", err)
 				return
 			}
 
@@ -84,7 +82,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 			err = json.Unmarshal(data.Data, &msg)
 			if err != nil {
-				sugar.Log.Error("data unmarshal failed", err)
+				sugar.Log.Error("ChatListenMsg data unmarshal failed", err)
 				continue
 			}
 
@@ -96,11 +94,10 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 				if tmp.ToId != userId {
 					// not me
-					sugar.Log.Errorf("record is not my [%s] - [%s]", tmp.ToId, userId)
 					continue
 				}
 
-				sugar.Log.Debugf("receive: %s\n", data.Data)
+				sugar.Log.Debugf("ChatListenMsg receive: %s\n", data.Data)
 
 				res, err := handleAddRecordMsg(db, tmp)
 				if err != nil {
@@ -122,11 +119,10 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 				if tmp.ToId != userId {
 					// not me
-					sugar.Log.Errorf("message is not my [%s] - [%s]", tmp.ToId, userId)
 					continue
 				}
 
-				sugar.Log.Debugf("receive: %s\n", data.Data)
+				sugar.Log.Debugf("ChatListenMsg receive: %s\n", data.Data)
 
 				res, err := handleNewMsg(db, tmp)
 				if err != nil {
@@ -150,7 +146,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 					continue
 				}
 
-				sugar.Log.Debugf("receive: %s\n", data.Data)
+				sugar.Log.Debugf("ChatListenMsg receive: %s\n", data.Data)
 
 				res, err := handleWithdrawMsg(db, tmp)
 				if err != nil {

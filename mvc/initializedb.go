@@ -52,7 +52,8 @@ func InitDB(path string) *sql.DB {
 	}
 	sugar.Log.Info(" Db path := ", path)
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	db, err := sql.Open("sqlite3", path)
+	// ?_fk=1 启动外键
+	db, err := sql.Open("sqlite3", path+"?_fk=1")
 	checkErr(err)
 	sugar.Log.Info("Open Sqlite3 is ok.")
 	sugar.Log.Info("Db value is ", db)
