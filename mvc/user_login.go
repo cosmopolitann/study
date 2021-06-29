@@ -39,6 +39,7 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 
 func GetUser(db *Sql, userid string) vo.RespSysUser {
 	fmt.Println("获得用户,id:",userid)
+	
 	var s vo.RespSysUser
 	rows, err := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user ", userid)
 	if err != nil {
