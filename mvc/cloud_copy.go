@@ -71,7 +71,7 @@ func InsertInto(db *Sql, id, parent_id, userid string) string {
 	}
 	//int => string. id => sid.
 	sid := strconv.FormatInt(id1, 10)
-	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, 0, dl.Thumbnail)
+	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, dl.IsFolder, dl.Thumbnail)
 	if err != nil {
 		sugar.Log.Error("Insert into file  is Failed.", err)
 		return ""
@@ -126,7 +126,8 @@ func Re(user_id, id string, d *Sql, parent_id string, userid string) error {
 		return err
 	}
 	sid := strconv.FormatInt(id1, 10)
-	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, 0, dl.Thumbnail)
+
+	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, dl.IsFolder, dl.Thumbnail)
 	if err != nil {
 		sugar.Log.Error("Insert into file  is Failed.", err)
 		return err
