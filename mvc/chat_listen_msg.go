@@ -41,13 +41,20 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 	}
 
 	go func(userId string, ipfsTopic *pubsub.Topic) {
-
+		// 先定义错误捕获
 		defer func() {
-			// 错误捕获
-			if r := recover(); r != nil {
+			r := recover()
+			if r != nil {
 				sugar.Log.Error("ChatListenMsg goroutine panic occure, err:", r)
 				sugar.Log.Error("stack:", debug.Stack())
 			}
+
+			msg := vo.ChatListenParams{
+				Type: "endListen",
+				Data: r,
+			}
+			jsonStr, _ := json.Marshal(msg)
+			clh.HandlerChat(string(jsonStr))
 		}()
 
 		sub, err := ipfsTopic.Subscribe()
