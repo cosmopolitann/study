@@ -43,11 +43,13 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 	}
 
 	go func(userId string, ipfsTopic *pubsub.Topic) {
+		sugar.Log.Error("Start ChatListenMsg Goroutine...")
 		// 先定义错误捕获
 		defer func() {
+			sugar.Log.Error("End ChatListenMsg Goroutine...")
 			r := recover()
 			if r != nil {
-				sugar.Log.Error("ChatListenMsg goroutine panic occure, err:", r)
+				sugar.Log.Error("ChatListenMsg goroutine panic occurent, err:", r)
 				sugar.Log.Error("stack:", debug.Stack())
 			}
 
@@ -71,6 +73,8 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 		for {
 			data, err := sub.Next(ctx)
+			sugar.Log.Errorf("Receive: %+v", data.Data)
+
 			if err != nil {
 				sugar.Log.Error("subscribe failed.", err)
 				return
@@ -92,6 +96,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 				if tmp.ToId != userId {
 					// not me
+					sugar.Log.Errorf("record is not my [%s] - [%s]", tmp.ToId, userId)
 					continue
 				}
 
@@ -117,6 +122,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 
 				if tmp.ToId != userId {
 					// not me
+					sugar.Log.Errorf("message is not my [%s] - [%s]", tmp.ToId, userId)
 					continue
 				}
 
