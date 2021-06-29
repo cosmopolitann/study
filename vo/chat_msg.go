@@ -1,9 +1,10 @@
 package vo
 
 const (
-	MSG_TYPE_WITHDRAW = "receiveMsgWithDraw" // 撤销
-	MSG_TYPE_NEW      = "receiveMsg"         // 新消息
-	MSG_TYPE_RECORD   = "receiveRecord"      // 新会话
+	MSG_TYPE_WITHDRAW  = "receiveMsgWithDraw" // 撤销
+	MSG_TYPE_NEW       = "receiveMsg"         // 新消息
+	MSG_TYPE_RECORD    = "receiveRecord"      // 新会话
+	MSG_TYPE_ENDLISTEN = "endListen"          // 监听结束
 
 	CHAT_MSG_SWAP_TOPIC = "xiaolong-chat-swap" // 消息接收主题
 )

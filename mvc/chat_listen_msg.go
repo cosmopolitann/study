@@ -5,8 +5,10 @@ import (
 	bsql "database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"runtime/debug"
 	"strings"
+	"time"
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
@@ -41,13 +43,22 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 	}
 
 	go func(userId string, ipfsTopic *pubsub.Topic) {
-
+		// 先定义错误捕获
 		defer func() {
-			// 错误捕获
-			if r := recover(); r != nil {
+			r := recover()
+			if r != nil {
 				sugar.Log.Error("ChatListenMsg goroutine panic occure, err:", r)
 				sugar.Log.Error("stack:", debug.Stack())
 			}
+
+			msg := vo.ChatListenParams{
+				Type: vo.MSG_TYPE_ENDLISTEN,
+				Data: map[string]string{
+					"message": fmt.Sprintf("%+v", r),
+				},
+			}
+			jsonStr, _ := json.Marshal(msg)
+			clh.HandlerChat(string(jsonStr))
 		}()
 
 		sub, err := ipfsTopic.Subscribe()
@@ -277,7 +288,7 @@ func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
 		Content:     msg.Content,
 		FromId:      msg.FromId,
 		ToId:        msg.ToId,
-		Ptime:       msg.Ptime,
+		Ptime:       time.Now().Unix(),
 		IsWithdraw:  msg.IsWithdraw,
 		IsRead:      msg.IsRead,
 		RecordId:    msg.RecordId,

@@ -52,13 +52,6 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 	topic := "/db-online-sync"
 	var tp *pubsub.Topic
 	ctx := context.Background()
-	// if tp, ok = Topicmp["/db-online-sync"]; ok == false {
-	// 	tp, err = ipfsNode.PubSub.Join(topic)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	Topicmp[topic] = tp
-	// }
 	tp, ok := TopicJoin.Load(topic)
 	if !ok {
 		tp, err = ipfsNode.PubSub.Join(topic)
@@ -72,35 +65,66 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 	//step 1
 	//query a article data
 	var dl vo.ArticleResp
-	//rows, err := db.DB.Query("SELECT * from article where id=?;",sid)
-	//if err != nil {
-	//	sugar.Log.Error("Query data is failed.Err is ", err)
-	//	return errors.New(" Sync query article table is failed. ")
-	//}
-	//for rows.Next() {
-	//	err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.ShareNum, &dl.PlayNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
-	//	if err != nil {
-	//		sugar.Log.Error("Query scan data is failed.The err is ", err)
-	//		return err
-	//	}
-	//}
-	//
 	err = db.DB.QueryRow("SELECT id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) from article where id=?;", sid).Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 	if err != nil && err != sql.ErrNoRows {
 		sugar.Log.Error("Query article failed.Err is", err)
 		return err
 	}
+	//
+
+	//query user info.
+	var dl1 vo.RespSysUser
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", art.UserId)
+	if err != nil {
+		sugar.Log.Error("AddUser Query data is failed.Err is ", err)
+		return err
+	}
+	for rows.Next() {
+		err = rows.Scan(&dl1.Id, &dl1.PeerId, &dl1.Name, &dl1.Phone, &dl1.Sex, &dl1.Ptime, &dl1.Utime, &dl1.NickName, &dl1.Img)
+		if err != nil {
+			sugar.Log.Error("AddUser Query scan data is failed.The err is ", err)
+			return err
+		}
+		sugar.Log.Info(" AddUser Query a entire data is ", dl)
+	}
+	//the first step.
+	var s3 UserAd
+	s3.Type = "receiveUserRegister"
+	s3.Data = dl1
+	s3.FromId = ipfsNode.Identity.String()
+	//marshal UserAd.
+	//the second step
+	sugar.Log.Info("--- second step ---")
+
+	jsonBytes, err := json.Marshal(s3)
+	if err != nil {
+		sugar.Log.Error("Publish msg is failed.Err:", err)
+		return err
+	}
+	sugar.Log.Info("Frwarding information:=", string(jsonBytes))
+	sugar.Log.Info("Local PeerId :=", ipfsNode.Identity.String())
+	//the  third  step .
+	sugar.Log.Info("--- third step ---")
+
+	err = tp.Publish(ctx, jsonBytes)
+	if err != nil {
+		sugar.Log.Error("Publish Err:", err)
+		return err
+	}
+
+	//----
 	var g PubSyncArticle
 	g.Data = dl
 	g.Type = "receiveArticleAdd"
 	g.FromId = ipfsNode.Identity.String()
 	//struct => json
-	jsonBytes, err := json.Marshal(g)
+	jsonBytes, err = json.Marshal(g)
 	if err != nil {
 		sugar.Log.Error("Marshal struct => json is failed.")
 		return err
 	}
 	sugar.Log.Info("Forward the data to the public gateway.data:=", string(jsonBytes))
+
 	err = tp.Publish(ctx, jsonBytes)
 	if err != nil {
 		sugar.Log.Error("Publish info failed.Err:", err)
@@ -109,28 +133,29 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 	sugar.Log.Info("---  Publish to other device  ---")
 	//
 
+	sugar.Log.Info("~~~~  Publish msg is successful.   ~~~~  ")
+
 	// 写入文件
-	sugar.Log.Info("---  sql语句 写入文件  ---")
+	sugar.Log.Info("---  write sql to file.  ---")
 	//
 	f1, err1 := os.OpenFile(path+"update", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
 	if err1 != nil {
-		sugar.Log.Error("创建失败update :", err1)
+		sugar.Log.Error(" Create update is failed. Err :", err1)
 	}
 
-	sugar.Log.Info("----- 本地 local 文件 存在  ----")
+	sugar.Log.Info("----- Local file is exist.  ----")
 
 	// 拼接字符串 sql 语句
-	sugar.Log.Info("----- sql 语句 写入 文件   ----")
 
 	sql := fmt.Sprintf("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('%s','%s','%s',%d,'%s','%s',%d,%d,%d,'%s','%s','%s','%s')\n", sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
 
 	_, err = f1.WriteString(sql)
 	if err != nil {
-		sugar.Log.Error("-----  写入 update 文件 错误：  ----", err)
+		sugar.Log.Error("-----  Write sql to update file is failed.Err:  ----", err)
 	}
-	sugar.Log.Info("----- 写入的 语句 sql:", sql)
+	sugar.Log.Info("-----sql :-----", sql)
 
-	sugar.Log.Info("-----  写入 update 文件 成功 ----", err)
+	sugar.Log.Info("-----  Write sql to file is successful~~ ----")
 	sugar.Log.Info(" ----  AddArticle Method  End ----")
 	return nil
 }
