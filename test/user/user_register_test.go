@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/mvc"
 	"github.com/cosmopolitann/clouddb/sugar"
 
@@ -16,13 +17,13 @@ func TestUserRegister(t *testing.T) {
 	//a,err1 := jwt.GenerateToken("123",-1)
 	//fmt.Println("token is:",a)
 	//time.Sleep(time.Second*3)
-	//tmp,err1 := jwt.ParseToken(a)
-	//if err1 != nil {
-	//	fmt.Println("token解析出错:",err1.Error())
-	//	return
-	//}
-	//fmt.Println("解析结果:",*tmp)
-	//return
+	tmp,err1 := jwt.ParseToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTYzMDY1MDU5NTI3OTI1NzYifQ.U2cUHN7AJhP0YbbGtMsFQal4B9xCqc7naTJnlaPQdYY")
+	if err1 != nil {
+		fmt.Println("token解析出错:",err1.Error())
+		return
+	}
+	fmt.Println("解析结果:",*tmp)
+	return
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.

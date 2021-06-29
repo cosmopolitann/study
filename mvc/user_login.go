@@ -38,11 +38,15 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 
 func GetUser(db *Sql, userid string) vo.RespSysUser {
 	var s vo.RespSysUser
-	rows, _ := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user as a where id=?", userid)
+	rows, err := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user as a where id=?", userid)
+	if err != nil {
+		sugar.Log.Error("查找用户表失败,sql错误:", err.Error())
+		return s
+	}
 	for rows.Next() {
 		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img)
 		if err != nil {
-			sugar.Log.Error("查找用户表失败,原因:", err)
+			sugar.Log.Error("查找用户表失败,原因:", err.Error())
 			return s
 		}
 		sugar.Log.Info("用户信息:", s)
