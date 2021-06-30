@@ -911,27 +911,28 @@ func OffLineSyncData(db *Sql, path string, ipfsNode *ipfsCore.IpfsNode) error {
 		return err
 	}
 	// //publish  hash => public gateway.
-	// topic := "/db-online-sync"
-	// var tp *pubsub.Topic
-	// ctx := context.Background()
-	// tp, ok := TopicJoin.Load(topic)
-	// if !ok {
-	// 	tp, err = ipfsNode.PubSub.Join(topic)
-	// 	if err != nil {
-	// 		sugar.Log.Error("PubSub.Join .Err is", err)
-	// 		return err
-	// 	}
-	// 	TopicJoin.Store(topic, tp)
-	// }
-	// //
-	// err = tp.Publish(ctx, []byte(uploadHash))
-	// if err != nil {
-	// 	sugar.Log.Error("Publish Err:", err)
-	// 	return err
-	// }
-	// sugar.Log.Info("Publish topic name :", "/db-online-sync")
+	topic := "offline-cid"
+	var tp *pubsub.Topic
+	ctx := context.Background()
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
+		tp, err = ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
+			return err
+		}
+		TopicJoin.Store(topic, tp)
+	}
+	//
+	err = tp.Publish(ctx, []byte(uploadHash))
+	if err != nil {
+		sugar.Log.Error("Publish Err:", err)
+		return err
+	}
+	sugar.Log.Info("Publish topic name :", "offline-cid")
 
 	sugar.Log.Info(" Because local  =====   remote. uploadHash ", uploadHash)
+	
 	return nil
 }
 
@@ -1217,7 +1218,7 @@ func PostFormDataPublicgatewayFile(path string, name string) (string, error) {
 
 	contentType := bodyWrite.FormDataContentType()
 	// req, err := http.NewRequest(http.MethodPost, "http://47.108.183.230:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
-	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
+	req, err := http.NewRequest(http.MethodPost, "http://47.108.183.230:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
 
 	sugar.Log.Info("  request contentType =", contentType)
 	if err != nil {

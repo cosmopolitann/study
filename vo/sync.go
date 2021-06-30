@@ -86,7 +86,7 @@ type ArticleLikeParams struct {
 
 //cid
 type AddCid struct {
-	Name string `json:"name"`
-	Hash string `json:"hash"`
-	Size string `json:"size"`
+	Name string `json:"Name"`
+	Hash string `json:"Hash"`
+	Size string `json:"Size"`
 }

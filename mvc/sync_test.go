@@ -1,12 +1,15 @@
 package mvc
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"testing"
 
+	"github.com/cosmopolitann/clouddb/myipfs"
 	"github.com/cosmopolitann/clouddb/sugar"
 	shell "github.com/ipfs/go-ipfs-api"
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -124,9 +127,113 @@ func TestUploadFile(t *testing.T) {
 	sugar.InitLogger()
 	hash := "QmTD5GfbjzznxAxKgn6H4sEUjHsvtXZd39TRgGY7nnVEo3"
 	path := "/Users/apple/winter/offline/"
+	//--- ipfs Node
+	ipfsNode, err := myipfs.GetIpfsNode("/Users/apple/winter/D-cloud/test/ipfs")
+	if err != nil {
+		fmt.Println("err:=", err)
+	}
+	sugar.Log.Info("ipfsNode :", ipfsNode)
 
+	// //publish  hash => public gateway.
+	topic := "doudou"
+	var tp *pubsub.Topic
+	ctx := context.Background()
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
+		tp, err = ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
+		}
+		TopicJoin.Store(topic, tp)
+	}
+	fmt.Println("topic :=", topic)
+	fmt.Println("tp :=", tp)
+
+	sugar.Log.Info("Publish topic name :", "doudou")
 	got, err := UploadFile(path, hash)
 	fmt.Println(err)
 	fmt.Println(got)
+
+	err = tp.Publish(ctx, []byte(got))
+	if err != nil {
+		sugar.Log.Error("Publish Err:", err)
+	}
+	sugar.Log.Info("Publish is successful ~~~~~~")
+
+	// recieve     msg
+
+	// sub, err := tp.Subscribe()
+	// if err != nil {
+	// 	sugar.Log.Error("subscribe failed.", err)
+	// }
+
+	// for {
+	// 	sugar.Log.Info("-----  Start Subscribe ------")
+	// 	data, err := sub.Next(ctx)
+	// 	if err != nil {
+	// 		sugar.Log.Error("subscribe failed.", err)
+	// 		continue
+	// 	}
+	// 	sugar.Log.Info("-----收到的 消息 ------", data)
+
+	// }
+	// select {}
+}
+
+func TestOffLineSyncData(t *testing.T) {
+	defer func() {
+		if err := recover(); err != nil {
+			sugar.Log.Info(" ~~~~~~~~~ Capture the panic ~~~~~~~~~~~~Err: ", err)
+		} else {
+			sugar.Log.Info("~~~~~~~~~~~~~~~   Normal ~~~~~~~~~~~~")
+		}
+	}()
+	sh = shell.NewShell("127.0.0.1:5001")
+	sugar.InitLogger()
+	hash := "QmTD5GfbjzznxAxKgn6H4sEUjHsvtXZd39TRgGY7nnVEo3"
+	path := "/Users/apple/winter/offline/"
+	//--- ipfs Node
+	ipfsNode, err := myipfs.GetIpfsNode("/Users/apple/winter/D-cloud/test/ipfs")
+	if err != nil {
+		fmt.Println("err:=", err)
+	}
+	sugar.Log.Info("ipfsNode :", ipfsNode)
+
+	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	if err != nil {
+		panic(err)
+	}
+	db := Testdb(d)
+	err = OffLineSyncData(&db, path, ipfsNode)
+	if err != nil {
+		sugar.Log.Error("  ~~~~~~    OffLineSyncData  ~~~~~   Err is", err)
+
+	}
+
+	// //publish  hash => public gateway.
+	topic := "doudou"
+	var tp *pubsub.Topic
+	ctx := context.Background()
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
+		tp, err = ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
+		}
+		TopicJoin.Store(topic, tp)
+	}
+	fmt.Println("topic :=", topic)
+	fmt.Println("tp :=", tp)
+
+	sugar.Log.Info("Publish topic name :", "doudou")
+	got, err := UploadFile(path, hash)
+	fmt.Println(err)
+	fmt.Println(got)
+
+	err = tp.Publish(ctx, []byte(got))
+	if err != nil {
+		sugar.Log.Error("Publish Err:", err)
+	}
+	sugar.Log.Info("Publish is successful ~~~~~~")
 
 }
