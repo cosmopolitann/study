@@ -24,7 +24,6 @@ require (
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/polydawn/refmt v0.0.0-20201211092308-30ac6d18308e // indirect
-	github.com/robfig/cron v1.2.0
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/goleak v1.1.10 // indirect
 	go.uber.org/zap v1.17.0

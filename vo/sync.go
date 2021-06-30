@@ -83,3 +83,10 @@ type ArticleLikeParams struct {
 	ArticleId string `json:"articleId"` //文章id
 	IsLike    int64  `json:"isLike"`    //是否点赞
 }
+
+//cid
+type AddCid struct {
+	Name string `json:"name"`
+	Hash string `json:"hash"`
+	Size string `json:"size"`
+}

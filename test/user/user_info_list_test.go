@@ -3,8 +3,9 @@ package user
 import (
 	"database/sql"
 	"fmt"
-	"github.com/cosmopolitann/clouddb/sugar"
 	"testing"
+
+	"github.com/cosmopolitann/clouddb/sugar"
 )
 
 func TestUserInfoList(t *testing.T) {
