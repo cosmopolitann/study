@@ -13,12 +13,21 @@ import (
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
-	pubsub "github.com/libp2p/go-libp2p-pubsub"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
 
 func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
+
+	sugar.Log.Info("Enter ChatListenMsg Function")
+
+	defer func() {
+		if r := recover(); r != nil {
+			sugar.Log.Error("End ChatListenMsg panic occurent, err:", r)
+		} else {
+			sugar.Log.Error("End ChatListenMsg")
+		}
+	}()
 
 	//check token is vaild
 	claim, b := jwt.JwtVeriyToken(token)
@@ -42,9 +51,9 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
 	}
 
-	go func(userId string, ipfsTopic *pubsub.Topic) {
+	go func() {
 		sugar.Log.Info("Start ChatListenMsg Goroutine...")
-		// 先定义错误捕获
+
 		defer func() {
 			sugar.Log.Error("End ChatListenMsg Goroutine...")
 			r := recover()
@@ -162,7 +171,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				continue
 			}
 		}
-	}(userId, ipfsTopic)
+	}()
 
 	return nil
 }
