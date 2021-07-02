@@ -13,6 +13,7 @@ import (
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
@@ -51,7 +52,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
 	}
 
-	go func() {
+	go func(userId string, ipfsTopic *pubsub.Topic) {
 		sugar.Log.Info("Start ChatListenMsg Goroutine...")
 
 		defer func() {
@@ -171,7 +172,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				continue
 			}
 		}
-	}()
+	}(userId, ipfsTopic)
 
 	return nil
 }
