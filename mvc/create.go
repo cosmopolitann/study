@@ -621,6 +621,14 @@ func (db *Sql) ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, token string, clh vo.C
 	return vo.ResponseSuccess()
 }
 
+// ChatListenMsgBlocked  监听消息 阻塞式
+func (db *Sql) ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, token string, clh vo.ChatListenHandler) error {
+
+	err := ChatListenMsgBlocked(ipfsNode, db, token, clh)
+
+	return err
+}
+
 /*
 ------------------------------------------------------
 |                    Chat  End                       |
