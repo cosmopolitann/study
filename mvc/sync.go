@@ -653,7 +653,7 @@ func Exist(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
-
+//
 // 2. local is nonexistent.
 func LocalNonexistent(path string) error {
 	var defaltPath = path + "local"
@@ -932,7 +932,7 @@ func OffLineSyncData(db *Sql, path string, ipfsNode *ipfsCore.IpfsNode) error {
 	sugar.Log.Info("Publish topic name :", "offline-cid")
 
 	sugar.Log.Info(" Because local  =====   remote. uploadHash ", uploadHash)
-	
+
 	return nil
 }
 
@@ -1034,6 +1034,22 @@ func UploadFile(path string, hash string) (string, error) {
 		if err != nil {
 			return updateCid, err
 		}
+		//delete update file.
+		existed := true
+		if _, err := os.Stat(path + "update"); os.IsNotExist(err) {
+			existed = false
+		}
+		if existed {
+			sugar.Log.Info(" Delete file path:", path+"update")
+			err := os.Remove(path + "update")
+			if err != nil {
+				sugar.Log.Error(" Delete file path is failed.Err:", err)
+				return "", err
+			} else {
+				sugar.Log.Info(" Delete file path is successful! ", path+"update")
+			}
+		}
+		//-----
 		updateCid = updateHash
 	}
 	//read remote file.

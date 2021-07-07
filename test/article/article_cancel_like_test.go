@@ -2,10 +2,13 @@ package article
 
 import (
 	"database/sql"
+	"fmt"
+	"testing"
+
 	"github.com/cosmopolitann/clouddb/mvc"
 	"github.com/cosmopolitann/clouddb/sugar"
+	"github.com/cosmopolitann/clouddb/test/myipfs"
 	_ "github.com/mattn/go-sqlite3"
-	"testing"
 )
 
 func TestArticleCancelLike(t *testing.T) {
@@ -25,10 +28,16 @@ func TestArticleCancelLike(t *testing.T) {
 	// request json  params
 	// test 1
 
-	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI","id":"414167149750259712"}
+	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI","id":"415931300260614144"}
 `
+	ipfsNode, err := myipfs.GetIpfsNode("/Users/apple/winter/D-cloud/test/ipfs")
+	if err != nil {
+		fmt.Println("err:=", err)
+	}
 	t.Log("request value :=", value)
-	resp := ss.ArticleCancelLike(value)
+
+	resp := ss.ArticleCancelLike(ipfsNode, value)
+
 	t.Log("result:=", resp)
 }
 func Testdb1(sq *sql.DB) mvc.Sql {

@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	"github.com/cosmopolitann/clouddb/mvc"
+	"github.com/cosmopolitann/clouddb/myipfs"
 	"github.com/cosmopolitann/clouddb/sugar"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/pkg/profile"
 )
 
 type Cloud struct {
@@ -36,7 +38,7 @@ func main() {
 	// example_folder.InItipfs()
 	// time.Sleep(time.Hour)
 	//test
-
+	defer profile.Start(profile.MemProfile).Stop()
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
@@ -52,7 +54,11 @@ func main() {
 
 	ss := Testdb(d)
 	path := "/Users/apple/winter/offline/"
-	ss.OfflineSync(path)
+	ipfsNode, err := myipfs.GetIpfsNode("/Users/apple/winter/D-cloud/test/ipfs")
+	if err != nil {
+		fmt.Println("err:=", err)
+	}
+	ss.OfflineSync(ipfsNode, path)
 
 }
 func Testdb(sq *sql.DB) mvc.Sql {
