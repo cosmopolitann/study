@@ -13,9 +13,186 @@ import (
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
+
+func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
+
+	sugar.Log.Info("Enter ChatListenMsgBlocked Function")
+
+	defer func() {
+		if r := recover(); r != nil {
+			sugar.Log.Error("End ChatListenMsgBlocked panic occurent, err:", r)
+		} else {
+			sugar.Log.Info("End ChatListenMsgBlocked")
+		}
+	}()
+
+	//check token is vaild
+	claim, b := jwt.JwtVeriyToken(token)
+	if !b {
+		return errors.New(" Token is invaild. ")
+	}
+	sugar.Log.Info("claim := ", claim)
+	userId := claim["UserId"].(string)
+
+	var err error
+
+	ipfsTopic, ok := TopicJoin.Load(vo.CHAT_MSG_SWAP_TOPIC)
+	if !ok {
+		ipfsTopic, err = ipfsNode.PubSub.Join(vo.CHAT_MSG_SWAP_TOPIC)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join failed:", err)
+			return fmt.Errorf("PubSub.Join failed: %s", err.Error())
+		}
+
+		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
+	}
+
+	sub, err := ipfsTopic.Subscribe()
+	if err != nil {
+		sugar.Log.Error("subscribe failed")
+		return fmt.Errorf("subscribe failed")
+	}
+
+	var msg vo.ChatListenParams
+
+	ctx := context.Background()
+	for {
+		data, err := sub.Next(ctx)
+		if err != nil {
+			sugar.Log.Error("sub.Next failed:", err)
+			continue
+		}
+
+		msg = vo.ChatListenParams{}
+
+		err = json.Unmarshal(data.Data, &msg)
+		if err != nil {
+			sugar.Log.Error("json.Unmarshal failed1:", err)
+			continue
+		}
+
+		if msg.Type == vo.MSG_TYPE_RECORD {
+
+			var tmp vo.ChatSwapRecordParams
+			json1, err := json.Marshal(msg.Data)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed1:", err)
+				continue
+			}
+
+			err = json.Unmarshal(json1, &tmp)
+			if err != nil {
+				sugar.Log.Error("json.Unmarshal failed2:", err)
+				continue
+			}
+
+			if tmp.ToId != userId { // not me
+				continue
+			}
+
+			sugar.Log.Debugf("record receive: %s\n", data.Data)
+
+			res, err := handleAddRecordMsg(db, tmp)
+			if err != nil {
+				if err != vo.ErrorRowIsExists {
+					sugar.Log.Error("handle add record failed.", err)
+				}
+				continue
+			}
+
+			msg.Data = res
+			jsonStr, err := json.Marshal(msg)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed2.", err)
+				continue
+			}
+			clh.HandlerChat(string(jsonStr))
+
+		} else if msg.Type == vo.MSG_TYPE_NEW {
+
+			var tmp vo.ChatSwapMsgParams
+			json1, err := json.Marshal(msg.Data)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed3:", err)
+				continue
+			}
+
+			err = json.Unmarshal(json1, &tmp)
+			if err != nil {
+				sugar.Log.Error("json.Unmarshal failed3:", err)
+				continue
+			}
+
+			if tmp.ToId != userId { // not me
+				continue
+			}
+
+			sugar.Log.Debugf("message receive: %s\n", data.Data)
+
+			res, err := handleNewMsg(db, tmp)
+			if err != nil {
+				if err != vo.ErrorRowIsExists {
+					sugar.Log.Error("handle add message failed.", err)
+				}
+				continue
+			}
+			msg.Data = res
+			jsonStr, err := json.Marshal(msg)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed4.", err)
+				continue
+			}
+
+			clh.HandlerChat(string(jsonStr))
+
+		} else if msg.Type == vo.MSG_TYPE_WITHDRAW {
+
+			var tmp vo.ChatSwapWithdrawMsgParams
+
+			json1, err := json.Marshal(msg.Data)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed5:", err)
+				continue
+			}
+
+			err = json.Unmarshal(json1, &tmp)
+			if err != nil {
+				sugar.Log.Error("json.Unmarshal failed4:", err)
+				continue
+			}
+
+			if tmp.ToId != userId {
+				// not me
+				continue
+			}
+
+			sugar.Log.Debugf("ChatListenMsg receive: %s\n", data.Data)
+
+			res, err := handleWithdrawMsg(db, tmp)
+			if err != nil {
+				sugar.Log.Error("handle withdraw message failed.", err)
+				continue
+			}
+			msg.Data = res
+			jsonStr, err := json.Marshal(msg)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed6:", err)
+				continue
+			}
+
+			clh.HandlerChat(string(jsonStr))
+
+		} else {
+			sugar.Log.Error("unsupport msg type", err)
+			continue
+		}
+	}
+
+}
 
 func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
 
@@ -25,7 +202,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		if r := recover(); r != nil {
 			sugar.Log.Error("End ChatListenMsg panic occurent, err:", r)
 		} else {
-			sugar.Log.Error("End ChatListenMsg")
+			sugar.Log.Info("End ChatListenMsg")
 		}
 	}()
 
@@ -51,7 +228,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
 	}
 
-	go func() {
+	go func(userId string, ipfsTopic *pubsub.Topic) {
 		sugar.Log.Info("Start ChatListenMsg Goroutine...")
 
 		defer func() {
@@ -171,13 +348,19 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				continue
 			}
 		}
-	}()
+	}(userId, ipfsTopic)
 
 	return nil
 }
 
 // handleAddRecordMsg 创建会话
 func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo, error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			sugar.Log.Error("handleAddRecordMsg panic occurent, err:", r)
+		}
+	}()
 
 	ret := vo.ChatRecordInfo{
 		Id:      msg.Id,
@@ -247,6 +430,12 @@ func handleAddRecordMsg(db *Sql, msg vo.ChatSwapRecordParams) (vo.ChatRecordInfo
 // handleWithdrawMsg 撤销消息
 func handleWithdrawMsg(db *Sql, msg vo.ChatSwapWithdrawMsgParams) (ChatMsg, error) {
 
+	defer func() {
+		if r := recover(); r != nil {
+			sugar.Log.Error("handleWithdrawMsg panic occurent, err:", r)
+		}
+	}()
+
 	ret := ChatMsg{
 		Id:     msg.MsgId,
 		FromId: msg.FromId,
@@ -290,6 +479,12 @@ func handleWithdrawMsg(db *Sql, msg vo.ChatSwapWithdrawMsgParams) (ChatMsg, erro
 
 // handleNewMsg 新增消息
 func handleNewMsg(db *Sql, msg vo.ChatSwapMsgParams) (ChatMsg, error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			sugar.Log.Error("handleNewMsg panic occurent, err:", r)
+		}
+	}()
 
 	var recordId string
 

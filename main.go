@@ -52,13 +52,9 @@ func main() {
 	e := d.Ping()
 	fmt.Println(" Ping is failed,err:=", e)
 
-	ss := Testdb(d)
-	path := "/Users/apple/winter/offline/"
-	ipfsNode, err := myipfs.GetIpfsNode("/Users/apple/winter/D-cloud/test/ipfs")
-	if err != nil {
-		fmt.Println("err:=", err)
-	}
-	ss.OfflineSync(ipfsNode, path)
+	// ss := Testdb(d)
+	// path := "/Users/apple/winter/offline/"
+	// ss.OfflineSync(path)
 
 }
 func Testdb(sq *sql.DB) mvc.Sql {
