@@ -25,6 +25,7 @@ require (
 	github.com/multiformats/go-multiaddr v0.3.2
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/pkg/profile v1.6.0
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
