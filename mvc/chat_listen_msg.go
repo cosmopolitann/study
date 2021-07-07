@@ -187,7 +187,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			clh.HandlerChat(string(jsonStr))
 
 		} else {
-			sugar.Log.Error("unsupport msg type", err)
+			sugar.Log.Error("unsupport msg type: ", msg.Type)
 			continue
 		}
 	}
@@ -344,7 +344,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				clh.HandlerChat(string(jsonStr))
 
 			} else {
-				sugar.Log.Error("unsupport msg type", err)
+				sugar.Log.Error("unsupport msg type: ", msg.Type)
 				continue
 			}
 		}
@@ -448,6 +448,10 @@ func handleWithdrawMsg(db *Sql, msg vo.ChatSwapWithdrawMsgParams) (ChatMsg, erro
 	case bsql.ErrNoRows:
 		return ret, err
 	case nil:
+		if ret.IsWithdraw == 1 {
+			// 已经处理
+			return ret, vo.ErrorRepeatHandle
+		}
 		res, err := db.DB.Exec("UPDATE chat_msg SET is_with_draw = 1 WHERE id = ? and from_id = ?", ret.Id, ret.FromId)
 		if err != nil {
 			return ret, err
