@@ -136,3 +136,9 @@ type ArticleSearchCategoryParams struct {
 	//Token    string   `json:"token"`
 	AccesstoryType int64 `json:"accesstoryType"`
 }
+
+// sync query all data
+
+type QueryAllData struct {
+	Token string `json:"token"` //token
+}
