@@ -1430,9 +1430,7 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 	wg.Wait()
 	// upload file to remote IPFS Node.
 
-	sugar.Log.Info("1111111111")
-
-	cid, err := PostFormDataPublicgatewayFile("/Users/apple/winter/offline/", "querydata")
+	cid, err := PostFormDataPublicgatewayFile(path, "querydata")
 	if err != nil {
 		sugar.Log.Error(" Write update file is failed.Err: ", err)
 		return err, ""
