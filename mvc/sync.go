@@ -1317,7 +1317,7 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 	wg.Add(5)
 	//query cloud_file table.
 	go func() {
-		rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file  where user_id=?", userId)
+		rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file")
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 			// return arrfile, errors.New("查询下载列表信息失败")
@@ -1343,7 +1343,7 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 	}()
 	//query cloud_transfer table.
 	go func() {
-		rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(down_path,'null'),IFNULL(file_type,0),IFNULL(transfer_type,0),IFNULL(upload_parent_id,0),IFNULL(upload_file_id,0) from cloud_transfer where user_id=?", claim["UserId"].(string))
+		rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(down_path,'null'),IFNULL(file_type,0),IFNULL(transfer_type,0),IFNULL(upload_parent_id,0),IFNULL(upload_file_id,0) from cloud_transfer")
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 		}
