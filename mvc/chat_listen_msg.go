@@ -13,7 +13,6 @@ import (
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
-	pubsub "github.com/libp2p/go-libp2p-pubsub"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
@@ -21,13 +20,19 @@ import (
 var listenUserId string
 
 func ChatListenMsgUpdateUser(token string) error {
-	claim, b := jwt.JwtVeriyToken(token)
-	if !b {
-		sugar.Log.Error("JwtVeriyToken failed:" + token)
-		return errors.New(" Token is invaild. ")
+
+	if token == "" {
+		listenUserId = ""
+		sugar.Log.Info("Anonymous User Listen")
+	} else {
+		claim, b := jwt.JwtVeriyToken(token)
+		if !b {
+			sugar.Log.Error("JwtVeriyToken failed:" + token)
+			return errors.New(" Token is invaild. ")
+		}
+		listenUserId = claim["UserId"].(string)
+		sugar.Log.Infof("Named User Listen %s", claim["UserId"].(string))
 	}
-	sugar.Log.Info("update token claim := ", claim)
-	listenUserId = claim["UserId"].(string)
 	return nil
 }
 
@@ -43,14 +48,18 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 		}
 	}()
 
-	//check token is vaild
-	claim, b := jwt.JwtVeriyToken(token)
-	if !b {
-		sugar.Log.Error("JwtVeriyToken failed:" + token)
-		return errors.New(" Token is invaild. ")
+	if token == "" {
+		listenUserId = ""
+		sugar.Log.Info("Anonymous User Listen")
+	} else {
+		claim, b := jwt.JwtVeriyToken(token)
+		if !b {
+			sugar.Log.Error("JwtVeriyToken failed:" + token)
+			return errors.New(" Token is invaild. ")
+		}
+		listenUserId = claim["UserId"].(string)
+		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
-	sugar.Log.Info("claim := ", claim)
-	listenUserId = claim["UserId"].(string)
 
 	var err error
 
@@ -78,6 +87,11 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 		data, err := sub.Next(ctx)
 		if err != nil {
 			sugar.Log.Error("sub.Next failed:", err)
+			continue
+		}
+
+		if listenUserId == "" {
+			sugar.Log.Info("listenUserId empty continue")
 			continue
 		}
 
@@ -220,14 +234,18 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		}
 	}()
 
-	//check token is vaild
-	claim, b := jwt.JwtVeriyToken(token)
-	if !b {
-		sugar.Log.Error("JwtVeriyToken failed:" + token)
-		return errors.New(" Token is invaild. ")
+	if token == "" {
+		listenUserId = ""
+		sugar.Log.Info("Anonymous User Listen")
+	} else {
+		claim, b := jwt.JwtVeriyToken(token)
+		if !b {
+			sugar.Log.Error("JwtVeriyToken failed:" + token)
+			return errors.New(" Token is invaild. ")
+		}
+		listenUserId = claim["UserId"].(string)
+		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
-	sugar.Log.Info("claim := ", claim)
-	listenUserId = claim["UserId"].(string)
 
 	var err error
 	ctx := context.Background()
@@ -243,7 +261,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
 	}
 
-	go func(listenUserId string, ipfsTopic *pubsub.Topic) {
+	go func() {
 		sugar.Log.Info("Start ChatListenMsg Goroutine...")
 
 		defer func() {
@@ -277,6 +295,11 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 			if err != nil {
 				sugar.Log.Error("ChatListenMsg subscribe failed2.", err)
 				return
+			}
+
+			if listenUserId == "" {
+				sugar.Log.Info("listenUserId empty continue")
+				continue
 			}
 
 			msg = vo.ChatListenParams{}
@@ -363,7 +386,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				continue
 			}
 		}
-	}(listenUserId, ipfsTopic)
+	}()
 
 	return nil
 }
