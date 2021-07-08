@@ -21,8 +21,8 @@ type LoginClaims struct {
 }
 
 const (
-	// tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
-	tokenStr = "xiaolongyunpan" //houxu fengzhuang dao nacos
+	tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
+	// tokenStr = "xiaolongyunpan" //houxu fengzhuang dao nacos
 
 	// xiaolongyunpan
 )
@@ -35,7 +35,7 @@ func GenerateToken(userId string, expireDuration int64) (string, error) {
 	if expireDuration != -1 {
 		calim.StandardClaims = jwt.StandardClaims{
 			ExpiresAt: time.Now().Unix() + expireDuration,
-			Issuer:"10001",
+			Issuer:    "10001",
 		}
 	}
 
