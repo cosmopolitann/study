@@ -1275,7 +1275,12 @@ func PostFormDataPublicgatewayFile(path string, name string) (string, error) {
 
 // query all data from  chat_msg ,cloud_file,cloud_transfer,chat_records.
 
-func QueryAllData(value string, db *Sql, path string) (error, string) {
+func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
+	defer func() {
+		if err := recover(); err != nil {
+			sugar.Log.Errorf("This is recover info:", err)
+		}
+	}()
 	sugar.Log.Info("~~~~ Start Query all data  ~~~~ ")
 	var t vo.QueryAllData
 	wg := sync.WaitGroup{}
@@ -1293,15 +1298,14 @@ func QueryAllData(value string, db *Sql, path string) (error, string) {
 	}
 	sugar.Log.Info("claim := ", claim)
 
-	path = "/Users/apple/winter/offline/querydata"
 	sugar.Log.Info("open file path:= ", path)
-	f1, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //open file
+	f1, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //open file
 	if err != nil {
 		sugar.Log.Errorf(" Open %s file is failed.Err:", err)
 		return err, ""
 	}
 
-	wg.Add(4)
+	wg.Add(5)
 	//query cloud_file table.
 	go func() {
 		rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file  where user_id=?", userId)
@@ -1373,6 +1377,8 @@ func QueryAllData(value string, db *Sql, path string) (error, string) {
 				sugar.Log.Error(" Write update file is failed.Err: ", err)
 			}
 		}
+		wg.Done()
+
 	}()
 	//query chat_record table.
 	go func() {
@@ -1393,9 +1399,39 @@ func QueryAllData(value string, db *Sql, path string) (error, string) {
 				sugar.Log.Error(" Write update file is failed.Err: ", err)
 			}
 		}
+		wg.Done()
+
 	}()
+	// query sys_user table.
+	go func() {
+		rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user")
+		if err != nil {
+			sugar.Log.Error("Query data is failed.Err is ", err)
+		}
+		var user SysUser
+
+		for rows.Next() {
+			err = rows.Scan(&user.Id, &user.PeerId, &user.Name, &user.Phone, &user.Sex, &user.Ptime, &user.Utime, &user.NickName, &user.Img)
+			if err != nil {
+				sugar.Log.Error("Query scan data is failed.The err is ", err)
+			}
+			sugar.Log.Info("Query a entire data is ", user)
+		}
+		//
+		sql := fmt.Sprintf("INSERT OR REPLACE INTO sys_user (id, peer_id, name, phone, sex, ptime,utime,nickname) VALUES ('%s', '%s', '%s', '%s',%d,%d,%d,'%s')\n", user.Id, user.PeerId, user.Name, user.Phone, user.Sex, user.Ptime, user.Utime, user.NickName)
+		_, err = f1.WriteString(sql)
+		if err != nil {
+			sugar.Log.Error(" Write update file is failed.Err: ", err)
+		}
+		wg.Done()
+
+	}()
+
 	wg.Wait()
 	// upload file to remote IPFS Node.
+
+	sugar.Log.Info("1111111111")
+
 	cid, err := PostFormDataPublicgatewayFile("/Users/apple/winter/offline/", "querydata")
 	if err != nil {
 		sugar.Log.Error(" Write update file is failed.Err: ", err)
@@ -1403,11 +1439,81 @@ func QueryAllData(value string, db *Sql, path string) (error, string) {
 	}
 	sugar.Log.Info(" Cid := ", cid)
 	//delete querydata file.
-	err = RemoveCidPathFile(path)
-	if err != nil {
-		sugar.Log.Error(" Write update file is failed.Err: ", err)
-		return err, ""
-	}
+	// err = RemoveCidPathFile(path)
+	// if err != nil {
+	// 	sugar.Log.Error(" Write update file is failed.Err: ", err)
+	// 	return err, ""
+	// }
 	sugar.Log.Info("~~~~ Query all data  End ~~~~ ")
 	return nil, cid
+}
+
+func SyncDatabaseMigration(token, path, cid string, db *Sql) error {
+	//
+	sugar.Log.Info("~~~~ Start Query all data  ~~~~ ")
+	var t vo.DatabaseMigrationParams
+	err := json.Unmarshal([]byte(token), &t)
+	if err != nil {
+		sugar.Log.Error("Marshal is failed.Err is ", err)
+	}
+	sugar.Log.Info("Marshal data is  ", t)
+	//check token is vaild.
+	claim, b := jwt.JwtVeriyToken(t.Token)
+	userId := claim["UserId"]
+	sugar.Log.Info("userId := ", userId)
+	if !b {
+		return errors.New(" Token is invaild. ")
+	}
+	sugar.Log.Info("claim := ", claim)
+
+	shell := shell.NewShell("127.0.0.1:5001")
+	err = shell.Get(cid, path)
+	if err != nil {
+		sugar.Log.Error(" Ipfs get cid hash is failed.Err:", err)
+		return err
+	}
+	// write file.
+	insetFile := path + cid
+	f1, err := os.Open(insetFile)
+	if err != nil {
+		sugar.Log.Error(" Open cidPath is failed.Err:", err)
+		return err
+
+	}
+	defer f1.Close()
+	rd1 := bufio.NewReader(f1)
+	for {
+		sugar.Log.Info(" Start loop read cidPath file by line util end. ")
+		line, err := rd1.ReadString('\n') // by '\n' as end sign of closure.
+		if err != nil || io.EOF == err {
+			sugar.Log.Info(" --- break ----")
+			sugar.Log.Info(" ---ReadString is failed.Err:", err)
+			break
+		}
+		sugar.Log.Info(" Data for each line:", line)
+		sugar.Log.Infof(" Data type for each line is %T .\n", line)
+		// exec sql read cidPath file by line.
+		sugar.Log.Info(" Start excute sql  by read cidpath file content. ", line)
+		stmt, err := db.DB.Prepare(string(line))
+		if err != nil {
+			sugar.Log.Error("Insert data into table is failed.", err)
+			continue
+		}
+		res, err := stmt.Exec()
+		if err != nil {
+			sugar.Log.Error("Insert data into  is Failed.", err)
+			continue
+		}
+		l, err := res.RowsAffected()
+		if l == 0 {
+			sugar.Log.Error("Excute sql is failed.Err:", err)
+			continue
+		}
+	}
+	//  delete file.
+	err = RemoveCidPathFile(insetFile)
+	if err != nil {
+		return err
+	}
+	return nil
 }

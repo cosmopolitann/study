@@ -142,3 +142,6 @@ type ArticleSearchCategoryParams struct {
 type QueryAllData struct {
 	Token string `json:"token"` //token
 }
+type DatabaseMigrationParams struct {
+	Token string `json:"token"` //token
+}
