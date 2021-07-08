@@ -21,7 +21,7 @@ type LoginClaims struct {
 }
 
 const (
-	tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
+	tokenStr = "xiaolongyunpan" //houxu fengzhuang dao nacos
 )
 
 func GenerateToken(userId string, expireDuration int64) (string, error) {
@@ -37,6 +37,9 @@ func GenerateToken(userId string, expireDuration int64) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, calim)
+	//base 64
+
+	
 	strBase, _ := base64.URLEncoding.DecodeString(tokenStr)
 
 	return token.SignedString(strBase)
@@ -55,6 +58,8 @@ func TestJwt(t *testing.T) {
 	if err != nil {
 		t.Log("jwt is failed.")
 	}
+	//  
+
 	t.Log("Token = ", token)
 
 }

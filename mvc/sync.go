@@ -1451,23 +1451,23 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 func SyncDatabaseMigration(token, path, cid string, db *Sql) error {
 	//
 	sugar.Log.Info("~~~~ Start Query all data  ~~~~ ")
-	var t vo.DatabaseMigrationParams
-	err := json.Unmarshal([]byte(token), &t)
-	if err != nil {
-		sugar.Log.Error("Marshal is failed.Err is ", err)
-	}
-	sugar.Log.Info("Marshal data is  ", t)
-	//check token is vaild.
-	claim, b := jwt.JwtVeriyToken(t.Token)
-	userId := claim["UserId"]
-	sugar.Log.Info("userId := ", userId)
-	if !b {
-		return errors.New(" Token is invaild. ")
-	}
-	sugar.Log.Info("claim := ", claim)
+	// var t vo.DatabaseMigrationParams
+	// err := json.Unmarshal([]byte(token), &t)
+	// if err != nil {
+	// 	sugar.Log.Error("Marshal is failed.Err is ", err)
+	// }
+	// sugar.Log.Info("Marshal data is  ", t)
+	// //check token is vaild.
+	// claim, b := jwt.JwtVeriyToken(t.Token)
+	// userId := claim["UserId"]
+	// sugar.Log.Info("userId := ", userId)
+	// if !b {
+	// 	return errors.New(" Token is invaild. ")
+	// }
+	// sugar.Log.Info("claim := ", claim)
 
 	shell := shell.NewShell("127.0.0.1:5001")
-	err = shell.Get(cid, path)
+	err := shell.Get(cid, path)
 	if err != nil {
 		sugar.Log.Error(" Ipfs get cid hash is failed.Err:", err)
 		return err

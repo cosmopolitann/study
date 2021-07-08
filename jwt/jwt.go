@@ -2,10 +2,11 @@ package jwt
 
 import (
 	"encoding/base64"
-	"github.com/dgrijalva/jwt-go"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 const (
@@ -20,7 +21,10 @@ type LoginClaims struct {
 }
 
 const (
-	tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
+	// tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
+	tokenStr = "xiaolongyunpan" //houxu fengzhuang dao nacos
+
+	// xiaolongyunpan
 )
 
 func GenerateToken(userId string, expireDuration int64) (string, error) {
@@ -31,10 +35,13 @@ func GenerateToken(userId string, expireDuration int64) (string, error) {
 	if expireDuration != -1 {
 		calim.StandardClaims = jwt.StandardClaims{
 			ExpiresAt: time.Now().Unix() + expireDuration,
+			Issuer:"10001",
 		}
 	}
 
+	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, calim)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, calim)
+
 	strBase, _ := base64.URLEncoding.DecodeString(tokenStr)
 	return token.SignedString(strBase)
 }
