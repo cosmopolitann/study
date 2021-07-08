@@ -2,10 +2,11 @@ package jwt
 
 import (
 	"encoding/base64"
-	"github.com/dgrijalva/jwt-go"
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 const (
@@ -27,7 +28,7 @@ func TestParseJwt(t *testing.T) {
 
 }
 func GetClaim(bareStr string) (jwt.MapClaims, string) {
-	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIxMjMiLCJwZWVySWQiOiJwZXJyIiwibmFtZSI6Im5hbWUiLCJwaG9uZSI6InBob25lIiwic2V4IjoxLCJuaWNrTmFtZSI6Im5pY2siLCJpbWciOiJpbWciLCJleHAiOjE2MjU3NTAxMzd9.I6J8fE1SbSiNiyd-WIiSawRFQ_tGA9PEt0jHNKyxVxo"
+	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIzMzMxODE3NTM5ODU3OTYwOTYiLCJjdGltZSI6MTYyNTczNzUyMDM3MiwiaWF0IjoxNjI1NzM3NTIwfQ.jAn9e0GIZbez5ErKH0EMZWfortPsXABb9lYwqhQwg"
 	bareArr := strings.Split(bareStr, " ")
 	errFlag := TOKEN_ERR_NONE
 	if len(bareArr) != 2 {
