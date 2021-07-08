@@ -90,3 +90,15 @@ type AddCid struct {
 	Hash string `json:"Hash"`
 	Size string `json:"Size"`
 }
+type JwtSysUser struct {
+	Id       string `json:"id"`       //id
+	PeerId   string `json:"peerId"`   //节点id
+	Name     string `json:"name"`     //用户名字
+	Phone    string `json:"phone"`    //手机号
+	Sex      int64  `json:"sex"`      //性别 0 未知  1 男  2 女
+	NickName string `json:"nickName"` //昵称
+	Ptime    int64  `json:"-"`        //时间
+	Utime    int64  `json:"-"`        //更新时间
+	Img      string `json:"img"`      //头像
+
+}

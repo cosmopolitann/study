@@ -22,7 +22,7 @@ func TestQueryAllData(t *testing.T) {
 	e := d.Ping()
 	fmt.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
-	value := `{"Token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI"}`
+	value := `{"Token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIxMjMiLCJwZWVySWQiOiJwZXJyIiwibmFtZSI6Im5hbWUiLCJwaG9uZSI6InBob25lIiwic2V4IjoxLCJuaWNrTmFtZSI6Im5pY2siLCJpbWciOiJpbWciLCJleHAiOjE2MjU3NTAxMzd9.I6J8fE1SbSiNiyd-WIiSawRFQ_tGA9PEt0jHNKyxVxo"}`
 	path := "/Users/apple/winter/offline/querydata"
 
 	resp := ss.SyncQueryAllData(value, path)

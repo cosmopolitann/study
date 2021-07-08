@@ -16,7 +16,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
 	shell "github.com/ipfs/go-ipfs-api"
@@ -1282,21 +1281,31 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 		}
 	}()
 	sugar.Log.Info("~~~~ Start Query all data  ~~~~ ")
-	var t vo.QueryAllData
+
 	wg := sync.WaitGroup{}
-	err := json.Unmarshal([]byte(value), &t)
-	if err != nil {
-		sugar.Log.Error("Marshal is failed.Err is ", err)
-	}
-	sugar.Log.Info("Marshal data is  ", t)
-	//check token is vaild.
-	claim, b := jwt.JwtVeriyToken(t.Token)
-	userId := claim["UserId"]
-	sugar.Log.Info("userId := ", userId)
-	if !b {
-		return errors.New(" Token is invaild. "), ""
-	}
-	sugar.Log.Info("claim := ", claim)
+
+	// //check token is vaild.
+	// var t vo.QueryAllData
+	// err := json.Unmarshal([]byte(value), &t)
+	// if err != nil {
+	// 	sugar.Log.Error("Marshal is failed.Err is ", err)
+	// }
+	// sugar.Log.Info("解析数据:", t)
+	// if err != nil {
+	// 	sugar.Log.Error("Decode is failed.", err)
+	// 	return errors.New("decode is failed"), ""
+	// }
+
+	// //token verify
+	// claim, b := jwt.JwtVeriyToken(t.Token)
+	// sugar.Log.Info("-------    claim -----", claim)
+
+	// if !b {
+	// 	return errors.New(" token is failed"), ""
+	// }
+
+	// userId := claim["UserId"]
+	// sugar.Log.Info("-------    用户名", userId)
 
 	sugar.Log.Info("open file path:= ", path)
 	f1, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //open file

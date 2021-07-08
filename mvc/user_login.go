@@ -25,7 +25,9 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 	if user.Id == "" {
 		return resp, errors.New("请先注册用户")
 	}
-	token, err := jwt.GenerateToken(user.Id, -1)
+	//
+
+	token, err := jwt.GenerateToken(user.Id, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Sex, user.Ptime, user.Utime, -1)
 	if err != nil {
 		return resp, errors.New("生成token失败，请重新登录")
 	}
@@ -38,7 +40,7 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 }
 
 func GetUser(db *Sql, userid string) vo.RespSysUser {
-	fmt.Println("获得用户,id:",userid)
+	fmt.Println("获得用户,id:", userid)
 	var s vo.RespSysUser
 	rows, err := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user as a where id = ? ", userid)
 	if err != nil {

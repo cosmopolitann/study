@@ -16,7 +16,15 @@ const (
 )
 
 type LoginClaims struct {
-	UserId string
+	UserId   string
+	PeerId   string `json:"peerId"`   //节点id
+	Name     string `json:"name"`     //用户名字
+	Phone    string `json:"phone"`    //手机号
+	Sex      int64  `json:"sex"`      //性别 0 未知  1 男  2 女
+	NickName string `json:"nickName"` //昵称
+	Ptime    int64  `json:"-"`        //时间
+	Utime    int64  `json:"-"`        //更新时间
+	Img      string `json:"img"`      //头像
 	jwt.StandardClaims
 }
 
@@ -27,9 +35,19 @@ const (
 	// xiaolongyunpan
 )
 
-func GenerateToken(userId string, expireDuration int64) (string, error) {
+func GenerateToken(id, peerid, name, phone, nick, img string, sex, pt, ut int64, expireDuration int64) (string, error) {
+
+	// func GenerateToken(userId string, expireDuration int64) (string, error) {
 	calim := LoginClaims{
-		UserId:         userId,
+		UserId: id,
+		// PeerId:         peerid,
+		// Name:           name,
+		// Phone:          phone,
+		// Sex:            sex,
+		// NickName:       nick,
+		// Ptime:          pt,
+		// Utime:          ut,
+		// Img:            img,
 		StandardClaims: jwt.StandardClaims{},
 	}
 	if expireDuration != -1 {
