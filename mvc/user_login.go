@@ -25,9 +25,7 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 	if user.Id == "" {
 		return resp, errors.New("请先注册用户")
 	}
-	//
-
-	token, err := jwt.GenerateToken(user.Id, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Sex, user.Ptime, user.Utime, -1)
+	token, err := jwt.GenerateToken(user.Id, -1)
 	if err != nil {
 		return resp, errors.New("生成token失败，请重新登录")
 	}
