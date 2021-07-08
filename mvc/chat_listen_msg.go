@@ -13,10 +13,28 @@ import (
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
-	pubsub "github.com/libp2p/go-libp2p-pubsub"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
+
+var listenUserId string
+
+func ChatListenMsgUpdateUser(token string) error {
+
+	if token == "" {
+		listenUserId = ""
+		sugar.Log.Info("Anonymous User Listen")
+	} else {
+		claim, b := jwt.JwtVeriyToken(token)
+		if !b {
+			sugar.Log.Error("JwtVeriyToken failed:" + token)
+			return errors.New(" Token is invaild. ")
+		}
+		listenUserId = claim["UserId"].(string)
+		sugar.Log.Infof("Named User Listen %s", claim["UserId"].(string))
+	}
+	return nil
+}
 
 func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
 
@@ -26,17 +44,22 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 		if r := recover(); r != nil {
 			sugar.Log.Error("End ChatListenMsgBlocked panic occurent, err:", r)
 		} else {
-			sugar.Log.Info("End ChatListenMsgBlocked")
+			sugar.Log.Error("End ChatListenMsgBlocked")
 		}
 	}()
 
-	//check token is vaild
-	claim, b := jwt.JwtVeriyToken(token)
-	if !b {
-		return errors.New(" Token is invaild. ")
+	if token == "" {
+		listenUserId = ""
+		sugar.Log.Info("Anonymous User Listen")
+	} else {
+		claim, b := jwt.JwtVeriyToken(token)
+		if !b {
+			sugar.Log.Error("JwtVeriyToken failed:" + token)
+			return errors.New(" Token is invaild. ")
+		}
+		listenUserId = claim["UserId"].(string)
+		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
-	sugar.Log.Info("claim := ", claim)
-	userId := claim["UserId"].(string)
 
 	var err error
 
@@ -67,6 +90,11 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			continue
 		}
 
+		if listenUserId == "" {
+			sugar.Log.Info("listenUserId empty continue")
+			continue
+		}
+
 		msg = vo.ChatListenParams{}
 
 		err = json.Unmarshal(data.Data, &msg)
@@ -90,7 +118,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 				continue
 			}
 
-			if tmp.ToId != userId { // not me
+			if tmp.ToId != listenUserId { // not me
 				continue
 			}
 
@@ -127,7 +155,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 				continue
 			}
 
-			if tmp.ToId != userId { // not me
+			if tmp.ToId != listenUserId { // not me
 				continue
 			}
 
@@ -165,7 +193,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 				continue
 			}
 
-			if tmp.ToId != userId {
+			if tmp.ToId != listenUserId {
 				// not me
 				continue
 			}
@@ -206,13 +234,18 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		}
 	}()
 
-	//check token is vaild
-	claim, b := jwt.JwtVeriyToken(token)
-	if !b {
-		return errors.New(" Token is invaild. ")
+	if token == "" {
+		listenUserId = ""
+		sugar.Log.Info("Anonymous User Listen")
+	} else {
+		claim, b := jwt.JwtVeriyToken(token)
+		if !b {
+			sugar.Log.Error("JwtVeriyToken failed:" + token)
+			return errors.New(" Token is invaild. ")
+		}
+		listenUserId = claim["UserId"].(string)
+		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
-	sugar.Log.Info("claim := ", claim)
-	userId := claim["UserId"].(string)
 
 	var err error
 	ctx := context.Background()
@@ -228,7 +261,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
 	}
 
-	go func(userId string, ipfsTopic *pubsub.Topic) {
+	go func() {
 		sugar.Log.Info("Start ChatListenMsg Goroutine...")
 
 		defer func() {
@@ -264,6 +297,11 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				return
 			}
 
+			if listenUserId == "" {
+				sugar.Log.Info("listenUserId empty continue")
+				continue
+			}
+
 			msg = vo.ChatListenParams{}
 
 			err = json.Unmarshal(data.Data, &msg)
@@ -278,7 +316,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				json1, _ := json.Marshal(msg.Data)
 				json.Unmarshal(json1, &tmp)
 
-				if tmp.ToId != userId {
+				if tmp.ToId != listenUserId {
 					// not me
 					continue
 				}
@@ -303,7 +341,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				json1, _ := json.Marshal(msg.Data)
 				json.Unmarshal(json1, &tmp)
 
-				if tmp.ToId != userId {
+				if tmp.ToId != listenUserId {
 					// not me
 					continue
 				}
@@ -327,7 +365,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				json1, _ := json.Marshal(msg.Data)
 				json.Unmarshal(json1, &tmp)
 
-				if tmp.ToId != userId {
+				if tmp.ToId != listenUserId {
 					// not me
 					continue
 				}
@@ -348,7 +386,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 				continue
 			}
 		}
-	}(userId, ipfsTopic)
+	}()
 
 	return nil
 }

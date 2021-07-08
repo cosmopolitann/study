@@ -629,6 +629,14 @@ func (db *Sql) ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, token string, c
 	return err
 }
 
+// ChatListenMsgUpdateUser  更新当前用户
+func (db *Sql) ChatListenMsgUpdateUser(token string) error {
+
+	err := ChatListenMsgUpdateUser(token)
+
+	return err
+}
+
 /*
 ------------------------------------------------------
 |                    Chat  End                       |
