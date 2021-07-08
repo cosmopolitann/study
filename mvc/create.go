@@ -728,6 +728,18 @@ func (db *Sql) SyncData(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 	return vo.ResponseSuccess()
 }
 
+// 同步 聊天 用户 数据
+
+func (db *Sql) QueryAllData(dInfo string, path string) string {
+	sugar.Log.Info("----   Start  QueryAll data     ------")
+
+	e, data := QueryAllData(dInfo, db, path)
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+	return vo.ResponseSuccess(data)
+}
+
 //---------------------------------------------
 
 /*

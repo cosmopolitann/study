@@ -27,7 +27,7 @@ func TestAddFile(t *testing.T) {
 	ss := Testdb(d)
 	//插入数据
 	var fi = vo.CloudAddFileParams{
-		Id:       "409054047794892800",
+		Id:       "411580511585046528",
 		FileName: "我爱中国",
 		ParentId: "0",
 		FileCid:  "Qmcid12312",

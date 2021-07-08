@@ -57,7 +57,7 @@ func InitDB(path string) *sql.DB {
 	checkErr(err)
 	sugar.Log.Info("Open Sqlite3 is ok.")
 	sugar.Log.Info("Db value is ", db)
-
+	
 	return db
 }
 func checkErr(err error) {
