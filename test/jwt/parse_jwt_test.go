@@ -27,7 +27,7 @@ func TestParseJwt(t *testing.T) {
 
 }
 func GetClaim(bareStr string) (jwt.MapClaims, string) {
-	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsIm5hbWUiOiIxMjMiLCJpYXQiOjE2MjU3NDQxNzR9.yELtKWv1oONjbCTP33NU0n-EQUYSqreI3sefHxBveX0"
+	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIxMDAwMSIsImV4cCI6MTYyNTc0ODM0OH0.YyElfrbh_A1jUg5XzPWbF1HPvuYVwCl77h-Eoh7o05s"
 	bareArr := strings.Split(bareStr, " ")
 	errFlag := TOKEN_ERR_NONE
 	if len(bareArr) != 2 {

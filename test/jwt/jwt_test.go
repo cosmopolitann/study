@@ -2,9 +2,10 @@ package jwt
 
 import (
 	"encoding/base64"
-	"github.com/dgrijalva/jwt-go"
 	"testing"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 /*
@@ -21,7 +22,7 @@ type LoginClaims struct {
 }
 
 const (
-	tokenStr = "xiaolongyunpan" //houxu fengzhuang dao nacos
+	tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
 )
 
 func GenerateToken(userId string, expireDuration int64) (string, error) {
@@ -38,8 +39,9 @@ func GenerateToken(userId string, expireDuration int64) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, calim)
 	//base 64
+	// strbytes := []byte(tokenStr)
+	// encoded := base64.StdEncoding.EncodeToString(strbytes)
 
-	
 	strBase, _ := base64.URLEncoding.DecodeString(tokenStr)
 
 	return token.SignedString(strBase)
@@ -58,7 +60,7 @@ func TestJwt(t *testing.T) {
 	if err != nil {
 		t.Log("jwt is failed.")
 	}
-	//  
+	//
 
 	t.Log("Token = ", token)
 

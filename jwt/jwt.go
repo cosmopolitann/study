@@ -35,7 +35,6 @@ func GenerateToken(userId string, expireDuration int64) (string, error) {
 	if expireDuration != -1 {
 		calim.StandardClaims = jwt.StandardClaims{
 			ExpiresAt: time.Now().Unix() + expireDuration,
-			Issuer:    "10001",
 		}
 	}
 
