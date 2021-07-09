@@ -1232,11 +1232,11 @@ func PostFormDataPublicgatewayFile(path string, name string) (string, error) {
 	}
 	bodyWrite.Close() //will closed, will take w.w.boundary copy => w.writer
 	// create requet.
-	sugar.Log.Info(" request url=", "http://47.108.183.230:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32")
+	sugar.Log.Info(" request url=", "http://182.150.116.150:15001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32")
 
 	contentType := bodyWrite.FormDataContentType()
-	// req, err := http.NewRequest(http.MethodPost, "http://47.108.183.230:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
-	req, err := http.NewRequest(http.MethodPost, "http://47.108.183.230:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
+	// req, err := http.NewRequest(http.MethodPost, "http://182.150.116.150:15001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
+	req, err := http.NewRequest(http.MethodPost, "http://182.150.116.150:15001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
 
 	sugar.Log.Info("  request contentType =", contentType)
 	if err != nil {
