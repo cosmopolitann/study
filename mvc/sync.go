@@ -1298,7 +1298,8 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 	// sugar.Log.Info("claim := ", claim)
 
 	sugar.Log.Info("open file path:= ", path)
-	f1, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //open file
+
+	f1, err := os.OpenFile(path+"querydata", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //open file
 	if err != nil {
 		sugar.Log.Errorf(" Open %s file is failed.Err:", err)
 		return err, ""
