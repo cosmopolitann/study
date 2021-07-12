@@ -2,8 +2,9 @@ package article
 
 import (
 	"database/sql"
-	"github.com/cosmopolitann/clouddb/sugar"
 	"testing"
+
+	"github.com/cosmopolitann/clouddb/sugar"
 )
 
 func TestArticleRecommend(t *testing.T) {
@@ -11,7 +12,7 @@ func TestArticleRecommend(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong.db")
 	if err != nil {
 		panic(err)
 	}
@@ -22,11 +23,45 @@ func TestArticleRecommend(t *testing.T) {
 	ss := Testdb(d)
 	// request json  params
 	// test 1
-	value := `{"pageSize":10,"pageNum":1}
+	value := `{"pageSize":10,"pageNum":2}
 `
 	t.Log("request value :=", value)
 	resp := ss.ArticleRecommend(value)
+	resp1 := ss.ArticleRecommendLimitTenData(value)
+
 	t.Log("result:=", resp)
+	t.Log("result1:=", resp1)
+
+	//	// test 2
+	//	value2:=`{"id":"411285804581654528"}
+	//`
+	//	t.Log("request value :=",value2)
+	//	resp2:= ss.ArticlePlayAdd(value2)
+	//	t.Log("result:=",resp2)
+
+}
+func TestArticleRecommendLimit(t *testing.T) {
+	sugar.InitLogger()
+	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
+	//The path is default.
+	sugar.Log.Info("Start Open Sqlite3 Database.")
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong.db")
+	if err != nil {
+		panic(err)
+	}
+	sugar.Log.Info("Open Sqlite3 is ok.")
+	sugar.Log.Info("Db value is ", d)
+	e := d.Ping()
+	sugar.Log.Info(" Ping is failed,err:= ", e)
+	ss := Testdb(d)
+	// request json  params
+	// test 1
+	value := `{"pageSize":10,"pageNum":2}
+`
+	t.Log("request value :=", value)
+	resp1 := ss.ArticleRecommendLimitTenData(value)
+
+	t.Log("result1:=", resp1)
 
 	//	// test 2
 	//	value2:=`{"id":"411285804581654528"}

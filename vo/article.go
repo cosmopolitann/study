@@ -36,6 +36,7 @@ type ArticleResp struct {
 	NickName       string `json:"nickName"`
 	LikeNum        int64  `json:"likeNum"`
 	Islike         int64  `json:"isLike"`
+	Img            string `json:"img"`
 }
 
 //1文本 2图片 3视频 4音乐
@@ -71,7 +72,12 @@ type ArticleRecommendParams struct {
 	PageNum  int64 `json:"pageNum"`
 	//int64 `json:"accesstoryType"`
 }
-
+//  文章推荐 2
+type ArticleRecommendLimitTenParams struct {
+	PageSize int64 `json:"pageSize"`
+	PageNum  int64 `json:"pageNum"`
+	//int64 `json:"accesstoryType"`
+}
 // article play add
 
 type ArticlePlayAddParams struct {
