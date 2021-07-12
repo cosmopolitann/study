@@ -13,6 +13,7 @@ import (
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
@@ -34,6 +35,32 @@ func ChatListenMsgUpdateUser(token string) error {
 		sugar.Log.Infof("Named User Listen %s", claim["UserId"].(string))
 	}
 	return nil
+}
+
+func GetIpfsTopic(ipfsNode *ipfsCore.IpfsNode, topicJoin *vo.TopicJoinMap, topic string) (*pubsub.Topic, error) {
+
+	var err error
+
+	if ipfsNode == nil {
+		return nil, errors.New("ipfsCore.IpfsNode is nil")
+	}
+
+	if topicJoin == nil {
+		return nil, errors.New("TopicJoin is nil")
+	}
+
+	ipfsTopic, ok := TopicJoin.Load(topic)
+	if !ok || ipfsTopic == nil {
+		ipfsTopic, err = ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join failed:", err)
+			return nil, fmt.Errorf("PubSub.Join failed: %s", err.Error())
+		}
+
+		TopicJoin.Store(topic, ipfsTopic)
+	}
+
+	return ipfsTopic, nil
 }
 
 func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
@@ -63,15 +90,10 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 
 	var err error
 
-	ipfsTopic, ok := TopicJoin.Load(vo.CHAT_MSG_SWAP_TOPIC)
-	if !ok {
-		ipfsTopic, err = ipfsNode.PubSub.Join(vo.CHAT_MSG_SWAP_TOPIC)
-		if err != nil {
-			sugar.Log.Error("PubSub.Join failed:", err)
-			return fmt.Errorf("PubSub.Join failed: %s", err.Error())
-		}
-
-		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
+	ipfsTopic, err := GetIpfsTopic(ipfsNode, TopicJoin, vo.CHAT_MSG_SWAP_TOPIC)
+	if err != nil {
+		sugar.Log.Error("GetIpfsTopic failed")
+		return fmt.Errorf("GetIpfsTopic failed")
 	}
 
 	sub, err := ipfsTopic.Subscribe()
@@ -84,10 +106,20 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 
 	ctx := context.Background()
 	for {
+		if sub == nil {
+			sugar.Log.Error("*pubsub.Subscription is nil, i will return")
+			return fmt.Errorf("sub is nil")
+		}
 		data, err := sub.Next(ctx)
 		if err != nil {
 			sugar.Log.Error("sub.Next failed:", err)
+			time.Sleep(200 * time.Millisecond)
 			continue
+		}
+
+		if data == nil {
+			sugar.Log.Error("*pubsub.Message is nil, i will return")
+			return fmt.Errorf("sub2 is nil")
 		}
 
 		if listenUserId == "" {
