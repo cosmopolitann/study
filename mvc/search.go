@@ -78,10 +78,10 @@ func Search(db *Sql, value string) (data []File, e error) {
 
 // 文章查询
 
-func ARticleSearch(db *Sql, value string) (data []Article, e error) {
+func ARticleSearch(db *Sql, value string) (data []ArticleAboutMeResp, e error) {
 	sugar.Log.Info("~~~ Start   ARticleSearch  data  ~~~~")
 	var s vo.ArticleSearchParams
-	var arrfile []Article
+	var arrfile []ArticleAboutMeResp
 	//marshal params.
 	err := json.Unmarshal([]byte(value), &s)
 	if err != nil {
@@ -91,15 +91,18 @@ func ARticleSearch(db *Sql, value string) (data []Article, e error) {
 	r := (s.PageNum - 1) * 3
 	str := strconv.FormatInt(r, 10)
 	pageSize := strconv.FormatInt(s.PageSize, 10)
-	sql := "select id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) from article where title like'%" + s.Title + "%' limit " + str + "," + pageSize
+	// sql := "select id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) from article where title like'%" + s.Title + "%' limit " + str + "," + pageSize
+	//select IFNULL(b.id,''),IFNULL(b.peer_id,''),IFNULL(b.name,''),IFNULL(b.phone,''),IFNULL(b.sex,0),IFNULL(b.ptime,strftime( '%s', 'now')),IFNULL(b.utime,strftime( '%s', 'now')), a.id,IFNULL(a.user_id,''),IFNULL(a.accesstory,''),IFNULL(a.accesstory_type,0),IFNULL(a.text,''),IFNULL(a.tag,''),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,''),IFNULL(a.thumbnail,''),IFNULL(a.file_name,''),IFNULL(a.file_size,0) from article as a LEFT JOIN sys_user as b on a.user_id=b.id where title like '%我%' limit 0,10
+	sql := "select IFNULL(b.peer_id,''),IFNULL(b.name,''),IFNULL(b.phone,''),IFNULL(b.sex,0),IFNULL(b.nickname,0),IFNULL(b.img,0),a.id,IFNULL(a.user_id,''),IFNULL(a.accesstory,''),IFNULL(a.accesstory_type,0),IFNULL(a.text,''),IFNULL(a.tag,''),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,''),IFNULL(a.thumbnail,''),IFNULL(a.file_name,''),IFNULL(a.file_size,0) from article as a LEFT JOIN sys_user as b on a.user_id=b.id where title like'%" + s.Title + "%' limit " + str + "," + pageSize
+
 	rows, err := db.DB.Query(sql)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, errors.New("查询下载列表信息失败")
 	}
 	for rows.Next() {
-		var dl Article
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+		var dl ArticleAboutMeResp
+		err = rows.Scan(&dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.NickName, &dl.Img, &dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
 			sugar.Log.Error("ARticleSearch scan data is failed.The err is ", err)
 			return arrfile, err
