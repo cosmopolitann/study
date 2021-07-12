@@ -28,7 +28,7 @@ func TestArticleCancelLike(t *testing.T) {
 	// request json  params
 	// test 1
 
-	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI","id":"415931300260614144"}
+	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTY5ODQ1NDUwNjIwMzEzNjAiLCJleHAiOjE2MjYwODUxNzN9.FDTDk9Zz-U3dvL8U2rH9nG19ndvQWDNo_a0L7xyQ2Qg","id":"414733371332104192"}
 `
 	ipfsNode, err := myipfs.GetIpfsNode("/Users/apple/winter/D-cloud/test/ipfs")
 	if err != nil {
