@@ -25,7 +25,7 @@ func TestAddArticleCategory(t *testing.T) {
 	ss := Testdb(d)
 	// request json  params
 	// test 1
-	value := `{"pageSize":10,"pageNum":1,"accesstoryType":2}
+	value := `{"pageSize":10,"pageNum":10,"accesstoryType":2}
 `
 	t.Log("request value :=", value)
 	resp := ss.ArticleCategory(value)
