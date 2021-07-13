@@ -30,6 +30,8 @@ func DownloadList(db *Sql, value string) (data []DownLoad, e error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return d, errors.New("查询下载列表信息失败")
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		var dl DownLoad
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.DownPath, &dl.FileType, &dl.TransferType, &dl.UploadParentId, &dl.UploadFileId)

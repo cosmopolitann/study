@@ -43,6 +43,9 @@ func MoveFile(db *Sql, value string) error {
 				return err
 			}
 		}
+		// 释放锁
+		rows.Close()
+
 		log.Println(" 这是移动 查找出来的结果  move file  =", s)
 
 		if s.Id != "" {

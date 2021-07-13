@@ -45,6 +45,8 @@ func GetUser(db *Sql, userid string) vo.RespSysUser {
 		sugar.Log.Error("查找用户表失败,sql错误:", err.Error())
 		return s
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img)
 		if err != nil {
@@ -62,6 +64,9 @@ func FindIsExistLoginUser(db *Sql, data string) (int64, error, vo.RespSysUser) {
 	var s vo.RespSysUser
 	sugar.Log.Info("用户信息是", data)
 	rows, _ := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user as a where phone=?", data)
+
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img)
 		if err != nil {

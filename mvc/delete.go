@@ -20,6 +20,8 @@ func del(db *Sql, parent_id string, userId string) {
 		var f File
 		var f1 []File
 		rows, _ := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0) FROM cloud_file where parent_id=? and user_id=?", parent_id, userId)
+		// 释放锁
+		defer rows.Close()
 		for rows.Next() {
 			err := rows.Scan(&f.Id, &f.UserId, &f.FileName, &f.ParentId, &f.Ptime, &f.FileCid, &f.FileSize, &f.FileType, &f.IsFolder)
 			if err != nil {
@@ -29,6 +31,7 @@ func del(db *Sql, parent_id string, userId string) {
 				f1 = append(f1, f)
 			}
 		}
+
 		for i := 0; i < len(f1); i++ {
 			delArray = append(delArray, f1[i].Id)
 			if f1[i].IsFolder == 1 {
@@ -63,6 +66,7 @@ func Delete(db *Sql, value string) error {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 			return errors.New("查询下载列表信息失败")
 		}
+
 		var dl File
 		for rows.Next() {
 			err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder)
@@ -71,6 +75,8 @@ func Delete(db *Sql, value string) error {
 				return err
 			}
 		}
+		// 释放锁
+		rows.Close()
 		if dl.IsFolder == 1 {
 			del(db, dl.Id, claim["UserId"].(string))
 		}

@@ -2,12 +2,10 @@ package chat
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/cosmopolitann/clouddb/sugar"
-	"github.com/cosmopolitann/clouddb/vo"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -34,16 +32,16 @@ func TestChatRenameRecord(t *testing.T) {
 
 	fmt.Println(token)
 
-	req := vo.ChatRenameRecordParams{
-		Id:    "411647506288480256_411642059200401408",
-		Name:  "Record Name 2222 3333",
-		Token: token,
-	}
+	// req := vo.ChatRenameRecordParams{
+	// 	Id:    "411647506288480256_411642059200401408",
+	// 	Name:  "Record Name 2222 3333",
+	// 	Token: token,
+	// }
 
-	value, _ := json.Marshal(req)
+	// value, _ := json.Marshal(req)
 
-	ss := Testdb(d)
-	resp := ss.ChatRenameRecord(nil, string(value))
-	t.Log("获取返回的数据 :=  ", resp)
+	// ss := Testdb(d)
+	// resp := ss.ChatRenameRecord(nil, string(value))
+	// t.Log("获取返回的数据 :=  ", resp)
 
 }

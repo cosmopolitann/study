@@ -123,6 +123,8 @@ func SyncAticlePlay(db *Sql, value string) error {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
 	}
+	// 释放锁
+	defer rows.Close()
 	//scan data.
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
@@ -179,6 +181,8 @@ func SyncArticleShareAdd(db *Sql, value string) error {
 		sugar.Log.Error("SyncArticleShareAdd Query data is failed.Err is ", err)
 		return err
 	}
+	// 释放锁
+	defer rows.Close()
 	//scan data => article.
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
@@ -305,6 +309,8 @@ func SyncUserRegister(db *Sql, value string) error {
 		sugar.Log.Error(" Query data is failed.Err is ", err)
 		return err
 	}
+	// 释放锁
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
@@ -1314,6 +1320,8 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 			// return arrfile, errors.New("查询下载列表信息失败")
 			return
 		}
+		// 释放锁
+		defer rows.Close()
 		for rows.Next() {
 			var dl File
 			err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
@@ -1338,6 +1346,8 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 		}
+		// 释放锁
+		defer rows.Close()
 		for rows.Next() {
 			var dl TransferDownLoadParams
 			err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.DownPath, &dl.FileType, &dl.TransferType, &dl.UploadParentId, &dl.UploadFileId)
@@ -1353,6 +1363,7 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 			}
 			// transfer = append(transfer, dl)
 		}
+
 		wg.Done()
 
 	}()
@@ -1362,6 +1373,8 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 		}
+		// 释放锁
+		defer rows.Close()
 		for rows.Next() {
 			var dl ChatMsg
 			err = rows.Scan(&dl.Id, &dl.ContentType, &dl.Content, &dl.FromId, &dl.ToId, &dl.Ptime, &dl.IsWithdraw, &dl.IsRead, &dl.RecordId)
@@ -1386,6 +1399,8 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 		if err != nil {
 			sugar.Log.Error("Query chat_record data is failed.Err is ", err)
 		}
+		// 释放锁
+		rows.Close()
 		for rows.Next() {
 			var ri ChatRecord
 			err := rows.Scan(&ri.Id, &ri.Name, &ri.FromId, &ri.Toid, &ri.Ptime, &ri.LastMsg)
@@ -1408,6 +1423,8 @@ func SyncQueryAllData(value string, db *Sql, path string) (error, string) {
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 		}
+		// 释放锁
+		defer rows.Close()
 		var user SysUser
 
 		for rows.Next() {

@@ -33,11 +33,12 @@ func CloudFileList(db *Sql, value string) (data []File, e error) {
 	// 查询
 	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where parent_id=? and is_folder=? and user_id=?", "0", 0, "123")
 	// rows, err := db.DB.Query("select * from cloud_file where parent_id=? and is_folder=? and user_id=?", "0", 0, "409330202166956032")
-	
+
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, errors.New("查询下载列表信息失败")
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var dl File
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)

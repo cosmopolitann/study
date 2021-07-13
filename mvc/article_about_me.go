@@ -44,6 +44,8 @@ func ArticleAboutMe(db *Sql, value string) ([]ArticleAboutMeResp, error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return art, err
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		var dl ArticleAboutMeResp
 		var id interface{}

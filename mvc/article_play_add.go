@@ -83,6 +83,8 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
 	}
+	// 释放锁
+	defer rows1.Close()
 	for rows1.Next() {
 		err = rows1.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
@@ -158,6 +160,9 @@ func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
 	}
+
+	// 释放锁
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
@@ -238,6 +243,9 @@ func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		return err
 	}
 
+	// 释放锁
+	defer rows1.Close()
+
 	for rows1.Next() {
 		err = rows1.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
@@ -247,6 +255,7 @@ func ArticleShareAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 
 		sugar.Log.Info("Query a entire data is ", dl)
 	}
+
 	if dl.Id == "" {
 		return errors.New(" update is failed .")
 	}

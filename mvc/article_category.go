@@ -49,6 +49,8 @@ func ArticleCategory(db *Sql, value string) ([]vo.ArticleResp, error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return art, err
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		var dl vo.ArticleResp
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.NickName, &dl.Img, &dl.LikeNum, &dl.Islike)
@@ -63,6 +65,7 @@ func ArticleCategory(db *Sql, value string) ([]vo.ArticleResp, error) {
 		}
 		art = append(art, dl)
 	}
+
 	if err != nil {
 		sugar.Log.Error("Insert into article  is Failed.", err)
 		return art, err
