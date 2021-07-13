@@ -40,7 +40,7 @@ type ChatSwapMsgParams struct {
 	Content     string `json:"content"`     // require     coment 消息内容
 	FromId      string `json:"fromId"`      //require     coment 发送方id
 	ToId        string `json:"toId"`        //require     coment 对方id
-	IsWithdraw  int64  `json:"isWithdraw"`  //require     coment 是否撤回         0 未撤回  1  撤回
+	IsWithdraw  int64  `json:"isWithDraw"`  //require     coment 是否撤回         0 未撤回  1  撤回
 	IsRead      int64  `json:"isRead"`      // require     coment 是否已读
 	Ptime       int64  `json:"ptime"`
 	Token       string `json:"token"` //token
