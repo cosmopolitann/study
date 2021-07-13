@@ -51,7 +51,7 @@ func GenerateToken(userId string, expireDuration int64) (string, error) {
 //}
 func TestJwt(t *testing.T) {
 	//token,err:=GenerateToken("10001",30*24*60*60)
-	token, err := GenerateToken("416984545062031360", 60*60*60)
+	token, err := GenerateToken("123", 60*60*60)
 
 	if err != nil {
 		t.Log("jwt is failed.")
@@ -59,3 +59,5 @@ func TestJwt(t *testing.T) {
 	t.Log("Token = ", token)
 
 }
+
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTY5ODQ1NDUwNjIwMzEzNjAiLCJleHAiOjE2MjYzNTUxMTl9.Ko9C6ojPzShQ3BSP_ASa602EUjD27trRO_11zaV4hCY

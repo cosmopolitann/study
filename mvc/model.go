@@ -94,14 +94,14 @@ type ArticleAboutMeResp struct {
 	FileName       string `json:"fileName"`       //文件名字
 	FileSize       string `json:"fileSize"`       //文件大小
 	Count          int64  `json:"count"`          //数量
-	IsLike         int64  `json:"isLike"`        //是否点赞
+	IsLike         int64  `json:"isLike"`         //是否点赞
 	PeerId         string `json:"peerId"`         //节点id
 	Name           string `json:"name"`           //用户名字
 	Phone          string `json:"phone"`          //手机号
 	Sex            int64  `json:"sex"`            //性别 0 未知  1 男  2 女
 	NickName       string `json:"nickName"`       //昵称
 	Img            string `json:"img"`            //头像
-	Sum            int64  `json:"sum"`
+	LikeNum        int64  `json:"likeNum"`
 }
 
 //article like

@@ -37,8 +37,9 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		}
 		sugar.Log.Info("Query a entire data is ", dl)
 	}
+	defer rows.Close()
 	if dl.Id == "" {
-		return errors.New(" update is failed .")
+		return nil
 	}
 	//update play num + 1
 	stmt, err := db.DB.Prepare("update article set play_num=? where id=?")
