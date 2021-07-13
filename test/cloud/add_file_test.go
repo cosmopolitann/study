@@ -28,12 +28,12 @@ func TestAddFile(t *testing.T) {
 	//插入数据
 	var fi = vo.CloudAddFileParams{
 		Id:       "411580511585046528",
-		FileName: "我爱中国",
+		FileName: "我爱成都1",
 		ParentId: "0",
-		FileCid:  "Qmcid12312",
+		FileCid:  "Qm123",
 		FileSize: 100,
 		FileType: 0,
-		Token:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIxMjMiLCJwZWVySWQiOiJwZXJyIiwibmFtZSI6Im5hbWUiLCJwaG9uZSI6InBob25lIiwic2V4IjoxLCJuaWNrTmFtZSI6Im5pY2siLCJpbWciOiJpbWciLCJleHAiOjE2MjU3NTAxMzd9.I6J8fE1SbSiNiyd-WIiSawRFQ_tGA9PEt0jHNKyxVxo",
+		Token:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTY5ODQ1NDUwNjIwMzEzNjAiLCJleHAiOjE2MjYzNTUxMTl9.Ko9C6ojPzShQ3BSP_ASa602EUjD27trRO_11zaV4hCY",
 	}
 
 	b1, e := json.Marshal(fi)
