@@ -94,7 +94,7 @@ type ArticleAboutMeResp struct {
 	FileName       string `json:"fileName"`       //文件名字
 	FileSize       string `json:"fileSize"`       //文件大小
 	Count          int64  `json:"count"`          //数量
-	IsLike         int64  `json:"is_like"`        //是否点赞
+	IsLike         int64  `json:"isLike"`        //是否点赞
 	PeerId         string `json:"peerId"`         //节点id
 	Name           string `json:"name"`           //用户名字
 	Phone          string `json:"phone"`          //手机号

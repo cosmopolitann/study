@@ -381,12 +381,12 @@ func (db *Sql) ArticleGiveLike(ipfsNode *ipfsCore.IpfsNode, dInfo string) string
 
 func (db *Sql) ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 
-	e := ArticleCancelLike(ipfsNode, db, dInfo)
+	data, e := ArticleCancelLike(ipfsNode, db, dInfo)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
 
-	return vo.ResponseSuccess()
+	return vo.ResponseSuccess(data)
 }
 
 // 获取文章详情

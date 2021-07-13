@@ -11,8 +11,10 @@ import (
 )
 
 //朋友圈点赞
-func ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
+func ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ArticleLike, error) {
 	sugar.Log.Info("~~~~~  ArticleCancelLike   Method   ~~~~~~")
+	var dl ArticleLike
+
 	var art vo.ArticleCancelLikeParams
 	//unmarshal params info.
 	err := json.Unmarshal([]byte(value), &art)
@@ -23,26 +25,26 @@ func ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error
 	//check token is valid.
 	claim, b := jwt.JwtVeriyToken(art.Token)
 	if !b {
-		return errors.New(" Token is invalid. ")
+		return dl, errors.New(" Token is invalid. ")
 	}
 	//userid:=claim["UserId"].(string)
 	sugar.Log.Info("claim := ", claim)
 	//First,query data from article_like table. where id=?,
 	//then update it.
-	stmt, err := db.DB.Prepare("UPDATE article_like set is_like=? where id=?")
+	stmt, err := db.DB.Prepare("UPDATE article_like set is_like=? where article_id=?")
 	if err != nil {
 		sugar.Log.Error("update article_like is failed.Err is ", err)
-		return err
+		return dl, err
 	}
 	res, err := stmt.Exec(int64(0), art.Id)
 	if err != nil {
 		sugar.Log.Error("update exec article_like is failed.Err is ", err)
-		return err
+		return dl, err
 	}
 	affect, err := res.RowsAffected()
 	if affect == 0 {
 		sugar.Log.Error("update article_like is failed.Err is ", err)
-		return err
+		return dl, err
 	}
 	// query
 
@@ -50,8 +52,6 @@ func ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error
 	// topic := "/db-online-sync"
 	// sugar.Log.Info("发布主题:", "/db-online-sync")
 	// sugar.Log.Info("发布消息:", value)
-
-	// var dl ArticleLike
 
 	// ctx := context.Background()
 
@@ -64,18 +64,20 @@ func ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error
 	// 	}
 	// 	TopicJoin.Store(topic, tp)
 	// }
-	// rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(article_id,'null'),IFNULL(is_like,0) FROM article_like where id=?", art.Id)
-	// if err != nil {
-	// 	sugar.Log.Error("Query article_like is failed.Err is ", err)
-	// 	return err
-	// }
-	// for rows.Next() {
-	// 	err = rows.Scan(&dl.Id, &dl.UserId, &dl.ArticleId, &dl.IsLike)
-	// 	if err != nil {
-	// 		sugar.Log.Error("Query scan data is failed.The err is ", err)
-	// 		return err
-	// 	}
-	// }
+	rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(article_id,'null'),IFNULL(is_like,0) FROM article_like where article_id=?", art.Id)
+	if err != nil {
+		sugar.Log.Error("Query article_like is failed.Err is ", err)
+		return dl, err
+	}
+	for rows.Next() {
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.ArticleId, &dl.IsLike)
+		if err != nil {
+			sugar.Log.Error("Query scan data is failed.The err is ", err)
+			return dl, err
+		}
+	}
+	defer rows.Close()
+
 	// sugar.Log.Info("--- 开始 发布的消息 ---")
 
 	// sugar.Log.Info("发布的消息:", value)
@@ -110,7 +112,7 @@ func ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error
 	// sugar.Log.Error("---  发布的消息  完成  ---")
 	// //---
 	// sugar.Log.Info("~~~~~  ArticleCancelLike   Method     End ~~~~~~")
-	return nil
+	return dl, nil
 }
 
 type ArticleCanCelLike struct {
