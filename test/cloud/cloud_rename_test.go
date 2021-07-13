@@ -23,11 +23,11 @@ func TestRenameFile(t *testing.T) {
 	ss := Testdb(d)
 	//插入数据
 	value := `{
-"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI",
-    "rename":"星星",
-    "id":"411908608159125504",
-"isFolder":1,
-"parentId":"411905426192338944"
+"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIxMDAwMSIsImV4cCI6MTYyNjA3NDA1N30.xE_IsI6GGqzqFh9D5ewJRcyWiTRotPJx5lLqumZEMHc",
+    "rename":"我爱中国1",
+    "id":"419096573771780091",
+"isFolder":0,
+"parentId":"321"
 }`
 	//b1, e := json.Marshal(fi)
 	//fmt.Println(ss)

@@ -2,19 +2,17 @@ package article
 
 import (
 	"database/sql"
-	"github.com/cosmopolitann/clouddb/mvc"
-	"github.com/cosmopolitann/clouddb/sugar"
-	_ "github.com/mattn/go-sqlite3"
 	"testing"
+
+	"github.com/cosmopolitann/clouddb/sugar"
 )
 
-func TestAddArticleCategory(t *testing.T) {
+func TestArticleSearch(t *testing.T) {
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
-
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong.db")
 	if err != nil {
 		panic(err)
 	}
@@ -25,14 +23,20 @@ func TestAddArticleCategory(t *testing.T) {
 	ss := Testdb(d)
 	// request json  params
 	// test 1
-	value := `{"pageSize":10,"pageNum":10,"accesstoryType":2}
+	value := `{"pageSize":10,"pageNum":1,"title":"我"}
 `
 	t.Log("request value :=", value)
-	resp := ss.ArticleCategory(value)
-	t.Log("result:=", resp)
 
 
-}
-func Testdb(sq *sql.DB) mvc.Sql {
-	return mvc.Sql{DB: sq}
+	resp1 := ss.ArticleSearch(value)
+
+	t.Log("result1:=", resp1)
+
+	//	// test 2
+	//	value2:=`{"id":"411285804581654528"}
+	//`
+	//	t.Log("request value :=",value2)
+	//	resp2:= ss.ArticlePlayAdd(value2)
+	//	t.Log("result:=",resp2)
+
 }

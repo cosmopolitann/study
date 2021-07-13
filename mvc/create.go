@@ -381,12 +381,12 @@ func (db *Sql) ArticleGiveLike(ipfsNode *ipfsCore.IpfsNode, dInfo string) string
 
 func (db *Sql) ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, dInfo string) string {
 
-	e := ArticleCancelLike(ipfsNode, db, dInfo)
+	data, e := ArticleCancelLike(ipfsNode, db, dInfo)
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
 	}
 
-	return vo.ResponseSuccess()
+	return vo.ResponseSuccess(data)
 }
 
 // 获取文章详情
@@ -447,7 +447,15 @@ func (db *Sql) ArticleRecommend(dInfo string) string {
 
 	return vo.ResponseSuccess(data)
 }
+func (db *Sql) ArticleRecommendLimitTenData(dInfo string) string {
 
+	data, e := ArticleRecommendLimitTenData(db, dInfo)
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+
+	return vo.ResponseSuccess(data)
+}
 func (db *Sql) ArticleAddTest(dInfo string) string {
 
 	e := ArticleAddTest(db, dInfo)
@@ -742,7 +750,7 @@ func (db *Sql) SyncQueryAllData(dInfo string, path string) string {
 
 func (db *Sql) SyncDatabaseMigration(token, path, cid string) error {
 	sugar.Log.Info("----   Start  DatabaseMigration data    ------")
-	e := SyncDatabaseMigration(token,path, cid, db)
+	e := SyncDatabaseMigration(token, path, cid, db)
 	return e
 }
 

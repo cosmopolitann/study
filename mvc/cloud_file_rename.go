@@ -3,6 +3,7 @@ package mvc
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
@@ -43,8 +44,8 @@ func CloudFileRename(db *Sql, value string) error {
 	}
 	sugar.Log.Info("查询到要重命名的文件是", dl)
 
-	if dl.Id == art.Id {
-		return errors.New("文件已经存在")
+	if dl.Id != "" {
+		return errors.New("文件名称已经存在")
 	} else {
 		//更新
 		stmt, err := db.DB.Prepare("update cloud_file set file_name=? where id=?")
