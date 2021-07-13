@@ -15,7 +15,7 @@ func TestAddArticleLike(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong.db")
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func TestAddArticleLike(t *testing.T) {
 	fmt.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
 
-	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTY5ODQ1NDUwNjIwMzEzNjAiLCJleHAiOjE2MjYzNTUxMTl9.Ko9C6ojPzShQ3BSP_ASa602EUjD27trRO_11zaV4hCY","id":"张柏芝30"}
+	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTY5ODQ1NDUwNjIwMzEzNjAiLCJleHAiOjE2MjYzNTUxMTl9.Ko9C6ojPzShQ3BSP_ASa602EUjD27trRO_11zaV4hCY","id":"419466189425610752"}
 `
 	ipfsNode, err := myipfs.GetIpfsNode("/Users/apple/winter/D-cloud/test/ipfs")
 	if err != nil {

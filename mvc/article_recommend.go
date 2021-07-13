@@ -99,7 +99,7 @@ func ArticleRecommendLimitTenData(db *Sql, value string) ([]ArticleAboutMeResp, 
 
 	sugar.Log.Info("-Marshal params.")
 	//
-	rows, err := db.DB.Query("SELECT a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),IFNULL(b.peer_id,'0'),IFNULL(b.name,'0'),IFNULL(b.phone,'0'),IFNULL(b.sex,0),IFNULL(b.nickname,'0'),(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id order by a.ptime DESC  LIMIT ?,?", 0, 10)
+	rows, err := db.DB.Query("SELECT a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),IFNULL(b.peer_id,'0'),IFNULL(b.name,'0'),IFNULL(b.phone,'0'),IFNULL(b.sex,0),IFNULL(b.nickname,'0'),f.is_like,(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on f.article_id=a.id order by a.ptime DESC LIMIT ?,?", 0, 10)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return art, err
@@ -107,7 +107,7 @@ func ArticleRecommendLimitTenData(db *Sql, value string) ([]ArticleAboutMeResp, 
 	for rows.Next() {
 		var dl ArticleAboutMeResp
 		//scan data =>  ArticleAboutMeResp.
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.NickName, &dl.LikeNum)
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.NickName, &dl.IsLike, &dl.LikeNum)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err
