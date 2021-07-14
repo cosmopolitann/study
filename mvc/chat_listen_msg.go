@@ -32,7 +32,7 @@ func ChatListenMsgUpdateUser(token string) error {
 			return errors.New(" Token is invaild. ")
 		}
 		listenUserId = claim["id"].(string)
-		sugar.Log.Infof("Named User Listen %s", claim["UserId"].(string))
+		sugar.Log.Infof("Named User Listen %s", claim["id"].(string))
 	}
 	return nil
 }
