@@ -114,7 +114,7 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 
 	sugar.Log.Info("ChatSendMsg success")
 
-	// publishUserInfo(ipfsNode, db, userId)
+	publishUserInfo(ipfsNode, db, userId)
 
 	// 发布消息
 	return ret, nil
@@ -170,6 +170,8 @@ func publishUserInfo(ipfsNode *ipfsCore.IpfsNode, db *Sql, userId string) error 
 	sugar.Log.Info("Local PeerId :=", ipfsNode.Identity.String())
 	//the  third  step .
 	sugar.Log.Info("--- third step ---")
+
+	// fmt.Printf("DD: %s", string(jsonBytes))
 
 	err = tp.Publish(ctx, jsonBytes)
 	if err != nil {

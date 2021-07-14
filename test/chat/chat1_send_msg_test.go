@@ -7,8 +7,8 @@ import (
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
+	"github.com/cosmopolitann/clouddb/test/myipfs"
 	"github.com/cosmopolitann/clouddb/vo"
-
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -28,12 +28,12 @@ func TestChatSendMsg(t *testing.T) {
 		panic(err)
 	}
 
-	token, _ := jwt.GenerateToken("414443377656860672", 30*24*60*60)
+	token, _ := jwt.GenerateToken("414443377656860672", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
 
 	req := vo.ChatSendMsgParams{
 		RecordId:    "414443377656860672_414455684399108096",
 		ContentType: 2,
-		Content:     "content 22222222",
+		Content:     "content 222222223333",
 		FromId:      "414443377656860672",
 		ToId:        "414455684399108096",
 		Token:       token,
@@ -42,7 +42,13 @@ func TestChatSendMsg(t *testing.T) {
 
 	ss := Testdb(d)
 
-	resp := ss.ChatSendMsg(nil, string(value))
+	node, err := myipfs.GetIpfsNode("/Users/apple/projects/clouddb/test/chat/.ipfs")
+	if err != nil {
+		sugar.Log.Info("xxxxx----", err)
+		panic(err)
+	}
+
+	resp := ss.ChatSendMsg(node, string(value))
 	t.Log("获取返回的数据 :=  ", resp)
 
 }
