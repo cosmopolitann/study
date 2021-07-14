@@ -78,7 +78,7 @@ func Delete(db *Sql, value string) error {
 		// 释放锁
 		rows.Close()
 		if dl.IsFolder == 1 {
-			del(db, dl.Id, claim["UserId"].(string))
+			del(db, dl.Id, claim["id"].(string))
 		}
 		delArray = append(delArray, string(v))
 	}

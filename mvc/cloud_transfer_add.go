@@ -37,7 +37,7 @@ func DownLoadFile(db *Sql, value string) (e error) {
 	}
 
 	sid := strconv.FormatInt(id, 10)
-	res, err := stmt.Exec(sid, claim["UserId"].(string), d.FileName, t, d.FileCid, d.FileSize, d.FilePath, d.FileType, d.TransferType, d.UploadParentId, d.UploadFileId)
+	res, err := stmt.Exec(sid, claim["id"].(string), d.FileName, t, d.FileCid, d.FileSize, d.FilePath, d.FileType, d.TransferType, d.UploadParentId, d.UploadFileId)
 
 	if err != nil {
 		sugar.Log.Error("Insert into cloud_down  is Failed.", err)

@@ -185,7 +185,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 	if !b {
 		return art, errors.New(" Token is invalid. ")
 	}
-	userid := claim["UserId"]
+	userid := claim["id"]
 	r := (result.PageNum - 1) * result.PageSize
 	sugar.Log.Info("r:=", r)
 	sugar.Log.Info("Claim:=", claim)

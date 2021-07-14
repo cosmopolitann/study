@@ -23,7 +23,7 @@ func ChatMsgDel(db *Sql, value string) error {
 		return errors.New("token 失效")
 	}
 	sugar.Log.Info("claim := ", claim)
-	//userid:=claim["UserId"].(string)
+	//userid:=claim["id"].(string)
 	stmt, err := db.DB.Prepare("delete from chat_msg where id=?")
 	if err != nil {
 		return err

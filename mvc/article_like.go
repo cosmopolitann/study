@@ -30,7 +30,7 @@ func AddArticleLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	if !b {
 		return errors.New("token 失效")
 	}
-	userid := claim["UserId"].(string)
+	userid := claim["id"].(string)
 	sugar.Log.Info("claim := ", claim)
 	//query data.
 	rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(article_id,'null'),IFNULL(is_like,0) FROM article_like where article_id=? and user_id=?", art.Id, userid)

@@ -22,13 +22,17 @@ func TestParseJwt(t *testing.T) {
 	if flag != TOKEN_ERR_LEN && flag != TOKEN_ERR_EXPIRED {
 		t.Log("T--------")
 	}
-	t.Log("calim is  userId === ", claim)
+	t.Log("calim === ", claim)
 
-	t.Log("calim is  userId === ", claim["UserId"])
+	t.Log("calim is  userId === ", claim["id"])
+
+	log.Println("calim === ", claim)
+	log.Println("id=", claim["id"])
+	log.Println("id=", claim["ptime"])
 
 }
 func GetClaim(bareStr string) (jwt.MapClaims, string) {
-	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiIxMjMiLCJwZWVySWQiOiJRbTEyMyIsIm5hbWUiOiJsaWx5IiwicGhvbmUiOiIxMjMzIiwic2V4IjowLCJuaWNrTmFtZSI6ImxpbGkiLCJpbWciOiJsbGxsbGwiLCJleHAiOjE2MjY0NjM1NjV9.rqIwLuoAmCTQcKDpQQPacaf6EfWA5bMC0uGxQjhM3tQ"
+	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsInBlZXJJZCI6IlFtMTIzIiwibmFtZSI6Im5pY2siLCJwaG9uZSI6IjE4MSIsInNleCI6MCwibmlja05hbWUiOiJzZGYiLCJpbWciOiJodHRwIiwicHRpbWUiOjEsInV0aW1lIjoxLCJleHAiOjE2MjY0NjgzNTJ9.0LXfrtj5oNPuYEPWEUCbVjgXX06WvZaBYr9RZo6b5dc"
 	bareArr := strings.Split(bareStr, " ")
 	errFlag := TOKEN_ERR_NONE
 	if len(bareArr) != 2 {

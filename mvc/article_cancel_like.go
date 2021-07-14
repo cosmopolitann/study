@@ -28,7 +28,7 @@ func ArticleCancelLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (Arti
 	if !b {
 		return dl, errors.New(" Token is invalid. ")
 	}
-	userid := claim["UserId"].(string)
+	userid := claim["id"].(string)
 	sugar.Log.Info("claim := ", claim)
 	//First,query data from article_like table. where id=?,
 	//then update it.

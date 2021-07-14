@@ -27,7 +27,7 @@ func UserQuery(db *Sql, value string) (data SysUser, e error) {
 	}
 	sugar.Log.Info("claim := ", claim)
 	//query
-	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", claim["UserId"])
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", claim["id"])
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return dl, err
@@ -61,7 +61,7 @@ func UserUpdate(db *Sql, value string) (e error) {
 	if !b {
 		return errors.New(" Token is invalid. ")
 	}
-	userid := claim["UserId"]
+	userid := claim["id"]
 	sugar.Log.Info("claim:= ", claim)
 	//user info.
 	sugar.Log.Info("User Info := ", userlist)

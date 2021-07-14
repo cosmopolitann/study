@@ -50,7 +50,7 @@ func Search(db *Sql, value string) (data []File, e error) {
 	}
 	sugar.Log.Info("order type:", or)
 	// userid info claim["UserId"].(string)
-	userid := claim["UserId"].(string)
+	userid := claim["id"].(string)
 	sugar.Log.Info("claim := ", claim)
 	sugar.Log.Info("UserId := ", userid)
 	// sql.

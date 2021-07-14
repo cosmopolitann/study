@@ -24,7 +24,7 @@ func CloudFileRename(db *Sql, value string) error {
 	if !b {
 		return errors.New("token 失效")
 	}
-	//userid:=claim["UserId"].(string)
+	//userid:=claim["id"].(string)
 	sugar.Log.Info("claim := ", claim)
 	var dl File
 	//查询数据

@@ -40,7 +40,7 @@ func ArticleCategory(db *Sql, value string) ([]vo.ArticleResp, error) {
 		if !b {
 			return art, errors.New(" Token is valid. ")
 		}
-		user_id := claim["UserId"]
+		user_id := claim["id"]
 		rows, err = db.DB.Query("SELECT a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),IFNULL(b.peer_id,''),IFNULL(b.name,''),IFNULL(b.phone,''),IFNULL(b.sex,0),IFNULL(b.nickname,'') ,IFNULL(b.img,''),(SELECT count(*) FROM article_like AS d  WHERE d.article_id = a.id AND d.is_like = 1 ) AS likeNum ,IFNULL(f.is_like,0) FROM article AS a LEFT JOIN sys_user AS b ON a.user_id = b.id LEFT JOIN article_like as f on a.id=f.article_id and f.user_id=? WHERE a.accesstory_type =? ORDER BY a.ptime desc LIMIT ?,?", user_id, result.AccesstoryType, r, r1)
 	}
 

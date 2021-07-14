@@ -27,7 +27,7 @@ func AddChatMsg(db *Sql, value string) error {
 		return errors.New("token 失效")
 	}
 	sugar.Log.Info("claim := ", claim)
-	userid := claim["UserId"].(string)
+	userid := claim["id"].(string)
 	id := utils.SnowId()
 	//t := time.Now().Format("2006-01-02 15:04:05")
 	t := time.Now().Unix()

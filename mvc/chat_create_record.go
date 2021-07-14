@@ -33,7 +33,7 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 		return ret, errors.New("token 失效")
 	}
 	sugar.Log.Info("claim := ", claim)
-	userId := claim["UserId"].(string)
+	userId := claim["id"].(string)
 
 	if userId != msg.FromId {
 		sugar.Log.Error("token is not msg.from_id")

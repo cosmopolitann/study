@@ -31,7 +31,7 @@ func ChatRenameRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error 
 		return errors.New("token 失效")
 	}
 	sugar.Log.Info("claim := ", claim)
-	// userId := claim["UserId"].(string)
+	// userId := claim["id"].(string)
 
 	res, err := db.DB.Exec("UPDATE chat_record SET name = ? WHERE id = ?", msg.Name, msg.Id)
 	if err != nil {

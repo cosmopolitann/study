@@ -41,7 +41,7 @@ func AddFolder(db *Sql, value string) error {
 
 	sugar.Log.Info("claim := ", claim)
 
-	userId := claim["UserId"].(string)
+	userId := claim["id"].(string)
 
 	sugar.Log.Info("  查看 user id  ", userId)
 

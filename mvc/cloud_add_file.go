@@ -30,7 +30,7 @@ func AddFile(db *Sql, value string) (string, error) {
 	if !b {
 		return "", err
 	}
-	userId := claim["UserId"]
+	userId := claim["id"]
 	id := utils.SnowId()
 	t := time.Now().Unix()
 	//查询 是否 有相同名字的 文件

@@ -31,7 +31,7 @@ func ChatListenMsgUpdateUser(token string) error {
 			sugar.Log.Error("JwtVeriyToken failed:" + token)
 			return errors.New(" Token is invaild. ")
 		}
-		listenUserId = claim["UserId"].(string)
+		listenUserId = claim["id"].(string)
 		sugar.Log.Infof("Named User Listen %s", claim["UserId"].(string))
 	}
 	return nil
@@ -84,7 +84,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			sugar.Log.Error("JwtVeriyToken failed:" + token)
 			return errors.New(" Token is invaild. ")
 		}
-		listenUserId = claim["UserId"].(string)
+		listenUserId = claim["id"].(string)
 		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
 
@@ -275,7 +275,7 @@ func ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.Ch
 			sugar.Log.Error("JwtVeriyToken failed:" + token)
 			return errors.New(" Token is invaild. ")
 		}
-		listenUserId = claim["UserId"].(string)
+		listenUserId = claim["id"].(string)
 		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
 

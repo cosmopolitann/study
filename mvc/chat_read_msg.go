@@ -30,7 +30,7 @@ func ChatReadMsg(db *Sql, value string) error {
 		return errors.New("token 失效")
 	}
 	sugar.Log.Info("claim := ", claim)
-	userId := claim["UserId"].(string)
+	userId := claim["id"].(string)
 
 	for _, id := range msg.Ids {
 		res, err := db.DB.Exec("UPDATE chat_msg SET is_read = 1 WHERE id = ? AND to_id = ?", id, userId)

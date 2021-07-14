@@ -38,7 +38,7 @@ func ArticleAboutMe(db *Sql, value string) ([]ArticleAboutMeResp, error) {
 		return art, err
 	}
 	sugar.Log.Info("claim := ", claim)
-	userid := claim["UserId"]
+	userid := claim["id"]
 	rows, err := db.DB.Query("SELECT a.is_like,b.id,IFNULL(b.user_id,'null'),IFNULL(b.accesstory,'null'),IFNULL(b.accesstory_type,0),IFNULL(b.text,'null'),IFNULL(b.tag,'null'),IFNULL(b.ptime,0),IFNULL(b.play_num,0),IFNULL(b.share_num,0),IFNULL(b.title,'null'),IFNULL(b.thumbnail,'null'),IFNULL(b.file_name,'null'),IFNULL(b.file_size,0),IFNULL(c.img,''),IFNULL(c.name,''),IFNULL(c.nickname,''),IFNULL(c.peer_id,''),IFNULL(c.phone,''),IFNULL(c.sex,0),(SELECT COUNT( * ) FROM article_like AS c WHERE c.article_id = a.article_id ) as sum from article_like as a LEFT JOIN article as b on a.article_id=b.id LEFT JOIN sys_user as c on c.id=b.user_id where a.user_id=? and a.is_like=1 ORDER BY b.ptime LIMIT ?,?", userid, r, result.PageSize)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)

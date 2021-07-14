@@ -25,7 +25,7 @@ func CloudFileCategory(db *Sql, value string) (data []File, e error) {
 	if !b {
 		return arrfile, errors.New("token 失效")
 	}
-	userid := claim["UserId"].(string)
+	userid := claim["id"].(string)
 	sugar.Log.Info("claim := ", claim)
 	// 排序
 	var or string

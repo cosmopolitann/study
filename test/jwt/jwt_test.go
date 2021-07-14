@@ -2,10 +2,10 @@ package jwt
 
 import (
 	"encoding/base64"
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/cosmopolitann/clouddb/vo"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -18,13 +18,15 @@ token, err := utils.GenerateToken(
 		"", 30*24*60*60)
 */
 type LoginClaims struct {
-	UserId   string
+	Id       string `json:"id"`
 	PeerId   string `json:"peerId"`   //节点id
 	Name     string `json:"name"`     //用户名字
 	Phone    string `json:"phone"`    //手机号
 	Sex      int64  `json:"sex"`      //性别 0 未知  1 男  2 女
-	NickName string `json:"nickName"` //昵称
+	NickName string `json:"nickname"` //昵称
 	Img      string `json:"img"`      //头像
+	Ptime    int64  `json:"ptime"`    //时间
+	Utime    int64  `json:"utime"`    //更新时间
 	jwt.StandardClaims
 }
 
@@ -32,17 +34,19 @@ const (
 	tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
 )
 
-func GenerateToken(user vo.RespSysUser, expireDuration int64) (string, error) {
+func GenerateToken(id, peerId, name, phone, nickname, img string, sex, ptime, utime int64, expireDuration int64) (string, error) {
 	// 将 uid，用户角色， 过期时间作为数据写入 token 中
 
 	calim := LoginClaims{
-		UserId:         user.Id,
-		PeerId:         user.PeerId,
-		Name:           user.Name,
-		Phone:          user.Phone,
-		Sex:            user.Sex,
-		NickName:       user.NickName,
-		Img:            user.Img,
+		Id:             id,
+		PeerId:         peerId,
+		Name:           name,
+		Phone:          phone,
+		Sex:            sex,
+		NickName:       nickname,
+		Img:            img,
+		Ptime:          ptime,
+		Utime:          utime,
 		StandardClaims: jwt.StandardClaims{},
 	}
 	if expireDuration != -1 {
@@ -50,7 +54,6 @@ func GenerateToken(user vo.RespSysUser, expireDuration int64) (string, error) {
 			ExpiresAt: time.Now().Unix() + expireDuration,
 		}
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, calim)
 	strBase, _ := base64.URLEncoding.DecodeString(tokenStr)
 
@@ -65,22 +68,16 @@ func GenerateToken(user vo.RespSysUser, expireDuration int64) (string, error) {
 //}
 func TestJwt(t *testing.T) {
 	//token,err:=GenerateToken("10001",30*24*60*60)
-	info := vo.RespSysUser{
-		Id:       "123",
-		Name:     "lily",
-		PeerId:   "Qm123",
-		Phone:    "1233",
-		Sex:      0,
-		NickName: "lili",
-		Img:      "llllll",
-	}
-	token, err := GenerateToken(info, 60*60*60)
+	fmt.Println("开始")
+
+	//                  id, peerId, name, phone, nickname, img string, sex, ptime, utime int64
+	token, err := GenerateToken("123", "Qm123", "nick", "181", "sdf", "http", 0, 1, 1, 60*60*60)
 
 	if err != nil {
 		t.Log("jwt is failed.")
 	}
 	t.Log("Token = ", token)
-
+	fmt.Println("token:=", token)
 }
 
 //eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTY5ODQ1NDUwNjIwMzEzNjAiLCJleHAiOjE2MjYzNTUxMTl9.Ko9C6ojPzShQ3BSP_ASa602EUjD27trRO_11zaV4hCY

@@ -31,7 +31,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 
 	sugar.Log.Info("claim := ", claim)
 
-	userId := claim["UserId"].(string)
+	userId := claim["id"].(string)
 
 	var user SysUser
 

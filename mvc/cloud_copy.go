@@ -34,7 +34,7 @@ func CopyFile(db *Sql, value string) error {
 		return errors.New(" Token is invaild. ")
 	}
 	//userid.
-	userid := claim["UserId"].(string)
+	userid := claim["id"].(string)
 	sugar.Log.Info("userid := ", userid)
 	//loop params ids.
 	for _, v := range cFile.Ids {
@@ -245,7 +245,7 @@ func Verify(db *Sql, value string) error {
 	if !b {
 		return errors.New(" Token is invalid ")
 	}
-	userid := claim["UserId"].(string)
+	userid := claim["id"].(string)
 	for _, v := range cFile.Ids {
 		rows, err := db.DB.Query("SELECT b.id,IFNULL(b.user_id,'null'),IFNULL(b.file_name,'null'),IFNULL(b.parent_id,0),IFNULL(b.ptime,0),IFNULL(b.file_cid,'null'),IFNULL(b.file_size,0),IFNULL(b.file_type,0),IFNULL(b.is_folder,0),IFNULL(b.thumbnail,'null') from cloud_file as b WHERE (b.file_name,b.user_id,b.is_folder) in (SELECT a.file_name,a.user_id,a.is_folder from cloud_file as a where a.id=?) and b.parent_id=?", v, cFile.ParentId)
 		if err != nil {
@@ -284,7 +284,7 @@ func Verify(db *Sql, value string) error {
 // 	if !b {
 // 		return errors.New("token 失效")
 // 	}
-// 	userid := claim["UserId"].(string)
+// 	userid := claim["id"].(string)
 // 	// for _, v := range cFile.Ids {
 // 	// 	rows, err := db.DB.Query("SELECT b.id,IFNULL(b.user_id,'null'),IFNULL(b.file_name,'null'),IFNULL(b.parent_id,0),IFNULL(b.ptime,0),IFNULL(b.file_cid,'null'),IFNULL(b.file_size,0),IFNULL(b.file_type,0),IFNULL(b.is_folder,0),IFNULL(b.thumbnail,'null') from cloud_file as b WHERE (b.file_name,b.user_id,b.is_folder) in (SELECT a.file_name,a.user_id,a.is_folder from cloud_file as a where a.id=?) and b.parent_id=?", v, cFile.ParentId)
 // 	// 	if err != nil {
