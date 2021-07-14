@@ -76,8 +76,8 @@ type Article struct {
 	Thumbnail      string `json:"thumbnail"`      //缩略图
 	FileName       string `json:"fileName"`       //文件名字
 	FileSize       string `json:"fileSize"`       //文件大小
-	Count          int64  `json:"count"`          //数量
-	IsLike         int64  `json:"is_like"`        //是否点赞
+	LikeNum        int64  `json:"likeNum"`        //数量
+	IsLike         int64  `json:"isLike"`         //是否点赞
 }
 type ArticleAboutMeResp struct {
 	Id             string `json:"id"`             //id

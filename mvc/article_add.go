@@ -194,7 +194,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 	sugar.Log.Info("PageNum:= ", result.PageNum)
 	sugar.Log.Info("PageSize:= ", result.PageSize)
 	//这里 要修改   加上 where  参数 判断
-	rows, err := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(accesstory,'null'),IFNULL(accesstory_type,0),IFNULL(text,'null'),IFNULL(tag,'null'),IFNULL(ptime,0),IFNULL(play_num,0),IFNULL(share_num,0),IFNULL(title,'null'),IFNULL(thumbnail,'null'),IFNULL(file_name,'null'),IFNULL(file_size,0) FROM article where user_id=? order by ptime Desc limit ?,?", userid, r, result.PageSize)
+	rows, err := db.DB.Query("SELECT IFNULL(b.is_like,0),a.id,IFNULL(a.user_id,'null'),IFNULL(a.accesstory,'null'),IFNULL(a.accesstory_type,0),IFNULL(a.text,'null'),IFNULL(a.tag,'null'),IFNULL(a.ptime,0),IFNULL(a.play_num,0),IFNULL(a.share_num,0),IFNULL(a.title,'null'),IFNULL(a.thumbnail,'null'),IFNULL(a.file_name,'null'),IFNULL(a.file_size,0),(SELECT COUNT( * ) FROM article_like AS c WHERE c.article_id = b.article_id ) as sum FROM article as a LEFT JOIN article_like as b on a.id=b.article_id where a.user_id=? order by ptime Desc limit ?,?", userid, r, result.PageSize)
 	if err != nil {
 		sugar.Log.Error("Query article table is failed.Err:", err)
 		return art, errors.New(" Query article list is failed.")
@@ -205,7 +205,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 		var dl Article
 		var userId interface{}
 		var k = ""
-		err = rows.Scan(&dl.Id, &userId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+		err = rows.Scan(&dl.IsLike, &dl.Id, &userId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.LikeNum)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err
