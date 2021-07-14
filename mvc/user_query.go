@@ -32,6 +32,8 @@ func UserQuery(db *Sql, value string) (data SysUser, e error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return dl, err
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
 		if err != nil {
@@ -102,6 +104,8 @@ func OtherUserQuery(db *Sql, value string) (data SysUser, e error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return dl, err
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
 		if err != nil {

@@ -51,6 +51,10 @@ func InsertInto(db *Sql, id, parent_id, userid string) string {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return ""
 	}
+
+	// 释放锁
+	defer rows.Close()
+
 	var dl File
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
@@ -109,6 +113,10 @@ func Re(user_id, id string, d *Sql, parent_id string, userid string) error {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
 	}
+
+	// 释放锁
+	defer rows.Close()
+
 	var dl File
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
@@ -117,6 +125,7 @@ func Re(user_id, id string, d *Sql, parent_id string, userid string) error {
 			return err
 		}
 	}
+
 	// insert table
 	id1 := utils.SnowId()
 	t := time.Now().Unix()
@@ -175,6 +184,8 @@ func walk(user_id, id string, d *Sql, node *FileNode) {
 				sugar.Log.Error("Query scan data is failed.The err is ", err)
 			}
 		}
+		// 释放锁
+		rows.Close()
 		//construct file structure.
 		//adds the current file to the folder as a child node.
 		child := FileNode{dl.Id, dl.ParentId, []*FileNode{}}
@@ -203,6 +214,8 @@ func QueryAllInfo(user_id, id string, d *Sql) []string {
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		var dl File
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
@@ -246,6 +259,8 @@ func Verify(db *Sql, value string) error {
 				return err
 			}
 		}
+		// 释放锁
+		rows.Close()
 		if s.Id != "" {
 			return errors.New("文件已经存在")
 		}

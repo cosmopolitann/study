@@ -79,6 +79,8 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 		sugar.Log.Error("AddUser Query data is failed.Err is ", err)
 		return err
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&dl1.Id, &dl1.PeerId, &dl1.Name, &dl1.Phone, &dl1.Sex, &dl1.Ptime, &dl1.Utime, &dl1.NickName, &dl1.Img)
 		if err != nil {
@@ -87,6 +89,7 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 		}
 		sugar.Log.Info(" AddUser Query a entire data is ", dl)
 	}
+
 	//the first step.
 	var s3 UserAd
 	s3.Type = "receiveUserRegister"
@@ -196,6 +199,8 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 		sugar.Log.Error("Query article table is failed.Err:", err)
 		return art, errors.New(" Query article list is failed.")
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		var dl Article
 		var userId interface{}
@@ -213,6 +218,7 @@ func ArticleList(db *Sql, value string) ([]Article, error) {
 		sugar.Log.Info("Query a data from article once.", dl)
 		art = append(art, dl)
 	}
+
 	if err != nil {
 		sugar.Log.Error("Query  article  is Failed.", err)
 		return art, err

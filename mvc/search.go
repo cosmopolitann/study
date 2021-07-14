@@ -60,6 +60,8 @@ func Search(db *Sql, value string) (data []File, e error) {
 		sugar.Log.Error("Search data is failed.Err is ", err)
 		return arrfile, err
 	}
+	// 释放锁
+	defer rows.Close()
 	//scan data.
 	for rows.Next() {
 		var dl File
@@ -101,6 +103,8 @@ func ARticleSearch(db *Sql, value string) (data []ArticleAboutMeResp, e error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, errors.New("查询下载列表信息失败")
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		var dl ArticleAboutMeResp
 		err = rows.Scan(&dl.IsLike, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.NickName, &dl.Img, &dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize, &dl.LikeNum)
@@ -140,6 +144,7 @@ func ArticleSearchCagetory(db *Sql, value string) (data []Article, e error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, errors.New("查询下载列表信息失败")
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var dl Article
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)

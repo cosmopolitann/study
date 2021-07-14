@@ -28,14 +28,14 @@ func TestChatSendMsg(t *testing.T) {
 		panic(err)
 	}
 
-	token, _ := jwt.GenerateToken("411647506288480256", 30*24*60*60)
+	token, _ := jwt.GenerateToken("414443377656860672", 30*24*60*60)
 
 	req := vo.ChatSendMsgParams{
-		RecordId:    "411647506288480256_411642059200401408",
+		RecordId:    "414443377656860672_414455684399108096",
 		ContentType: 2,
 		Content:     "content 22222222",
-		FromId:      "411647506288480256",
-		ToId:        "411642059200401408",
+		FromId:      "414443377656860672",
+		ToId:        "414455684399108096",
 		Token:       token,
 	}
 	value, _ := json.Marshal(req)

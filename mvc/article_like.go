@@ -38,6 +38,8 @@ func AddArticleLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		sugar.Log.Error("Query article_like is failed.Err is ", err)
 		return err
 	}
+	// 释放锁
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.ArticleId, &dl.IsLike)

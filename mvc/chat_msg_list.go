@@ -40,6 +40,10 @@ func ChatMsgList(db *Sql, value string) ([]ChatMsg, error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return art, errors.New("查询下载列表信息失败")
 	}
+
+	// 释放锁
+	defer rows.Close()
+
 	for rows.Next() {
 		var dl ChatMsg
 		err = rows.Scan(&dl.Id, &dl.ContentType, &dl.Content, &dl.FromId, &dl.ToId, &dl.Ptime, &dl.IsWithdraw, &dl.IsRead, &dl.RecordId)

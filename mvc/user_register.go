@@ -80,6 +80,8 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 		sugar.Log.Error("AddUser Query data is failed.Err is ", err)
 		return resp, err
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
 		if err != nil {
@@ -154,6 +156,9 @@ func FindIsExistUser(db *Sql, user SysUser) (int64, error) {
 	sugar.Log.Info("user info is ", user)
 
 	rows, _ := db.DB.Query("SELECT id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') FROM sys_user where phone=?", user.Phone)
+
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img)
 		if err != nil {

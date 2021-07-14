@@ -26,6 +26,10 @@ func ArticleSearch(db *Sql, value string) (data Article, e error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return dl, err
 	}
+
+	// 释放锁
+	defer rows.Close()
+
 	for rows.Next() {
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
@@ -34,6 +38,7 @@ func ArticleSearch(db *Sql, value string) (data Article, e error) {
 		}
 		sugar.Log.Info("Query a entire data is ", dl)
 	}
+
 	sugar.Log.Info("Query all data is ", dl)
 	sugar.Log.Info("~~~~ Start ArticleSearch  End ~~~~  ")
 	return dl, nil

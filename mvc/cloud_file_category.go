@@ -52,6 +52,8 @@ func CloudFileCategory(db *Sql, value string) (data []File, e error) {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return arrfile, err
 	}
+	// 释放锁
+	defer rows.Close()
 	for rows.Next() {
 		var dl File
 		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)

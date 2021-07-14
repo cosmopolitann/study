@@ -48,6 +48,8 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 	}
+	// 释放锁
+	defer rows.Close()
 
 	for rows.Next() {
 		var ri vo.ChatRecordRespListParams

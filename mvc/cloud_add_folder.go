@@ -166,6 +166,10 @@ func FindOneDirIsExist(mvc *Sql, d vo.CloudAddFolderParams) (int64, error) {
 	//查询数据
 	var f File
 	rows, _ := mvc.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') FROM cloud_file where file_name=? and parent_id=? and is_folder=?", d.FileName, d.ParentId, 1)
+
+	// 释放锁
+	defer rows.Close()
+
 	for rows.Next() {
 		err := rows.Scan(&f.Id, &f.UserId, &f.FileName, &f.ParentId, &f.Ptime, &f.FileCid, &f.FileSize, &f.FileType, &f.IsFolder, &f.Thumbnail)
 		if err != nil {
