@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 	"time"
@@ -120,8 +121,15 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 		sugar.Log.Error("Create update file is failed.Err: ", err1)
 	}
 	sugar.Log.Info("----- Local update is already exist.  ----")
+	//
+	rand.Seed(time.Now().UnixNano())
+
+	//step2：获取随机数
+	num4 := rand.Intn(1000000) + 0
+	s1 := strconv.Itoa(num4)
+	nickname := "dragon" + s1
 	// sprintf sql
-	sql := fmt.Sprintf("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values('%s','%s','%s','%s',%d,%d,%d,'%s','%s')\n", sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+	sql := fmt.Sprintf("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values('%s','%s','%s','%s',%d,%d,%d,'%s','%s')\n", sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, nickname, user.Img)
 	_, err = f1.WriteString(sql)
 	if err != nil {
 		sugar.Log.Error(" Write update file is failed.Err: ", err)
