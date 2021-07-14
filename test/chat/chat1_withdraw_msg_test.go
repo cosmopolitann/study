@@ -28,7 +28,7 @@ func TestChatWithdrawMsg(t *testing.T) {
 		panic(err)
 	}
 
-	token, _ := jwt.GenerateToken("411647506288480256", 30*24*60*60)
+	token, _ := jwt.GenerateToken("411647506288480256", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
 
 	req := vo.ChatWithdrawMsgParams{
 		MsgId:  "412578662399873024",
