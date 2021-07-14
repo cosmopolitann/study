@@ -52,7 +52,16 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	//生成 token
 	// 手机号
 	//token,err:=jwt.GenerateToken(user.Phone,60)
-	resp.Token, _ = jwt.GenerateToken(sid, -1)
+	info := vo.RespSysUser{
+		Id:       sid,
+		Name:     user.NickName,
+		PeerId:   user.PeerId,
+		Phone:    user.Phone,
+		Sex:      user.Sex,
+		NickName: user.NickName,
+		Img:      user.Img,
+	}
+	resp.Token, _ = jwt.GenerateToken(info, -1)
 	resp.UserInfo = GetUser(db, sid)
 	// publish msg
 	topic := "/db-online-sync"
@@ -213,7 +222,16 @@ func AddUserTest(db *Sql, value string) (vo.UserLoginRespParams, error) {
 	//生成 token
 	// 手机号
 	//token,err:=jwt.GenerateToken(user.Phone,60)
-	resp.Token, _ = jwt.GenerateToken(sid, -1)
+	info := vo.RespSysUser{
+		Id:       sid,
+		Name:     user.NickName,
+		PeerId:   user.PeerId,
+		Phone:    user.Phone,
+		Sex:      user.Sex,
+		NickName: user.NickName,
+		Img:      user.Img,
+	}
+	resp.Token, _ = jwt.GenerateToken(info, -1)
 	resp.UserInfo = GetUser(db, sid)
 
 	return resp, nil
