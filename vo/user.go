@@ -20,7 +20,12 @@ type RespSysUser struct {
 	Utime    int64  `json:"utime"`    //更新时间
 	Img      string `json:"img"`      //图片
 }
-
+type RespArticleLike struct {
+	Id        string `json:"id"`        //id
+	UserId    string `json:"userId"`    //用户
+	ArticleId string `json:"articleId"` //文章id
+	IsLike    int64  `json:"isLike"`    //点赞
+}
 type UserLoginRespParams struct {
 	Token    string      `json:"token"`    //token
 	UserInfo RespSysUser `json:"userInfo"` //用户信息
