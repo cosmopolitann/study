@@ -79,7 +79,7 @@ func AddFile(db *Sql, value string) (string, error) {
 		snowid = sid
 	} else if c == 2 {
 		//
-
+		
 	}
 	return snowid, nil
 
