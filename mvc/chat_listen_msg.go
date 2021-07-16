@@ -26,15 +26,33 @@ func ChatListenMsgUpdateUser(token string) error {
 		listenUserId = ""
 		sugar.Log.Info("Anonymous User Listen")
 	} else {
-		claim, b := jwt.JwtVeriyToken(token)
-		if !b {
-			sugar.Log.Error("JwtVeriyToken failed:" + token)
-			return errors.New(" Token is invaild. ")
+		userId, err := parseToken(token)
+		if err != nil {
+			sugar.Log.Errorf("parseToken failed, token: %s, error: %s \n", token, err.Error())
+			return errors.New("token is invaild")
 		}
-		listenUserId = claim["id"].(string)
-		sugar.Log.Infof("Named User Listen %s", claim["UserId"].(string))
+
+		listenUserId = userId
+		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
 	return nil
+}
+
+func parseToken(token string) (string, error) {
+	claim, b := jwt.JwtVeriyToken(token)
+	if !b {
+		return "", errors.New("token is invaild. ")
+	}
+	userId, ok := claim["id"]
+	if !ok {
+		return "", fmt.Errorf("can not get userid from token: %s", token)
+	}
+	userIdStr, ok := userId.(string)
+	if !ok {
+		return "", fmt.Errorf("not string type userid: %v", userId)
+	}
+
+	return userIdStr, nil
 }
 
 func GetIpfsTopic(ipfsNode *ipfsCore.IpfsNode, topicJoin *vo.TopicJoinMap, topic string) (*pubsub.Topic, error) {
@@ -79,16 +97,15 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 		listenUserId = ""
 		sugar.Log.Info("Anonymous User Listen")
 	} else {
-		claim, b := jwt.JwtVeriyToken(token)
-		if !b {
-			sugar.Log.Error("JwtVeriyToken failed:" + token)
-			return errors.New(" Token is invaild. ")
+		userId, err := parseToken(token)
+		if err != nil {
+			sugar.Log.Errorf("parseToken failed, token: %s, error: %s \n", token, err.Error())
+			return errors.New("token is invaild")
 		}
-		listenUserId = claim["id"].(string)
+
+		listenUserId = userId
 		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
-
-	var err error
 
 	ipfsTopic, err := GetIpfsTopic(ipfsNode, TopicJoin, vo.CHAT_MSG_SWAP_TOPIC)
 	if err != nil {
@@ -230,7 +247,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 				continue
 			}
 
-			sugar.Log.Debugf("ChatListenMsg receive: %s\n", data.Data)
+			sugar.Log.Debugf("message receive: %s\n", data.Data)
 
 			res, err := handleWithdrawMsg(db, tmp)
 			if err != nil {

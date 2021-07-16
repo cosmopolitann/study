@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"testing"
-	"time"
-
-	"github.com/cosmopolitann/clouddb/sugar"
 
 	"github.com/cosmopolitann/clouddb/jwt"
+	"github.com/cosmopolitann/clouddb/myipfs"
+	"github.com/cosmopolitann/clouddb/sugar"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestChatListenMsg(t *testing.T) {
+
 	sugar.InitLogger()
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
@@ -30,23 +30,23 @@ func TestChatListenMsg(t *testing.T) {
 
 	ss := Testdb(d)
 
-	token, _ := jwt.GenerateToken("409330202166956089", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
+	token, _ := jwt.GenerateToken("414207114215428096", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
 
 	fmt.Println(token)
 	sugar.Log.Info("token: ", token)
 
 	var cl ChatLister
 
-	// node, err := ipfs.GetIpfsNode("/Users/apple/.ipfs")
-	// if err != nil {
-	// 	sugar.Log.Info("xxxxx----", err)
-	// 	panic(err)
-	// }
+	node, err := myipfs.GetIpfsNode("/Users/apple/projects/clouddb/test/chat/.ipfs")
+	if err != nil {
+		sugar.Log.Info("xxxxx----", err)
+		panic(err)
+	}
 
-	resp := ss.ChatListenMsg(nil, token, &cl)
-	t.Log("获取返回的数据 :=  ", resp)
+	err = ss.ChatListenMsgBlocked(node, token, &cl)
+	fmt.Println(err)
 
-	time.Sleep(time.Hour)
+	select {}
 
 }
 
