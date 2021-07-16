@@ -114,6 +114,13 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 
 	sugar.Log.Info("ChatSendMsg success")
 
+	// update last msg
+	_, err = db.DB.Exec("UPDATE chat_record SET last_msg = ?, ptime = ? WHERE id = ?", ret.Content, ret.Ptime, ret.RecordId)
+	if err != nil {
+		sugar.Log.Error("UPDATE chat_record .Err is", err)
+		return ret, err
+	}
+
 	publishUserInfo(ipfsNode, db, userId)
 
 	// 发布消息
