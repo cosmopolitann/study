@@ -71,6 +71,12 @@ type SyncRecieveLikeParams struct {
 	Data   ArticleLikeParams `json:"data"` //同步数据
 }
 
+// 用户更新
+type SyncRecieveUserUpdateParams struct {
+	Method string      `json:"type"` //同步方法
+	Data   SyncSysUser `json:"data"` //同步数据
+}
+
 // 取消点赞
 type SyncRecieveCancelLikeParams struct {
 	Method string            `json:"type"` //同步方法

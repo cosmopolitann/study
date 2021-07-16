@@ -13,7 +13,7 @@ func TestArticleQuery(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong.db")
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +24,7 @@ func TestArticleQuery(t *testing.T) {
 	ss := Testdb(d)
 	// request json  params
 	// test 1
-	value := `{"id":"413271162890489856"}
+	value := `{"id":"419469508080574464"}
 `
 	t.Log("request value :=", value)
 	resp := ss.ArticleQuery(value)

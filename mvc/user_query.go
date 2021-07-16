@@ -1,12 +1,14 @@
 package mvc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
+	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
 
 //用户查询信息
@@ -48,7 +50,7 @@ func UserQuery(db *Sql, value string) (data SysUser, e error) {
 
 // 更新用户信息
 
-func UserUpdate(db *Sql, value string) (e error) {
+func UserUpdate(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (e error) {
 	var userlist vo.UserUpdateParams
 	err := json.Unmarshal([]byte(value), &userlist)
 	if err != nil {
@@ -80,8 +82,75 @@ func UserUpdate(db *Sql, value string) (e error) {
 	if affect == 0 {
 		return errors.New(" update user info  is failed. ")
 	}
+	var dl vo.RespSysUser
+
+	//查询用户信息
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", userid)
+	if err != nil {
+		sugar.Log.Error("Query data is failed.Err is ", err)
+		return err
+	}
+	// 释放锁
+	defer rows.Close()
+	for rows.Next() {
+		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
+		if err != nil {
+			sugar.Log.Error("Query scan data is failed.The err is ", err)
+			return err
+		}
+		sugar.Log.Info("Query a entire data is ", dl)
+	}
+
+	//
+	topic := "/db-online-sync"
+	sugar.Log.Info("Publish Topic: ", "/db-online-sync")
+	sugar.Log.Info("Publish recieve: ", value)
+	ctx := context.Background()
+	//Topic join.
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
+		tp, err = ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
+			return err
+		}
+		TopicJoin.Store(topic, tp)
+	}
+	var s3 UserAd
+	s3.Type = "receiveUserUpdate"
+	s3.Data = dl
+	s3.FromId = ipfsNode.Identity.String()
+	//marshal UserAd.
+	//the second step
+	sugar.Log.Info("--- second step ---")
+
+	jsonBytes, err := json.Marshal(s3)
+	if err != nil {
+		sugar.Log.Error("Publish msg is failed.Err:", err)
+		return err
+	}
+	sugar.Log.Info("Frwarding information:=", string(jsonBytes))
+	sugar.Log.Info("Local PeerId :=", ipfsNode.Identity.String())
+	//the  third  step .
+	sugar.Log.Info("--- third step ---")
+
+	err = tp.Publish(ctx, jsonBytes)
+	if err != nil {
+		sugar.Log.Error("Publish Err:", err)
+		return err
+	}
+	sugar.Log.Info("~~~~  Publish msg is successful.   ~~~~  ")
+	//
 	sugar.Log.Info("~~~~~   update user  is Successful ~~~~~~")
 	return nil
+}
+
+type UserUpdateInfo struct {
+	Type string `json:"type"`
+
+	Data vo.RespSysUser `json:"data"`
+
+	FromId string `json:"from"`
 }
 
 // 查询 对方 用户 信息

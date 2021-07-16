@@ -135,7 +135,7 @@ func SyncAticlePlay(db *Sql, value string) error {
 		sugar.Log.Info("Query a entire data is ", dl)
 	}
 	if dl.Id == "" {
-		return errors.New(" Update is failed . ")
+		return errors.New(" Update id is inexist . ")
 	}
 	//update play num + 1
 	stmt, err := db.DB.Prepare("update article set play_num=? where id=?")
@@ -263,7 +263,7 @@ func SyncArticleCancelLike(db *Sql, value string) error {
 	}
 	sugar.Log.Info(" Marshal data is:", art)
 
-	stmt, err := db.DB.Prepare("insert or replace into article_like (id,user_id,article_id,is_like) values (id,user_id,article_id,is_like)")
+	stmt, err := db.DB.Prepare("insert or replace into article_like (id,user_id,article_id,is_like) values (?,?,?,?)")
 
 	if err != nil {
 		sugar.Log.Error(" Sync Update  data is failed.The err is ", err)
@@ -281,6 +281,48 @@ func SyncArticleCancelLike(db *Sql, value string) error {
 	}
 	sugar.Log.Info("---Start   Sync   SyncArticleCancelLike   End ---- ")
 
+	return nil
+}
+
+func SyncUserUpdate(db *Sql, value string) error {
+	sugar.Log.Info("---Start   Sync   SyncUserUpdate    ---- ")
+	var user SysUser
+	err := json.Unmarshal([]byte(value), &user)
+	if err != nil {
+		sugar.Log.Error("Sync User Unmarshal is failed.Err:", err)
+		return err
+	}
+	sugar.Log.Info("params:= ", user)
+	// l, e := FindIsExistUser(db, user)
+	// if e != nil {
+	// 	sugar.Log.Error("FindIsExistUser info is Failed.")
+	// }
+	// // l > 0 user is exist.
+	// if l > 0 {
+	// 	sugar.Log.Error("user is exist.")
+	// 	return errors.New(" User is already exist. ")
+	// }
+	//inExist insert into sys_user.
+	//create now time
+	t := time.Now().Unix()
+	stmt, err := db.DB.Prepare("INSERT OR REPLACE INTO sys_user values(?,?,?,?,?,?,?,?,?)")
+	if err != nil {
+		sugar.Log.Error("Insert data to sys_user is failed.Err:", err)
+		return err
+	}
+	//sid := strconv.FormatInt(user.Id, 10)
+	res, err := stmt.Exec(user.Id, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+	if err != nil {
+		sugar.Log.Error("Insert data to sys_user is failed.Err:", err)
+		return err
+	}
+	c, _ := res.RowsAffected()
+	if c == 0 {
+		return errors.New(" Insert into sys_user is failed. ")
+	}
+	sugar.Log.Info("---Start Sync User End---- ")
+
+	sugar.Log.Info("~~~~~   Insert into sys_user data is Successful ~~~~~~", c)
 	return nil
 }
 
@@ -381,10 +423,6 @@ func SyncArticleShare(db *Sql, value string) error {
 		sugar.Log.Error("Update  is failed.The err is ", err)
 		return err
 	}
-	return nil
-}
-
-func SyncUserUpdate(db *Sql, value string) error {
 	return nil
 }
 
@@ -636,6 +674,35 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 					}
 					sugar.Log.Info("~~~  Sync receiveArticleCancelLike is successful!  ~~~")
 					sugar.Log.Info("~~~   Add  receiveArticleCancelLike  End ~~~")
+				} else if recieve.Method == "receiveUserUpdate" {
+					//
+					sugar.Log.Info("~~~  Start receiveUserUpdate   ~~~")
+					//  add article into table.
+					sugar.Log.Info("~~~ Because Method == receiveUserUpdate ~~~~")
+					sugar.Log.Info(" recieve.Method :=", recieve.Method)
+					//unmarshal params.
+					var syn vo.SyncRecieveUserUpdateParams
+					err = json.Unmarshal(msg.Data, &syn)
+					if err != nil {
+						sugar.Log.Error("Sync marshal params is failed.Err:", err)
+						continue
+					}
+					// string
+					// marshal syn.data => userInfo.
+					userInfo, err := json.Marshal(syn.Data)
+					if err != nil {
+						sugar.Log.Error("Marshal params is failed.Err:", err)
+						continue
+					}
+					// start sync ArticleShareAdd
+					err = db.SyncUserUpdate(string(userInfo))
+					if err != nil {
+						sugar.Log.Error("Sync SyncUserUpdate is failed.Err:", err)
+						continue
+					}
+					sugar.Log.Info("~~~  Sync SyncUserUpdate is successful!  ~~~")
+					sugar.Log.Info("~~~   Add  SyncUserUpdate  End ~~~")
+
 				} else {
 					sugar.Log.Info("~~~~~  No ~~~~~ ")
 					sugar.Log.Info("~~~~~  Continue ~~~~~ ")
@@ -1238,11 +1305,11 @@ func PostFormDataPublicgatewayFile(path string, name string) (string, error) {
 	}
 	bodyWrite.Close() //will closed, will take w.w.boundary copy => w.writer
 	// create requet.
-	sugar.Log.Info(" request url=", "http://182.150.116.150:15001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32")
+	sugar.Log.Info(" request url=", "http://47.108.166.41:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32")
 
 	contentType := bodyWrite.FormDataContentType()
 	// req, err := http.NewRequest(http.MethodPost, "http://182.150.116.150:15001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
-	req, err := http.NewRequest(http.MethodPost, "http://182.150.116.150:15001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
+	req, err := http.NewRequest(http.MethodPost, "http://47.108.166.41:5001/api/v0/add?chunker=size-262144&pin=true&hash=sha2-256&inline-limit=32", bodyBuf)
 
 	sugar.Log.Info("  request contentType =", contentType)
 	if err != nil {

@@ -122,13 +122,13 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	}
 	sugar.Log.Error("---  发布的消息  完成  ---")
 
-	//==
-	err = tp.Publish(ctx, jsonBytes)
-	if err != nil {
-		sugar.Log.Error("发布错误:", err)
-		return err
-	}
-	sugar.Log.Error("---  发布的消息  完成  ---")
+	// //==
+	// err = tp.Publish(ctx, jsonBytes)
+	// if err != nil {
+	// 	sugar.Log.Error("发布错误:", err)
+	// 	return err
+	// }
+	// sugar.Log.Error("---  发布的消息  完成  ---")
 
 	return nil
 }

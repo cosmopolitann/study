@@ -96,9 +96,9 @@ func (db *Sql) OtherUserQuery(user string) string {
 
 //用户 更新
 
-func (db *Sql) UserUpdate(user string) string {
+func (db *Sql) UserUpdate(ipfsNode *ipfsCore.IpfsNode, user string) string {
 
-	e := UserUpdate(db, user)
+	e := UserUpdate(ipfsNode, db, user)
 
 	if e != nil {
 		return vo.ResponseErrorMsg(400, e.Error())
@@ -721,6 +721,12 @@ func (db *Sql) SyncArticleLike(dInfo string) error {
 func (db *Sql) SyncArticleCancelLikee(dInfo string) error {
 
 	e := SyncArticleCancelLike(db, dInfo)
+	return e
+}
+
+//同步用户更新
+func (db *Sql) SyncUserUpdate(dInfo string) error {
+	e := SyncUserUpdate(db, dInfo)
 	return e
 }
 

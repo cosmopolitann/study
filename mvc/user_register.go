@@ -53,7 +53,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	// 手机号
 	//token,err:=jwt.GenerateToken(user.Phone,60)
 
-	resp.Token, _ = jwt.GenerateToken(user.Id, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Sex, user.Ptime, user.Utime, -1)
+	resp.Token, _ = jwt.GenerateToken(sid, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Sex, user.Ptime, user.Utime, -1)
 	resp.UserInfo = GetUser(db, sid)
 	// publish msg
 	topic := "/db-online-sync"

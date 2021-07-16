@@ -24,12 +24,19 @@ func CloudFileRename(db *Sql, value string) error {
 	if !b {
 		return errors.New("token 失效")
 	}
-	//userid:=claim["id"].(string)
+	userid := claim["id"].(string)
 	sugar.Log.Info("claim := ", claim)
-	var dl File
+	var dl string
 	//查询数据
 	//stmt, err := db.DB.Query("select * from cloud_file where file_name=? and is_folder=? and parent_id",)
-	rows, err := db.DB.Query("select a.id from cloud_file as a where file_name=? and is_folder=? and parent_id", art.Rename, art.IsFolder, art.ParentId)
+
+	sugar.Log.Info("rename:= ", art.Rename)
+	sugar.Log.Info("art.IsFolder:= ", art.IsFolder)
+	sugar.Log.Info("art.ParentId:= ", art.ParentId)
+
+	// rows, err := db.DB.Query("select a.id from cloud_file as a where a.file_name=? and a.is_folder=? and a.parent_id", art.Rename, art.IsFolder, art.ParentId)
+	rows, err := db.DB.Query("select IFNULL(a.id,'') FROM cloud_file as a WHERE a.file_name=? and a.is_folder=? and a.parent_id=? and user_id=?", art.Rename, art.IsFolder, art.ParentId, userid)
+
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return errors.New("查询下载列表信息失败")
@@ -39,7 +46,7 @@ func CloudFileRename(db *Sql, value string) error {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&dl.Id)
+		err = rows.Scan(&dl)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return err
@@ -48,7 +55,7 @@ func CloudFileRename(db *Sql, value string) error {
 	}
 	sugar.Log.Info("查询到要重命名的文件是", dl)
 
-	if dl.Id != "" {
+	if dl != "" {
 		return errors.New("文件名称已经存在")
 	} else {
 		//更新

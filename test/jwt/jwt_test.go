@@ -71,7 +71,7 @@ func TestJwt(t *testing.T) {
 	fmt.Println("开始")
 
 	//                  id, peerId, name, phone, nickname, img string, sex, ptime, utime int64
-	token, err := GenerateToken("123", "Qm123", "nick", "181", "sdf", "http", 0, 1, 1, 60*60*60)
+	token, err := GenerateToken("416203556291354624", "Qm123", "nick", "181", "sdf", "http", 0, 1, 1, 60*60*60)
 
 	if err != nil {
 		t.Log("jwt is failed.")

@@ -1,6 +1,7 @@
 package mvc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strconv"
@@ -48,7 +49,18 @@ func AddArticleLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 			return err
 		}
 	}
-
+	topic := "/db-online-sync"
+	ctx := context.Background()
+	//Topic join.
+	tp, ok := TopicJoin.Load(topic)
+	if !ok {
+		tp, err = ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
+			return err
+		}
+		TopicJoin.Store(topic, tp)
+	}
 	if dl.Id == "" {
 		//insert a new entire.
 		id := utils.SnowId()
@@ -70,6 +82,33 @@ func AddArticleLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 			return errors.New(" Insert data into article_like table is failed. ")
 		}
 		sugar.Log.Info("~~~~  AddArticleLike   Method   End ~~~~~")
+		//pubsub
+		var s3 AticleLikeAd
+		s3.Type = "receiveArticleLike"
+		s3.Data = dl
+		s3.FromId = ipfsNode.Identity.String()
+		//marshal UserAd.
+		//the second step
+		sugar.Log.Info("--- second step ---")
+
+		jsonBytes, err := json.Marshal(s3)
+		if err != nil {
+			sugar.Log.Error("Publish msg is failed.Err:", err)
+			return err
+		}
+		sugar.Log.Info("Frwarding information:=", string(jsonBytes))
+		sugar.Log.Info("Local PeerId :=", ipfsNode.Identity.String())
+		//the  third  step .
+		sugar.Log.Info("--- third step ---")
+
+		err = tp.Publish(ctx, jsonBytes)
+		if err != nil {
+			sugar.Log.Error("Publish Err:", err)
+			return err
+		}
+		sugar.Log.Info("~~~~  Publish msg is successful.   ~~~~  ")
+
+		//
 		return nil
 	} else {
 		//更新字段  is_ike = 1
@@ -89,7 +128,44 @@ func AddArticleLike(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 			return err
 		}
 		sugar.Log.Info("~~~~  AddArticleLike   Method   End ~~~~~")
+
+		//pubsub
+
+		var s3 AticleLikeAd
+
+		s3.Type = "receiveArticleLike"
+		s3.Data = dl
+		s3.FromId = ipfsNode.Identity.String()
+		//marshal UserAd.
+		//the second step
+		sugar.Log.Info("--- second step ---")
+
+		jsonBytes, err := json.Marshal(s3)
+		if err != nil {
+			sugar.Log.Error("Publish msg is failed.Err:", err)
+			return err
+		}
+		sugar.Log.Info("Frwarding information:=", string(jsonBytes))
+		sugar.Log.Info("Local PeerId :=", ipfsNode.Identity.String())
+		//the  third  step .
+		sugar.Log.Info("--- third step ---")
+
+		err = tp.Publish(ctx, jsonBytes)
+		if err != nil {
+			sugar.Log.Error("Publish Err:", err)
+			return err
+		}
+		sugar.Log.Info("~~~~  Publish msg is successful.   ~~~~  ")
+
 		return nil
 	}
 
+}
+
+type AticleLikeAd struct {
+	Type string `json:"type"`
+
+	Data ArticleLike `json:"data"`
+
+	FromId string `json:"from"`
 }
