@@ -44,7 +44,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 	sugar.Log.Debugf("Get User: %#v", user)
 
 	// 查询会话列表
-	rows, err := db.DB.Query("SELECT id, from_id, to_id, ptime, last_msg FROM chat_record WHERE from_id = ? OR to_id = ?", user.Id, user.Id)
+	rows, err := db.DB.Query("SELECT id, from_id, to_id, ptime, last_msg FROM chat_record WHERE from_id = ? OR to_id = ? ORDER BY ptime DESC", user.Id, user.Id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 	}
