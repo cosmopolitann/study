@@ -30,9 +30,9 @@ func TestChatRecordList(t *testing.T) {
 	token, _ := jwt.GenerateToken("414202692580151296", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
 
 	req := vo.ChatRecordListParams{
-		FromId: "414202692580151296",
-		Token:  token,
-		// NoUserIds: []string{"414537917285797888"},
+		FromId:     "414202692580151296",
+		Token:      token,
+		CustomerId: "414202692580151333",
 	}
 
 	value, _ := json.Marshal(req)

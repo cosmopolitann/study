@@ -17,11 +17,10 @@ type ChatAddMsgParams struct {
 //获取消息分页
 
 type ChatMsgListParams struct {
-	PageSize   int64  `json:"pageSize"`
-	PageNum    int64  `json:"pageNum"`
-	RecordType string `json:"recordType"`
-	RecordId   string `json:"recordId"`
-	Token      string `json:"token"` //token
+	PageSize int64  `json:"pageSize"`
+	PageNum  int64  `json:"pageNum"`
+	RecordId string `json:"recordId"`
+	Token    string `json:"token"` //token
 
 }
 
@@ -35,7 +34,7 @@ type ArticleListParams struct {
 type ArticleListUserParams struct {
 	PageSize int64  `json:"pageSize"`
 	PageNum  int64  `json:"pageNum"`
-	UserId   string `json:"userId"` //token
+	UserId   string `json:"userId"` //UserId
 }
 
 // 删除消息

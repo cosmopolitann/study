@@ -3,6 +3,8 @@ package mvc
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"time"
 
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
@@ -32,6 +34,32 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 	sugar.Log.Info("claim := ", claim)
 
 	userId := claim["id"].(string)
+
+	if len(req.CustomerId) > 0 {
+		var rid string
+
+		recordId := genRecordID(userId, req.CustomerId)
+		err = db.DB.QueryRow("SELECT id FROM chat_record where id = ?", recordId).Scan(&rid)
+		if err != nil && err != sql.ErrNoRows {
+			sugar.Log.Error("Query data is failed.Err is ", err)
+			return ret, errors.New("查询下载列表信息失败")
+		}
+
+		if rid == "" {
+			// no room
+			res, err := db.DB.Exec("INSERT INTO chat_record (id, name, from_id, to_id, ptime, last_msg) VALUES (?, ?, ?, ?, ?, ?)", recordId, "", userId, req.CustomerId, time.Now().Unix(), "")
+			if err != nil {
+				sugar.Log.Error("INSERT INTO chat_record is Failed.", err)
+				return ret, err
+			}
+
+			_, err = res.LastInsertId()
+			if err != nil {
+				sugar.Log.Error("INSERT INTO chat_record is Failed2.", err)
+				return ret, err
+			}
+		}
+	}
 
 	var user SysUser
 
@@ -64,20 +92,6 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 		peerId := ""
 
 		if ri.FromId == user.Id {
-			if len(req.NoUserIds) > 0 {
-				isFound := false
-				for _, v := range req.NoUserIds {
-					if ri.ToId == v {
-						isFound = true
-						break
-					}
-				}
-
-				if isFound {
-					continue
-				}
-			}
-
 			peerId = ri.ToId
 
 			ri.FromName = user.Name
@@ -90,20 +104,6 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 		}
 
 		if ri.ToId == user.Id {
-			if len(req.NoUserIds) > 0 {
-				isFound := false
-				for _, v := range req.NoUserIds {
-					if ri.FromId == v {
-						isFound = true
-						break
-					}
-				}
-
-				if isFound {
-					continue
-				}
-			}
-
 			peerId = ri.FromId
 
 			ri.ToName = user.Name

@@ -16,9 +16,9 @@ type ChatRecoredAddParams struct {
 //获取消息记录列表
 
 type ChatRecordListParams struct {
-	FromId    string   `json:"fromId"`
-	Token     string   `json:"token"`
-	NoUserIds []string `json:"noUserIds"`
+	FromId     string `json:"fromId"`
+	Token      string `json:"token"`
+	CustomerId string `json:"customerId"`
 }
 
 // 获取消息记录列表

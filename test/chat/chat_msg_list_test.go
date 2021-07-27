@@ -33,11 +33,10 @@ func TestChatMsgList(t *testing.T) {
 	sugar.Log.Info("token: ", token)
 
 	param := vo.ChatMsgListParams{
-		PageNum:    1,
-		PageSize:   2,
-		RecordType: "user",
-		RecordId:   "414537917285797888",
-		Token:      token,
+		PageNum:  1,
+		PageSize: 2,
+		RecordId: "414202692580151296_414537917285797888",
+		Token:    token,
 	}
 
 	value, _ := json.Marshal(param)
