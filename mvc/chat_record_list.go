@@ -64,6 +64,20 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 		peerId := ""
 
 		if ri.FromId == user.Id {
+			if len(req.NoUserIds) > 0 {
+				isFound := false
+				for _, v := range req.NoUserIds {
+					if ri.ToId == v {
+						isFound = true
+						break
+					}
+				}
+
+				if isFound {
+					continue
+				}
+			}
+
 			peerId = ri.ToId
 
 			ri.FromName = user.Name
@@ -74,7 +88,22 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			ri.FromSex = user.Sex
 
 		}
+
 		if ri.ToId == user.Id {
+			if len(req.NoUserIds) > 0 {
+				isFound := false
+				for _, v := range req.NoUserIds {
+					if ri.FromId == v {
+						isFound = true
+						break
+					}
+				}
+
+				if isFound {
+					continue
+				}
+			}
+
 			peerId = ri.FromId
 
 			ri.ToName = user.Name

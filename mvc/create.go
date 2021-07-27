@@ -326,6 +326,16 @@ func (db *Sql) ArticleList(dInfo string) string {
 	return vo.ResponseSuccess(data)
 }
 
+//  用户文章列表
+func (db *Sql) ArticleListUser(dInfo string) string {
+	data, e := ArticleListUser(db, dInfo)
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+
+	return vo.ResponseSuccess(data)
+}
+
 // 文章列表分类
 
 func (db *Sql) ArticleCategory(dInfo string) string {

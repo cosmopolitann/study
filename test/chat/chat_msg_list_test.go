@@ -27,22 +27,23 @@ func TestChatMsgList(t *testing.T) {
 	fmt.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
 
-	token, _ := jwt.GenerateToken("411647506288480256", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
+	token, _ := jwt.GenerateToken("414202692580151296", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
 
 	fmt.Println(token)
 	sugar.Log.Info("token: ", token)
 
 	param := vo.ChatMsgListParams{
-		PageNum:  2,
-		PageSize: 2,
-		RecordId: "411647506288480256_411642059200401408",
-		Token:    token,
+		PageNum:    1,
+		PageSize:   2,
+		RecordType: "user",
+		RecordId:   "414537917285797888",
+		Token:      token,
 	}
 
 	value, _ := json.Marshal(param)
 
 	resp := ss.ChatMsgList(string(value))
 
-	t.Log("获取返回的数据 :=  ", resp)
+	fmt.Println("获取返回的数据 :=  ", resp)
 
 }
