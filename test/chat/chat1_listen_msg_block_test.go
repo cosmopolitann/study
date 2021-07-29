@@ -57,7 +57,7 @@ func TestChatListenMsgBlock(t *testing.T) {
 			time.Sleep(20 * time.Second)
 			token = ""
 			if t != "" {
-				token, _ = jwt.GenerateToken(t, "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
+				token, _ = jwt.GenerateToken(t, "peerid", "name", "phone", "nickname", "img", "2", 0, 1, 1, 30*24*60*60)
 			}
 			ss.ChatListenMsgUpdateUser(token)
 		}
@@ -68,6 +68,7 @@ func TestChatListenMsgBlock(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 }
 
 type ChatListerBlocked struct{}
