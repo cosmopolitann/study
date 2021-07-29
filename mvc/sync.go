@@ -464,11 +464,24 @@ func SyncTopicData(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	}
 	for {
 		sugar.Log.Info("-----  Start Subscribe ------")
+
+		if sub == nil {
+			sugar.Log.Error("*pubsub.Subscription is nil, i will return 1")
+			return fmt.Errorf("sub is nil")
+		}
+
 		data, err := sub.Next(ctx)
 		if err != nil {
 			sugar.Log.Error("subscribe failed.", err)
+			time.Sleep(200 * time.Millisecond)
 			continue
 		}
+
+		if data == nil {
+			sugar.Log.Error("*pubsub.Message is nil, i will return 1")
+			return fmt.Errorf("sub2 is nil")
+		}
+
 		sugar.Log.Info("~~~  Recieve Data  ~~~~")
 		msg := data.Message
 		fromId := msg.From

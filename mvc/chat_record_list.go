@@ -35,7 +35,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 
 	userId := claim["id"].(string)
 
-	if len(req.CustomerId) > 0 {
+	if len(req.CustomerId) > 0 && req.CustomerId != userId {
 		var rid string
 
 		recordId := genRecordID(userId, req.CustomerId)

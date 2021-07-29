@@ -629,16 +629,6 @@ func (db *Sql) ChatWithdrawMsg(ipfsNode *ipfsCore.IpfsNode, msg string) string {
 	return vo.ResponseSuccess()
 }
 
-// ChatListenMsg  监听消息
-func (db *Sql) ChatListenMsg(ipfsNode *ipfsCore.IpfsNode, token string, clh vo.ChatListenHandler) string {
-
-	err := ChatListenMsg(ipfsNode, db, token, clh)
-	if err != nil {
-		return vo.ResponseErrorMsg(400, err.Error())
-	}
-	return vo.ResponseSuccess()
-}
-
 // ChatListenMsgBlocked  监听消息 阻塞式
 func (db *Sql) ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, token string, clh vo.ChatListenHandler) error {
 
