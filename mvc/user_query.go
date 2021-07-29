@@ -85,7 +85,7 @@ func UserUpdate(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (e error) {
 	var dl vo.RespSysUser
 
 	//查询用户信息
-	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", userid)
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null'),IFNULL(role,'2') from sys_user where id=?", userid)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
@@ -93,7 +93,7 @@ func UserUpdate(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (e error) {
 	// 释放锁
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
+		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img, &dl.Role)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return err
@@ -168,7 +168,7 @@ func OtherUserQuery(db *Sql, value string) (data SysUser, e error) {
 	sugar.Log.Info("Marshal data is  ", userlist)
 	sugar.Log.Info(" UserId := ", userlist.UserId)
 	//query
-	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", userlist.UserId)
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null'),IFNULL(role,'2') from sys_user where id=?", userlist.UserId)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return dl, err

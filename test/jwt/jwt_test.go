@@ -27,6 +27,7 @@ type LoginClaims struct {
 	Img      string `json:"img"`      //头像
 	Ptime    int64  `json:"ptime"`    //时间
 	Utime    int64  `json:"utime"`    //更新时间
+	Role     string `json:"string"`
 	jwt.StandardClaims
 }
 
@@ -34,7 +35,7 @@ const (
 	tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
 )
 
-func GenerateToken(id, peerId, name, phone, nickname, img string, sex, ptime, utime int64, expireDuration int64) (string, error) {
+func GenerateToken(id, peerId, name, phone, nickname, img, role string, sex, ptime, utime int64, expireDuration int64) (string, error) {
 	// 将 uid，用户角色， 过期时间作为数据写入 token 中
 
 	calim := LoginClaims{
@@ -47,6 +48,7 @@ func GenerateToken(id, peerId, name, phone, nickname, img string, sex, ptime, ut
 		Img:            img,
 		Ptime:          ptime,
 		Utime:          utime,
+		Role:           role,
 		StandardClaims: jwt.StandardClaims{},
 	}
 	if expireDuration != -1 {
@@ -69,9 +71,9 @@ func GenerateToken(id, peerId, name, phone, nickname, img string, sex, ptime, ut
 func TestJwt(t *testing.T) {
 	//token,err:=GenerateToken("10001",30*24*60*60)
 	fmt.Println("开始")
-
+	// 414207114215428096', '', '','', 0, 1627444008, 1627444008, '人工客服1', ''
 	//                  id, peerId, name, phone, nickname, img string, sex, ptime, utime int64
-	token, err := GenerateToken("416203556291354624", "Qm123", "nick", "181", "sdf", "http", 0, 1, 1, 60*60*60)
+	token, err := GenerateToken("414207114215428096", "", "星河飞天-人工客服1", "", "人工客服1", "", "2", 0, 1627444008, 1627444008, 60*60*60)
 
 	if err != nil {
 		t.Log("jwt is failed.")

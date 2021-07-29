@@ -19,6 +19,8 @@ type RespSysUser struct {
 	Ptime    int64  `json:"ptime"`    //创建时间
 	Utime    int64  `json:"utime"`    //更新时间
 	Img      string `json:"img"`      //图片
+	Role     string `json:"role"`     //角色
+
 }
 type RespArticleLike struct {
 	Id        string `json:"id"`        //id

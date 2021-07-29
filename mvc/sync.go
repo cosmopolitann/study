@@ -45,13 +45,13 @@ func SyncUser(db *Sql, value string) error {
 	//inExist insert into sys_user.
 	//create now time
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO sys_user values(?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO sys_user values(?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed.Err:", err)
 		return err
 	}
 	//sid := strconv.FormatInt(user.Id, 10)
-	res, err := stmt.Exec(user.Id, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+	res, err := stmt.Exec(user.Id, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img, user.Role)
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed.Err:", err)
 		return err
@@ -80,14 +80,14 @@ func SyncArticle(db *Sql, value string) error {
 	sugar.Log.Info("Marshal data is  ", art)
 	// id := utils.SnowId()
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.", err)
 		return err
 	}
 	// sid := strconv.FormatInt(id, 10)
 	stmt.QueryRow()
-	res, err := stmt.Exec(art.Id, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	res, err := stmt.Exec(art.Id, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize, art.ExternalHref)
 	if err != nil {
 		sugar.Log.Error("Insert into article  is Failed.", err)
 		return err

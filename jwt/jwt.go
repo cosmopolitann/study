@@ -25,6 +25,7 @@ type LoginClaims struct {
 	Ptime    int64  `json:"ptime"`    //时间
 	Utime    int64  `json:"utime"`    //更新时间
 	Img      string `json:"img"`      //头像
+	Role     string `json:"role"`     //角色
 	jwt.StandardClaims
 }
 
@@ -32,7 +33,7 @@ const (
 	tokenStr = "adsfa#^$%#$fgrf" //houxu fengzhuang dao nacos
 )
 
-func GenerateToken(id, peerId, name, phone, nickname, img string, sex, ptime, utime int64, expireDuration int64) (string, error) {
+func GenerateToken(id, peerId, name, phone, nickname, img, role string, sex, ptime, utime int64, expireDuration int64) (string, error) {
 	calim := LoginClaims{
 		Id:             id,
 		PeerId:         peerId,
@@ -43,6 +44,7 @@ func GenerateToken(id, peerId, name, phone, nickname, img string, sex, ptime, ut
 		Img:            img,
 		Ptime:          ptime,
 		Utime:          utime,
+		Role:           role,
 		StandardClaims: jwt.StandardClaims{},
 	}
 	if expireDuration != -1 {

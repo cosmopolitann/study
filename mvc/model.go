@@ -12,6 +12,7 @@ type SysUser struct {
 	Ptime    int64  `json:"-"`        //时间
 	Utime    int64  `json:"-"`        //更新时间
 	Img      string `json:"img"`      //头像
+	Role     string `json:"role"`     //角色
 
 }
 

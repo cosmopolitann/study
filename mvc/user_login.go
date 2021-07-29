@@ -27,7 +27,7 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 	}
 	//
 	//              id, peerId, name, phone, nickname, img string, sex, ptime, utime int64
-	token, err := jwt.GenerateToken(user.Id, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Sex, user.Ptime, user.Utime, -1)
+	token, err := jwt.GenerateToken(user.Id, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Role, user.Sex, user.Ptime, user.Utime, -1)
 	if err != nil {
 		return resp, errors.New("生成token失败，请重新登录")
 	}
@@ -42,7 +42,7 @@ func UserLogin(db *Sql, value string) (vo.UserLoginRespParams, error) {
 func GetUser(db *Sql, userid string) vo.RespSysUser {
 	fmt.Println("获得用户,id:", userid)
 	var s vo.RespSysUser
-	rows, err := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user as a where id = ? ", userid)
+	rows, err := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img,role FROM sys_user as a where id = ? ", userid)
 	if err != nil {
 		sugar.Log.Error("查找用户表失败,sql错误:", err.Error())
 		return s
@@ -50,7 +50,7 @@ func GetUser(db *Sql, userid string) vo.RespSysUser {
 	// 释放锁
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img)
+		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img, &s.Role)
 		if err != nil {
 			sugar.Log.Error("查找用户表失败,原因:", err.Error())
 			return s
@@ -65,12 +65,12 @@ func GetUser(db *Sql, userid string) vo.RespSysUser {
 func FindIsExistLoginUser(db *Sql, data string) (int64, error, vo.RespSysUser) {
 	var s vo.RespSysUser
 	sugar.Log.Info("用户信息是", data)
-	rows, _ := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img FROM sys_user as a where phone=?", data)
+	rows, _ := db.DB.Query("SELECT id,peer_id,name,phone,sex,ptime,utime,nickname,img,role FROM sys_user as a where phone=?", data)
 
 	// 释放锁
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img)
+		err := rows.Scan(&s.Id, &s.PeerId, &s.Name, &s.Phone, &s.Sex, &s.Ptime, &s.Utime, &s.NickName, &s.Img, &s.Role)
 		if err != nil {
 			sugar.Log.Error("查找用户表失败,原因:", err)
 			return 0, err, s

@@ -33,7 +33,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	id := utils.SnowId()
 	//create now time
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values(?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img,role) values(?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed:", err.Error())
 		return resp, err
@@ -42,7 +42,8 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	user.Phone = sid //手机号注册不用了,phone字段直接用id来填,兼容老版本
 	user.Sex = 0
 	user.NickName = "dragon" + sid[len(sid)-5:]
-	res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img)
+
+	res, err := stmt.Exec(sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, user.NickName, user.Img, user.Role)
 	if err != nil {
 		sugar.Log.Error("Insert data to sys_user is failed:", err.Error())
 		return resp, err
@@ -53,7 +54,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	// 手机号
 	//token,err:=jwt.GenerateToken(user.Phone,60)
 
-	resp.Token, _ = jwt.GenerateToken(sid, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Sex, user.Ptime, user.Utime, -1)
+	resp.Token, _ = jwt.GenerateToken(sid, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Role, user.Sex, user.Ptime, user.Utime, -1)
 	resp.UserInfo = GetUser(db, sid)
 	// publish msg
 	topic := "/db-online-sync"
@@ -76,7 +77,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	sugar.Log.Info("publish content :", value)
 	// query data about publish msg.
 	var dl vo.RespSysUser
-	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", sid)
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null'),IFNULL(role,'2') from sys_user where id=?", sid)
 	if err != nil {
 		sugar.Log.Error("AddUser Query data is failed.Err is ", err)
 		return resp, err
@@ -84,7 +85,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	// 释放锁
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
+		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img, &dl.Role)
 		if err != nil {
 			sugar.Log.Error("AddUser Query scan data is failed.The err is ", err)
 			return resp, err
@@ -132,7 +133,7 @@ func AddUser(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string) (v
 	s1 := strconv.Itoa(num4)
 	nickname := "dragon" + s1
 	// sprintf sql
-	sql := fmt.Sprintf("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img) values('%s','%s','%s','%s',%d,%d,%d,'%s','%s')\n", sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, nickname, user.Img)
+	sql := fmt.Sprintf("INSERT INTO sys_user (id,peer_id,name,phone,sex,ptime,utime,nickname,img,role) values('%s','%s','%s','%s',%d,%d,%d,'%s','%s','%s')\n", sid, user.PeerId, user.Name, user.Phone, user.Sex, t, t, nickname, user.Img, user.Role)
 	_, err = f1.WriteString(sql)
 	if err != nil {
 		sugar.Log.Error(" Write update file is failed.Err: ", err)
@@ -215,7 +216,7 @@ func AddUserTest(db *Sql, value string) (vo.UserLoginRespParams, error) {
 	// 手机号
 	//token,err:=jwt.GenerateToken(user.Phone,60)
 
-	resp.Token, _ = jwt.GenerateToken(user.Id, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, user.Sex, user.Ptime, user.Utime, -1)
+	resp.Token, _ = jwt.GenerateToken(user.Id, user.PeerId, user.Name, user.Phone, user.NickName, user.Img, "2", user.Sex, user.Ptime, user.Utime, -1)
 	resp.UserInfo = GetUser(db, sid)
 
 	return resp, nil

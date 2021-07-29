@@ -11,6 +11,7 @@ type ArticleAddParams struct {
 	Thumbnail      string `json:"thumbnail"`
 	FileName       string `json:"fileName"`
 	FileSize       string `json:"fileSize"`
+	ExternalHref   string `json:"externalHref"`
 }
 
 //  返回 信息
@@ -72,12 +73,14 @@ type ArticleRecommendParams struct {
 	PageNum  int64 `json:"pageNum"`
 	//int64 `json:"accesstoryType"`
 }
+
 //  文章推荐 2
 type ArticleRecommendLimitTenParams struct {
 	PageSize int64 `json:"pageSize"`
 	PageNum  int64 `json:"pageNum"`
 	//int64 `json:"accesstoryType"`
 }
+
 // article play add
 
 type ArticlePlayAddParams struct {

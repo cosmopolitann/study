@@ -144,7 +144,7 @@ func publishUserInfo(ipfsNode *ipfsCore.IpfsNode, db *Sql, userId string) error 
 	}
 
 	var dl vo.RespSysUser
-	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", userId)
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null'),IFNULL(role,'2') from sys_user where id=?", userId)
 	if err != nil {
 		sugar.Log.Error("AddUser Query data is failed.Err is ", err)
 		return err
@@ -152,7 +152,7 @@ func publishUserInfo(ipfsNode *ipfsCore.IpfsNode, db *Sql, userId string) error 
 	// 释放锁
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img)
+		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img, &dl.Role)
 		if err != nil {
 			sugar.Log.Error("AddUser Query scan data is failed.The err is ", err)
 			return err

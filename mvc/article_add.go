@@ -29,14 +29,14 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 	sugar.Log.Info("Marshal article params data : ", art)
 	id := utils.SnowId()
 	t := time.Now().Unix()
-	stmt, err := db.DB.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values (?,?,?,?,?,?,?,?,?,?,?,?,?)")
+	stmt, err := db.DB.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size,external_href) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.Err: ", err)
 		return errors.New(" Insert into article table is failed. ")
 	}
 	sid := strconv.FormatInt(id, 10)
 	//stmt.QueryRow()
-	res, err := stmt.Exec(sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	res, err := stmt.Exec(sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize, art.ExternalHref)
 	if err != nil {
 		sugar.Log.Error(" Insert into article  is Failed.", err)
 		return errors.New(" Execute query article table is failed. ")
@@ -73,7 +73,7 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 
 	//query user info.
 	var dl1 vo.RespSysUser
-	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null') from sys_user where id=?", art.UserId)
+	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null'),IFNULL(role,'2') from sys_user where id=?", art.UserId)
 	if err != nil {
 		sugar.Log.Error("AddUser Query data is failed.Err is ", err)
 		return err
@@ -81,7 +81,7 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 	// 释放锁
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&dl1.Id, &dl1.PeerId, &dl1.Name, &dl1.Phone, &dl1.Sex, &dl1.Ptime, &dl1.Utime, &dl1.NickName, &dl1.Img)
+		err = rows.Scan(&dl1.Id, &dl1.PeerId, &dl1.Name, &dl1.Phone, &dl1.Sex, &dl1.Ptime, &dl1.Utime, &dl1.NickName, &dl1.Img, &dl1.Role)
 		if err != nil {
 			sugar.Log.Error("AddUser Query scan data is failed.The err is ", err)
 			return err
@@ -149,7 +149,7 @@ func AddArticle(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string, path string)
 
 	// 拼接字符串 sql 语句
 
-	sql := fmt.Sprintf("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('%s','%s','%s',%d,'%s','%s',%d,%d,%d,'%s','%s','%s','%s')\n", sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize)
+	sql := fmt.Sprintf("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size,external_href) values ('%s','%s','%s',%d,'%s','%s',%d,%d,%d,'%s','%s','%s','%s','%s')\n", sid, art.UserId, art.Accesstory, art.AccesstoryType, art.Text, art.Tag, t, 0, 0, art.Title, art.Thumbnail, art.FileName, art.FileSize, art.ExternalHref)
 
 	_, err = f1.WriteString(sql)
 	if err != nil {
