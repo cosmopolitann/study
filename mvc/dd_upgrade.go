@@ -47,16 +47,14 @@ func DbUpgrade(db *Sql, dbv string) (string, error) {
 	}
 	if lv == uv {
 		sugar.Log.Info("版本信息一致  不更新")
-		return "", errors.New("版本信息一致  不更新")
+		return loaclVersion, nil
 	}
 	//循环遍历 执行sql语句
 	if uv > lv {
 		sugar.Log.Info("当前版本大于最新版本，不符合")
-
-		return "", errors.New("当前版本大于最新版本，不符合")
+		return dbv, nil
 	}
 	for i := uv; i < lv; i++ {
-		fmt.Println("i:=", i)
 		//执行sql 语句
 		result := vo.UpgradeSql[i]
 		for _, v := range result {
