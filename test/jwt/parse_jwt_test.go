@@ -32,7 +32,7 @@ func TestParseJwt(t *testing.T) {
 
 }
 func GetClaim(bareStr string) (jwt.MapClaims, string) {
-	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMzNTU5NTk2ODI1NDMyMTY2NCIsInBlZXJJZCI6IjEyRDNLb29XREpHZ2NzWUpKWWY5ekFjNXBMd21XR1FVY2pFZzU3WWZma1FZTEF6WHp6bUMiLCJuYW1lIjoiIiwicGhvbmUiOiIzMzU1OTU5NjgyNTQzMjE2NjQiLCJzZXgiOjAsInB0aW1lIjoxNjI2MzEzMTEzLCJ1dGltZSI6MTYyNjMxMzExMywibmlja25hbWUiOiJkcmFnb256em1DXzlfMzgiLCJpbWciOiIiLCJjdGltZSI6MTYyNjMxMzExMzkwNywiaWF0IjoxNjI2MzEzMTEzfQ.1IaJewoNeaxjCOszPqKbsNGIymH_3jqd8S1gr_aj0Fk"
+	bareStr = "Auth eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQyNjE5MzAwMDg3NjQ3ODQ2NCIsInBlZXJJZCI6IjEyMyIsIm5hbWUiOiIxMjMiLCJwaG9uZSI6IiIsInNleCI6MSwibmlja25hbWUiOiJuaWNrIiwicHRpbWUiOjEyMywidXRpbWUiOjEyMywiaW1nIjoic2RmIn0.PhUWOUM-g3cWia4GZITJlmQGGGOJTcLON0S0mdZUid0"
 	bareArr := strings.Split(bareStr, " ")
 	errFlag := TOKEN_ERR_NONE
 	if len(bareArr) != 2 {

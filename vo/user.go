@@ -15,7 +15,7 @@ type RespSysUser struct {
 	Name     string `json:"name"`     //用户名字
 	Phone    string `json:"phone"`    //手机号  暂时用
 	Sex      int64  `json:"sex"`      //性别 0 未知 1男 2女
-	NickName string `json:"nickName"` //昵称
+	NickName string `json:"nickname"` //昵称
 	Ptime    int64  `json:"ptime"`    //创建时间
 	Utime    int64  `json:"utime"`    //更新时间
 	Img      string `json:"img"`      //图片

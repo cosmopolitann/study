@@ -245,3 +245,33 @@ func TestOffLineSyncData(t *testing.T) {
 
 	}
 }
+
+//
+
+func TestPostUploadFile(t *testing.T) {
+	defer func() {
+		if err := recover(); err != nil {
+			sugar.Log.Info(" ~~~~~~~~~ Capture the panic ~~~~~~~~~~~~Err: ", err)
+		} else {
+			sugar.Log.Info("~~~~~~~~~~~~~~~   Normal ~~~~~~~~~~~~")
+		}
+	}()
+	sh = shell.NewShell("127.0.0.1:5001")
+	sugar.InitLogger()
+	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	if err != nil {
+		panic(err)
+	}
+	db := Testdb(d)
+
+	path := "/Users/apple/Desktop/"
+	fmt.Println("db:=", db)
+	hash, err := PostFormDataPublicgatewayFile(path, "test.txt")
+	if err != nil {
+		fmt.Println("err:=", err)
+	}
+	fmt.Println("====Hash =====", hash)
+
+	fmt.Println("=========")
+
+}

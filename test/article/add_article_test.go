@@ -15,7 +15,7 @@ func TestAddArticle(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/winter/clouddb/tables/foo.db")
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +47,7 @@ func TestAddArticle(t *testing.T) {
 	// id := utils.SnowId()
 	// t1:=time.Now().Unix()
 	// stmt, err := d.Prepare("INSERT INTO article values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
-	stmt, err := d.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('笨猪','13414','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)")
+	stmt, err := d.Prepare("INSERT INTO article (id,user_id,accesstory,accesstory_type,text,tag,ptime,play_num,share_num,title,thumbnail,file_name,file_size) values ('笨猪bbbb','13414','123',2,'123','213',1312,12312,0,'fgh','123','nijk',1)")
 
 	if err != nil {
 		sugar.Log.Error("Insert into article table is failed.", err)

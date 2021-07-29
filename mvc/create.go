@@ -830,3 +830,16 @@ func ConvertString(value string, t interface{}) (res map[string]interface{}) {
 	fmt.Printf(" 这是 获得的结果  %T\n", t)
 	return t.(map[string]interface{})
 }
+
+// db upgrade
+func (db *Sql) DbUpgrade(dbv string) (string, error) {
+
+	sugar.Log.Info("---- Start DbUpgrade   ------")
+
+	newversion, err := DbUpgrade(db, dbv)
+	// if err != nil {
+	// 	return vo.ResponseErrorMsg(400, err.Error())
+	// }
+	// return vo.ResponseSuccess()
+	return newversion, err
+}
