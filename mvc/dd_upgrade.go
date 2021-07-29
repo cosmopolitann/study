@@ -48,6 +48,7 @@ func DbUpgrade(db *Sql, dbv string) (string, error) {
 	if lv == uv {
 		sugar.Log.Info("版本信息一致  不更新")
 		return loaclVersion, nil
+		// return "", errors.New("版本信息一致  不更新")
 	}
 	//循环遍历 执行sql语句
 	if uv > lv {

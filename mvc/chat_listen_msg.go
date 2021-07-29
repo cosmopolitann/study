@@ -84,14 +84,6 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 
 	sugar.Log.Info("Enter ChatListenMsgBlocked Function")
 
-	defer func() {
-		if r := recover(); r != nil {
-			sugar.Log.Error("End ChatListenMsgBlocked panic occurent, err:", r)
-		} else {
-			sugar.Log.Error("End ChatListenMsgBlocked")
-		}
-	}()
-
 	if token == "" {
 		listenUserId = ""
 		sugar.Log.Info("Anonymous User Listen")

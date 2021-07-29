@@ -63,7 +63,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 
 	var user SysUser
 
-	err = db.DB.QueryRow("SELECT id, peer_id, name, nickname, phone, sex, img FROM sys_user WHERE id = ?", userId).Scan(&user.Id, &user.PeerId, &user.Name, &user.NickName, &user.Phone, &user.Sex, &user.Img)
+	err = db.DB.QueryRow("SELECT id, IFNULL(peer_id, ''), IFNULL(name, ''), IFNULL(nickname, ''), IFNULL(phone, ''), IFNULL(sex, 0), IFNULL(img, ''), IFNULL(role, '2') FROM sys_user WHERE id = ?", userId).Scan(&user.Id, &user.PeerId, &user.Name, &user.NickName, &user.Phone, &user.Sex, &user.Img, &user.Role)
 	if err != nil {
 		sugar.Log.Error("query user info failed.Err is ", err)
 		return ret, err

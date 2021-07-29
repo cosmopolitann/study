@@ -28,7 +28,7 @@ func TestChatRenameRecord(t *testing.T) {
 		panic(err)
 	}
 
-	token, _ := jwt.GenerateToken("411647506288480256", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
+	token, _ := jwt.GenerateToken("411647506288480256", "peerid", "name", "phone", "nickname", "img", "2", 0, 1, 1, 30*24*60*60)
 
 	fmt.Println(token)
 

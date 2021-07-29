@@ -28,7 +28,7 @@ func TestChatSendMsg(t *testing.T) {
 		panic(err)
 	}
 
-	token, _ := jwt.GenerateToken("414443377656860672", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
+	token, _ := jwt.GenerateToken("414443377656860672", "peerid", "name", "phone", "nickname", "img", "2", 0, 1, 1, 30*24*60*60)
 
 	req := vo.ChatSendMsgParams{
 		RecordId:    "414443377656860672_414455684399108096",

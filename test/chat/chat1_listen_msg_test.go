@@ -30,7 +30,7 @@ func TestChatListenMsg(t *testing.T) {
 
 	ss := Testdb(d)
 
-	token, _ := jwt.GenerateToken("414207114215428096", "peerid", "name", "phone", "nickname", "img", 0, 1, 1, 30*24*60*60)
+	token, _ := jwt.GenerateToken("414207114215428096", "peerid", "name", "phone", "nickname", "img", "2", 0, 1, 1, 30*24*60*60)
 
 	fmt.Println(token)
 	sugar.Log.Info("token: ", token)
