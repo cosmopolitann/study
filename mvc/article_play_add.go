@@ -86,7 +86,7 @@ func ArticlePlayAdd(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 	// 释放锁
 	defer rows1.Close()
 	for rows1.Next() {
-		err = rows1.Scan(&dl.Id, &dl.UserId, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
+		err = rows1.Scan(&dl.Id, &dl.Accesstory, &dl.AccesstoryType, &dl.Text, &dl.Tag, &dl.Ptime, &dl.PlayNum, &dl.ShareNum, &dl.Title, &dl.Thumbnail, &dl.FileName, &dl.FileSize)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return err
