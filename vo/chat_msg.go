@@ -9,11 +9,17 @@ const (
 	CHAT_MSG_SWAP_TOPIC = "xiaolong-chat-swap" // 消息接收主题
 )
 
+const (
+	MSG_STATE_SENDING = 0  // 发送中
+	MSG_STATE_SUCCESS = 1  // 发送成功
+	MSG_STATE_FAILED  = -1 // 发送失败
+)
+
 type ChatListenHandler interface {
 	HandlerChat(string)
 }
 
-type ChatListenParams struct {
+type ChatPacketParams struct {
 	Type string      `json:"type"` //类型
 	Data interface{} `json:"data"` //数据
 	From string      `json:"from"` //来源

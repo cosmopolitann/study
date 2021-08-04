@@ -70,50 +70,6 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 		return ret, err
 	}
 
-	swapMsg := vo.ChatSwapMsgParams{
-		Id:          ret.Id,
-		RecordId:    ret.RecordId,
-		ContentType: ret.ContentType,
-		Content:     ret.Content,
-		FromId:      ret.FromId,
-		ToId:        ret.ToId,
-		IsWithdraw:  ret.IsWithdraw,
-		IsRead:      ret.IsRead,
-		Ptime:       ret.Ptime,
-		Token:       "",
-	}
-
-	msgBytes, err := json.Marshal(map[string]interface{}{
-		"type": vo.MSG_TYPE_NEW,
-		"from": ipfsNode.Identity.String(),
-		"data": swapMsg,
-	})
-	if err != nil {
-		sugar.Log.Error("marshal send msg failed.", err)
-		return ret, err
-	}
-
-	ipfsTopic, ok := TopicJoin.Load(vo.CHAT_MSG_SWAP_TOPIC)
-	if !ok {
-		ipfsTopic, err = ipfsNode.PubSub.Join(vo.CHAT_MSG_SWAP_TOPIC)
-		if err != nil {
-			sugar.Log.Error("PubSub.Join .Err is", err)
-			return ret, err
-		}
-
-		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
-	}
-
-	ctx := context.Background()
-
-	err = ipfsTopic.Publish(ctx, msgBytes)
-	if err != nil {
-		sugar.Log.Error("ChatSendMsg failed.", err)
-		return ret, err
-	}
-
-	sugar.Log.Info("ChatSendMsg success")
-
 	// update last msg
 	_, err = db.DB.Exec("UPDATE chat_record SET last_msg = ?, ptime = ? WHERE id = ?", ret.Content, ret.Ptime, ret.RecordId)
 	if err != nil {
@@ -121,10 +77,99 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 		return ret, err
 	}
 
-	publishUserInfo(ipfsNode, db, userId)
+	msgPacket := vo.ChatPacketParams{
+		Type: vo.MSG_TYPE_NEW,
+		From: ipfsNode.Identity.String(),
+		Data: vo.ChatSwapMsgParams{
+			Id:          ret.Id,
+			RecordId:    ret.RecordId,
+			ContentType: ret.ContentType,
+			Content:     ret.Content,
+			FromId:      ret.FromId,
+			ToId:        ret.ToId,
+			IsWithdraw:  ret.IsWithdraw,
+			IsRead:      ret.IsRead,
+			Ptime:       ret.Ptime,
+			Token:       "",
+		},
+	}
+
+	go func() {
+		var sendState int64
+		var sendFail string
+
+		tryTimes := 0
+		maxTimes := 3
+
+		for {
+			err = chatSendMsg(ipfsNode, msgPacket)
+			if err != nil {
+				sugar.Log.Errorf("send chat msg failed. msgid: %s, err: %v", ret.Id, err)
+				return
+			}
+
+			<-time.After(10 * time.Second)
+
+			tryTimes++
+			err := db.DB.QueryRow("select send_state from chat_msg where id = ?", ret.Id).Scan(&sendState)
+			if err != nil {
+				sendState = -1
+				sendFail = err.Error()
+			}
+
+			if sendState != 0 {
+				break
+			} else if tryTimes >= maxTimes {
+				sendState = -1
+				sendFail = "failed"
+				break
+			}
+		}
+
+		if sendState == -1 {
+			_, err := db.DB.Exec("update chat_msg set send_state = ?, send_fail = ? where id = ?", sendState, sendFail, ret.Id)
+			if err != nil {
+				sugar.Log.Error("update chat_msg send_state fail", err)
+			}
+		}
+	}()
 
 	// 发布消息
 	return ret, nil
+}
+
+func chatSendMsg(ipfsNode *ipfsCore.IpfsNode, msgPacket vo.ChatPacketParams) error {
+
+	var err error
+
+	msgTopicKey := vo.CHAT_MSG_SWAP_TOPIC + msgPacket.Data.(vo.ChatSwapMsgParams).FromId
+
+	ipfsTopic, ok := TopicJoin.Load(msgTopicKey)
+	if !ok {
+		ipfsTopic, err = ipfsNode.PubSub.Join(msgTopicKey)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
+			return err
+		}
+
+		TopicJoin.Store(msgTopicKey, ipfsTopic)
+	}
+
+	ctx := context.Background()
+
+	msgBytes, err := json.Marshal(msgPacket)
+	if err != nil {
+		sugar.Log.Error("marshal send msg failed.", err)
+		return err
+	}
+
+	err = ipfsTopic.Publish(ctx, msgBytes)
+	if err != nil {
+		sugar.Log.Error("ChatSendMsg failed.", err)
+		return err
+	}
+
+	return nil
 }
 
 func publishUserInfo(ipfsNode *ipfsCore.IpfsNode, db *Sql, userId string) error {

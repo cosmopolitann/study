@@ -110,7 +110,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 		return fmt.Errorf("subscribe failed")
 	}
 
-	var msg vo.ChatListenParams
+	var msg vo.ChatPacketParams
 
 	ctx := context.Background()
 	for {
@@ -135,7 +135,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			continue
 		}
 
-		msg = vo.ChatListenParams{}
+		msg = vo.ChatPacketParams{}
 
 		err = json.Unmarshal(data.Data, &msg)
 		if err != nil {
