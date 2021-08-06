@@ -17,7 +17,7 @@ func TestChatRecordList(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/Projects/clouddb/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Projects/clouddb/tables/xiaolong.db")
 	if err != nil {
 		panic(err)
 	}
@@ -27,12 +27,12 @@ func TestChatRecordList(t *testing.T) {
 	fmt.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
 
-	token, _ := jwt.GenerateToken("414202692580151296", "peerid", "name", "phone", "nickname", "img", "2", 0, 1, 1, 30*24*60*60)
+	token, _ := jwt.GenerateToken("416203557629337600", "peerid", "name", "phone", "nickname", "img", "2", 0, 1, 1, 30*24*60*60)
 
 	req := vo.ChatRecordListParams{
-		FromId:     "414202692580151296",
+		FromId:     "416203557629337600",
 		Token:      token,
-		CustomerId: "414202692580151333",
+		CustomerId: "416418921625690112",
 	}
 
 	value, _ := json.Marshal(req)

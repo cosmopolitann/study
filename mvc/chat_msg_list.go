@@ -12,6 +12,9 @@ import (
 func ChatMsgList(db *Sql, value string) ([]ChatMsg, error) {
 	var art []ChatMsg
 	var result vo.ChatMsgListParams
+
+	sugar.Log.Debug("Request Param:", value)
+
 	err := json.Unmarshal([]byte(value), &result)
 
 	if err != nil {
@@ -28,15 +31,11 @@ func ChatMsgList(db *Sql, value string) ([]ChatMsg, error) {
 	sugar.Log.Info("claim := ", claim)
 	sugar.Log.Info("Marshal data is  result := ", result)
 	r := (result.PageNum - 1) * result.PageSize
-	sugar.Log.Info("pageSize := ", result.PageSize)
-	sugar.Log.Info("pageNum := ", result.PageNum)
-	sugar.Log.Info("r := ", r)
-	sugar.Log.Info("recordId ==== := ", result.RecordId)
 
 	//这里 要修改   加上 where  参数 判断
 
 	//todo
-	rows, err := db.DB.Query("SELECT * FROM chat_msg where record_id =? order by ptime desc limit ?,? ", result.RecordId, r, result.PageSize)
+	rows, err := db.DB.Query("SELECT id, content_type, content, from_id, to_id, ptime, is_with_draw, is_read, record_id, send_state, send_fail FROM chat_msg where record_id =? order by ptime desc limit ?,? ", result.RecordId, r, result.PageSize)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return art, errors.New("查询下载列表信息失败")
@@ -47,7 +46,7 @@ func ChatMsgList(db *Sql, value string) ([]ChatMsg, error) {
 
 	for rows.Next() {
 		var dl ChatMsg
-		err = rows.Scan(&dl.Id, &dl.ContentType, &dl.Content, &dl.FromId, &dl.ToId, &dl.Ptime, &dl.IsWithdraw, &dl.IsRead, &dl.RecordId)
+		err = rows.Scan(&dl.Id, &dl.ContentType, &dl.Content, &dl.FromId, &dl.ToId, &dl.Ptime, &dl.IsWithdraw, &dl.IsRead, &dl.RecordId, &dl.SendState, &dl.SendFail)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return art, err

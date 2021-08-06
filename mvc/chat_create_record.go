@@ -1,7 +1,6 @@
 package mvc
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -76,60 +75,60 @@ func ChatCreateRecord(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (vo.Ch
 		return ret, err
 	}
 
-	// 查询对方信息
-	err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM sys_user WHERE id = ?", msg.ToId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			sugar.Log.Warn("not found peer info, so set empty")
-		} else {
-			sugar.Log.Error("Query Peer User Failed. Err:", err)
-			return ret, err
-		}
-	}
+	// // 查询对方信息
+	// err = db.DB.QueryRow("SELECT peer_id, name, phone, sex, nickname, img FROM sys_user WHERE id = ?", msg.ToId).Scan(&ret.PeerId, &ret.UserName, &ret.Phone, &ret.Sex, &ret.NickName, &ret.Img)
+	// if err != nil {
+	// 	if err == sql.ErrNoRows {
+	// 		sugar.Log.Warn("not found peer info, so set empty")
+	// 	} else {
+	// 		sugar.Log.Error("Query Peer User Failed. Err:", err)
+	// 		return ret, err
+	// 	}
+	// }
 
-	swapMsg := vo.ChatSwapRecordParams{
-		Id:      ret.Id,
-		Name:    ret.Name,
-		Img:     "",
-		FromId:  ret.FromId,
-		ToId:    ret.Toid,
-		Ptime:   ret.Ptime,
-		LastMsg: ret.LastMsg,
-		Token:   "",
-	}
+	// swapMsg := vo.ChatSwapRecordParams{
+	// 	Id:      ret.Id,
+	// 	Name:    ret.Name,
+	// 	Img:     "",
+	// 	FromId:  ret.FromId,
+	// 	ToId:    ret.Toid,
+	// 	Ptime:   ret.Ptime,
+	// 	LastMsg: ret.LastMsg,
+	// 	Token:   "",
+	// }
 
-	msgBytes, err := json.Marshal(map[string]interface{}{
-		"type": vo.MSG_TYPE_RECORD,
-		"from": ipfsNode.Identity.String(),
-		"data": swapMsg,
-	})
-	if err != nil {
-		sugar.Log.Error("Message record marshal failed.Err is", err)
-		return ret, err
-	}
+	// msgBytes, err := json.Marshal(map[string]interface{}{
+	// 	"type": vo.MSG_TYPE_RECORD,
+	// 	"from": ipfsNode.Identity.String(),
+	// 	"data": swapMsg,
+	// })
+	// if err != nil {
+	// 	sugar.Log.Error("Message record marshal failed.Err is", err)
+	// 	return ret, err
+	// }
 
-	sugar.Log.Info("publish data: ", string(msgBytes))
+	// sugar.Log.Info("publish data: ", string(msgBytes))
 
-	ipfsTopic, ok := TopicJoin.Load(vo.CHAT_MSG_SWAP_TOPIC)
-	if !ok {
-		ipfsTopic, err = ipfsNode.PubSub.Join(vo.CHAT_MSG_SWAP_TOPIC)
-		if err != nil {
-			sugar.Log.Error("PubSub.Join .Err is", err)
-			return ret, err
-		}
+	// ipfsTopic, ok := TopicJoin.Load(vo.CHAT_MSG_SWAP_TOPIC)
+	// if !ok {
+	// 	ipfsTopic, err = ipfsNode.PubSub.Join(vo.CHAT_MSG_SWAP_TOPIC)
+	// 	if err != nil {
+	// 		sugar.Log.Error("PubSub.Join .Err is", err)
+	// 		return ret, err
+	// 	}
 
-		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
-	}
+	// 	TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
+	// }
 
-	ctx := context.Background()
+	// ctx := context.Background()
 
-	err = ipfsTopic.Publish(ctx, msgBytes)
-	if err != nil {
-		sugar.Log.Error("publish failed.", err)
-		return ret, err
-	}
-	sugar.Log.Info("publish success")
-	sugar.Log.Info("~~~~~  ChatCreateRecord   Method   End ~~~~~~~")
+	// err = ipfsTopic.Publish(ctx, msgBytes)
+	// if err != nil {
+	// 	sugar.Log.Error("publish failed.", err)
+	// 	return ret, err
+	// }
+	// sugar.Log.Info("publish success")
+	// sugar.Log.Info("~~~~~  ChatCreateRecord   Method   End ~~~~~~~")
 	return ret, nil
 }
 

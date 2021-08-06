@@ -17,9 +17,11 @@ import (
 	ipfsCore "github.com/ipfs/go-ipfs/core"
 )
 
+var curSub *pubsub.Subscription
 var listenUserId string
+var listenCancelFunc context.CancelFunc
 
-func ChatListenMsgUpdateUser(token string) error {
+func ChatListenMsgUpdateUser(ipfsNode *ipfsCore.IpfsNode, token string) error {
 
 	if token == "" {
 		listenUserId = ""
@@ -34,50 +36,16 @@ func ChatListenMsgUpdateUser(token string) error {
 		listenUserId = userId
 		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
+
+	err := updateIpfsTopicSubs(ipfsNode, vo.CHAT_MSG_SWAP_TOPIC+listenUserId)
+	if err != nil {
+		sugar.Log.Error("subscribe failed")
+		return fmt.Errorf("subscribe failed")
+	}
+
+	listenCancelFunc()
+
 	return nil
-}
-
-func parseToken(token string) (string, error) {
-	claim, b := jwt.JwtVeriyToken(token)
-	if !b {
-		return "", errors.New("token is invaild. ")
-	}
-	userId, ok := claim["id"]
-	if !ok {
-		return "", fmt.Errorf("can not get userid from token: %s", token)
-	}
-	userIdStr, ok := userId.(string)
-	if !ok {
-		return "", fmt.Errorf("not string type userid: %v", userId)
-	}
-
-	return userIdStr, nil
-}
-
-func GetIpfsTopic(ipfsNode *ipfsCore.IpfsNode, topicJoin *vo.TopicJoinMap, topic string) (*pubsub.Topic, error) {
-
-	var err error
-
-	if ipfsNode == nil {
-		return nil, errors.New("ipfsCore.IpfsNode is nil")
-	}
-
-	if topicJoin == nil {
-		return nil, errors.New("TopicJoin is nil")
-	}
-
-	ipfsTopic, ok := TopicJoin.Load(topic)
-	if !ok || ipfsTopic == nil {
-		ipfsTopic, err = ipfsNode.PubSub.Join(topic)
-		if err != nil {
-			sugar.Log.Error("PubSub.Join failed:", err)
-			return nil, fmt.Errorf("PubSub.Join failed: %s", err.Error())
-		}
-
-		TopicJoin.Store(topic, ipfsTopic)
-	}
-
-	return ipfsTopic, nil
 }
 
 func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, clh vo.ChatListenHandler) error {
@@ -98,27 +66,27 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
 
-	ipfsTopic, err := GetIpfsTopic(ipfsNode, TopicJoin, vo.CHAT_MSG_SWAP_TOPIC)
-	if err != nil {
-		sugar.Log.Error("GetIpfsTopic failed")
-		return fmt.Errorf("GetIpfsTopic failed")
-	}
-
-	sub, err := ipfsTopic.Subscribe()
+	err := updateIpfsTopicSubs(ipfsNode, vo.CHAT_MSG_SWAP_TOPIC+listenUserId)
 	if err != nil {
 		sugar.Log.Error("subscribe failed")
 		return fmt.Errorf("subscribe failed")
 	}
 
-	var msg vo.ChatPacketParams
-
-	ctx := context.Background()
 	for {
-		if sub == nil {
+		if curSub == nil {
 			sugar.Log.Error("*pubsub.Subscription is nil, i will return")
 			return fmt.Errorf("sub is nil")
 		}
-		data, err := sub.Next(ctx)
+		if db == nil {
+			sugar.Log.Error("*Sql is nil, i will return")
+			return fmt.Errorf("sql is nil")
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		listenCancelFunc = cancel
+
+		sugar.Log.Debugf("subscribe current topic: %s", curSub.Topic())
+		data, err := curSub.Next(ctx)
 		if err != nil {
 			sugar.Log.Error("sub.Next failed:", err)
 			time.Sleep(200 * time.Millisecond)
@@ -135,11 +103,11 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			continue
 		}
 
-		msg = vo.ChatPacketParams{}
+		msg := vo.ChatPacketParams{}
 
 		err = json.Unmarshal(data.Data, &msg)
 		if err != nil {
-			sugar.Log.Error("json.Unmarshal failed1:", err)
+			sugar.Log.Error("json.Unmarshal failed:", err)
 			continue
 		}
 
@@ -148,13 +116,13 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			var tmp vo.ChatSwapRecordParams
 			json1, err := json.Marshal(msg.Data)
 			if err != nil {
-				sugar.Log.Error("json.Marshal failed1:", err)
+				sugar.Log.Error("json.Marshal failed:", err)
 				continue
 			}
 
 			err = json.Unmarshal(json1, &tmp)
 			if err != nil {
-				sugar.Log.Error("json.Unmarshal failed2:", err)
+				sugar.Log.Error("json.Unmarshal failed:", err)
 				continue
 			}
 
@@ -175,7 +143,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			msg.Data = res
 			jsonStr, err := json.Marshal(msg)
 			if err != nil {
-				sugar.Log.Error("json.Marshal failed2.", err)
+				sugar.Log.Error("json.Marshal failed.", err)
 				continue
 			}
 			clh.HandlerChat(string(jsonStr))
@@ -185,13 +153,13 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			var tmp vo.ChatSwapMsgParams
 			json1, err := json.Marshal(msg.Data)
 			if err != nil {
-				sugar.Log.Error("json.Marshal failed3:", err)
+				sugar.Log.Error("json.Marshal failed:", err)
 				continue
 			}
 
 			err = json.Unmarshal(json1, &tmp)
 			if err != nil {
-				sugar.Log.Error("json.Unmarshal failed3:", err)
+				sugar.Log.Error("json.Unmarshal failed:", err)
 				continue
 			}
 
@@ -205,14 +173,29 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			if err != nil {
 				if err != vo.ErrorRowIsExists {
 					sugar.Log.Error("handle add message failed.", err)
+				} else {
+					sugar.Log.Info("handle add message failed.", err)
 				}
 				continue
 			}
 			msg.Data = res
 			jsonStr, err := json.Marshal(msg)
 			if err != nil {
-				sugar.Log.Error("json.Marshal failed4.", err)
+				sugar.Log.Error("json.Marshal failed.", err)
 				continue
+			}
+
+			ackMsg := vo.ChatSwapAckParams{
+				Type:   msg.Type,
+				Id:     tmp.Id,
+				FromId: tmp.ToId,
+				ToId:   tmp.FromId,
+			}
+
+			err = sendMsgAck(ipfsNode, db, ackMsg)
+			if err != nil {
+				sugar.Log.Error("sendMsgAck failed.", err)
+				// 只记录日志，继续允许
 			}
 
 			clh.HandlerChat(string(jsonStr))
@@ -223,13 +206,13 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 
 			json1, err := json.Marshal(msg.Data)
 			if err != nil {
-				sugar.Log.Error("json.Marshal failed5:", err)
+				sugar.Log.Error("json.Marshal failed:", err)
 				continue
 			}
 
 			err = json.Unmarshal(json1, &tmp)
 			if err != nil {
-				sugar.Log.Error("json.Unmarshal failed4:", err)
+				sugar.Log.Error("json.Unmarshal failed:", err)
 				continue
 			}
 
@@ -248,10 +231,84 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			msg.Data = res
 			jsonStr, err := json.Marshal(msg)
 			if err != nil {
-				sugar.Log.Error("json.Marshal failed6:", err)
+				sugar.Log.Error("json.Marshal failed:", err)
 				continue
 			}
 
+			clh.HandlerChat(string(jsonStr))
+
+		} else if msg.Type == vo.MSG_TYPE_ACK {
+			var tmp vo.ChatSwapAckParams
+
+			json1, err := json.Marshal(msg.Data)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed:", err)
+				continue
+			}
+
+			err = json.Unmarshal(json1, &tmp)
+			if err != nil {
+				sugar.Log.Error("json.Unmarshal failed:", err)
+				continue
+			}
+
+			if tmp.ToId != listenUserId {
+				// not me
+				continue
+			}
+
+			sugar.Log.Debugf("message receive: %s\n", data.Data)
+
+			err = handleAck(db, tmp)
+			if err != nil {
+				sugar.Log.Error("handle ack failed.", err)
+				continue
+			}
+
+			jsonStr, err := json.Marshal(msg)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed.", err)
+				continue
+			}
+
+			// 消息回调
+			clh.HandlerChat(string(jsonStr))
+
+		} else if msg.Type == vo.MSG_TYPE_HEARTBEAT {
+			var tmp vo.FriendSwapOnlineParams
+
+			json1, err := json.Marshal(msg.Data)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed:", err)
+				continue
+			}
+
+			err = json.Unmarshal(json1, &tmp)
+			if err != nil {
+				sugar.Log.Error("json.Unmarshal failed:", err)
+				continue
+			}
+
+			if tmp.ToId != listenUserId {
+				// not me
+				continue
+			}
+
+			sugar.Log.Debugf("message receive: %s\n", data.Data)
+
+			err = handleHeartbeat(db, tmp)
+			if err != nil {
+				sugar.Log.Error("handle ack failed.", err)
+				continue
+			}
+
+			jsonStr, err := json.Marshal(msg)
+			if err != nil {
+				sugar.Log.Error("json.Marshal failed.", err)
+				continue
+			}
+
+			// 消息回调
 			clh.HandlerChat(string(jsonStr))
 
 		} else {
@@ -259,6 +316,127 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 			continue
 		}
 	}
+}
+
+func parseToken(token string) (string, error) {
+	claim, b := jwt.JwtVeriyToken(token)
+	if !b {
+		return "", errors.New("token is invaild. ")
+	}
+	userId, ok := claim["id"]
+	if !ok {
+		return "", fmt.Errorf("can not get userid from token: %s", token)
+	}
+	userIdStr, ok := userId.(string)
+	if !ok {
+		return "", fmt.Errorf("not string type userid: %v", userId)
+	}
+
+	return userIdStr, nil
+}
+
+func updateIpfsTopicSubs(ipfsNode *ipfsCore.IpfsNode, topic string) error {
+
+	var err error
+
+	if ipfsNode == nil {
+		return errors.New("ipfsCore.IpfsNode is nil")
+	}
+
+	ipfsTopic, ok := TopicJoin.Load(topic)
+	if !ok || ipfsTopic == nil {
+		ipfsTopic, err = ipfsNode.PubSub.Join(topic)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join failed:", err)
+			return fmt.Errorf("PubSub.Join failed: %s", err.Error())
+		}
+
+		TopicJoin.Store(topic, ipfsTopic)
+	}
+
+	sub, err := ipfsTopic.Subscribe()
+	if err != nil {
+		sugar.Log.Error("subscribe failed")
+		return fmt.Errorf("subscribe failed")
+	}
+
+	// sugar.Log.Debugf("Current Sub Topic: %s", topic)
+
+	// 更新 subscription
+	curSub = sub
+
+	return nil
+}
+
+func sendMsgAck(ipfsNode *ipfsCore.IpfsNode, db *Sql, ackMsg vo.ChatSwapAckParams) error {
+
+	var err error
+
+	msgTopicKey := vo.CHAT_MSG_SWAP_TOPIC + ackMsg.ToId
+
+	ipfsTopic, ok := TopicJoin.Load(msgTopicKey)
+	if !ok {
+		ipfsTopic, err = ipfsNode.PubSub.Join(msgTopicKey)
+		if err != nil {
+			sugar.Log.Error("PubSub.Join .Err is", err)
+			return err
+		}
+
+		TopicJoin.Store(msgTopicKey, ipfsTopic)
+	}
+
+	msg := vo.ChatPacketParams{
+		Type: vo.MSG_TYPE_ACK,
+		From: ipfsNode.Identity.String(),
+		Data: ackMsg,
+	}
+	msgBytes, err := json.Marshal(msg)
+
+	if err != nil {
+		sugar.Log.Error("marshal send msg failed.", err)
+		return err
+	}
+
+	err = ipfsTopic.Publish(context.Background(), msgBytes)
+	if err != nil {
+		sugar.Log.Error("ChatSendMsg failed.", err)
+		return err
+	}
+
+	sugar.Log.Debugf("sendMsgAck topic: %s, data: %v", msgTopicKey, msg)
+
+	return nil
+}
+
+func handleAck(db *Sql, msg vo.ChatSwapAckParams) error {
+
+	if msg.Type != vo.MSG_TYPE_NEW {
+		return fmt.Errorf("unsupport msg ack type: %s", msg.Type)
+	}
+
+	// msg.FromId -> 消息接收者， msg.ToId -> 消息发送者
+	res, err := db.DB.Exec("update chat_msg set send_state = 1 where id = ? and from_id = ? and to_id = ?", msg.Id, msg.ToId, msg.FromId)
+	if err != nil {
+		sugar.Log.Error("update chat_msg ack fail, err:", err)
+		return err
+	}
+
+	ar, err := res.RowsAffected()
+	if err != nil {
+		sugar.Log.Error("update chat_msg ack fail2, err:", err)
+		return err
+	}
+
+	if ar <= 0 {
+		sugar.Log.Error("update chat_msg ack fail3, err: affected rows <= 0")
+		return err
+	}
+
+	return nil
+}
+
+func handleHeartbeat(db *Sql, msg vo.FriendSwapOnlineParams) error {
+	return nil
 }
 
 // handleAddRecordMsg 创建会话

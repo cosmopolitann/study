@@ -14,7 +14,7 @@ func TestChatMsgWithDraw(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/xiaolong.db")
 	if err != nil {
 		panic(err)
 	}

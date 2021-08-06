@@ -131,7 +131,28 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			} else {
 				sugar.Log.Debugf("Update Peer: %#v", peer)
 
-				ri.Name = peer.Name
+				var fnickname string
+				err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
+				if err != nil {
+					if err == sql.ErrNoRows {
+						sugar.Log.Warn("not found friend nickname, so not set")
+					} else {
+						sugar.Log.Error("query user_friend nickname failed.Err is ", err)
+						return ret, err
+					}
+				}
+
+				if fnickname != "" {
+					peer.NickName = fnickname
+					ri.Name = fnickname
+
+				} else if peer.NickName != "" {
+					ri.Name = peer.NickName
+
+				} else if peer.Name != "" {
+					ri.Name = peer.Name
+				}
+
 				ri.Img = peer.Img
 
 				if ri.FromId == peer.Id {

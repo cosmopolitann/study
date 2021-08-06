@@ -161,6 +161,51 @@ func (db *Sql) UserUpdate(ipfsNode *ipfsCore.IpfsNode, user string) string {
 
 /*
 ------------------------------------------------------
+|                     Friend                         |
+------------------------------------------------------
+*/
+
+// 检测好友是否在线
+
+func (db *Sql) FriendCheckOnline(ipfsNode *ipfsCore.IpfsNode, data string) string {
+	defer func() {
+		if err := recover(); err != nil {
+			sugar.Log.Errorf("Panic -> FriendCheckOnline, Err: %v", err)
+		}
+	}()
+
+	e := FriendCheckOnline(ipfsNode, data)
+
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+	return vo.ResponseSuccess()
+}
+
+// 设置好友昵称
+func (db *Sql) FriendUpdateNickname(data string) string {
+	defer func() {
+		if err := recover(); err != nil {
+			sugar.Log.Errorf("Panic -> FriendUpdateNickname, Err: %v", err)
+		}
+	}()
+
+	e := FriendUpdateNickname(db, data)
+
+	if e != nil {
+		return vo.ResponseErrorMsg(400, e.Error())
+	}
+	return vo.ResponseSuccess()
+}
+
+/*
+------------------------------------------------------
+|                     Friend  End                      |
+------------------------------------------------------
+*/
+
+/*
+------------------------------------------------------
 |                       Cloud                        |
 ------------------------------------------------------
 */
@@ -901,14 +946,14 @@ func (db *Sql) ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, token string, c
 }
 
 // ChatListenMsgUpdateUser  更新当前用户
-func (db *Sql) ChatListenMsgUpdateUser(token string) error {
+func (db *Sql) ChatListenMsgUpdateUser(ipfsNode *ipfsCore.IpfsNode, token string) error {
 	defer func() {
 		if err := recover(); err != nil {
 			sugar.Log.Errorf("Panic -> ChatListenMsgUpdateUser, Err: %v", err)
 		}
 	}()
 
-	err := ChatListenMsgUpdateUser(token)
+	err := ChatListenMsgUpdateUser(ipfsNode, token)
 
 	return err
 }

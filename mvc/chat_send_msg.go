@@ -55,6 +55,8 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 	ret.IsWithdraw = 0
 	ret.IsRead = 0
 	ret.RecordId = msg.RecordId
+	ret.SendState = vo.MSG_STATE_SENDING
+	ret.SendFail = ""
 
 	res, err := db.DB.Exec(
 		"INSERT INTO chat_msg (id, content_type, content, from_id, to_id, ptime, is_with_draw, is_read, record_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -77,21 +79,17 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 		return ret, err
 	}
 
-	msgPacket := vo.ChatPacketParams{
-		Type: vo.MSG_TYPE_NEW,
-		From: ipfsNode.Identity.String(),
-		Data: vo.ChatSwapMsgParams{
-			Id:          ret.Id,
-			RecordId:    ret.RecordId,
-			ContentType: ret.ContentType,
-			Content:     ret.Content,
-			FromId:      ret.FromId,
-			ToId:        ret.ToId,
-			IsWithdraw:  ret.IsWithdraw,
-			IsRead:      ret.IsRead,
-			Ptime:       ret.Ptime,
-			Token:       "",
-		},
+	swapMsg := vo.ChatSwapMsgParams{
+		Id:          ret.Id,
+		RecordId:    ret.RecordId,
+		ContentType: ret.ContentType,
+		Content:     ret.Content,
+		FromId:      ret.FromId,
+		ToId:        ret.ToId,
+		IsWithdraw:  ret.IsWithdraw,
+		IsRead:      ret.IsRead,
+		Ptime:       ret.Ptime,
+		Token:       "",
 	}
 
 	go func() {
@@ -102,7 +100,7 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 		maxTimes := 3
 
 		for {
-			err = chatSendMsg(ipfsNode, msgPacket)
+			err = chatSendMsg(ipfsNode, swapMsg)
 			if err != nil {
 				sugar.Log.Errorf("send chat msg failed. msgid: %s, err: %v", ret.Id, err)
 				return
@@ -115,6 +113,8 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 			if err != nil {
 				sendState = -1
 				sendFail = err.Error()
+				sugar.Log.Error("select send_state from chat_msg err: ", err)
+				break
 			}
 
 			if sendState != 0 {
@@ -122,6 +122,7 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 			} else if tryTimes >= maxTimes {
 				sendState = -1
 				sendFail = "failed"
+				sugar.Log.Warnf("try over max times %d", maxTimes)
 				break
 			}
 		}
@@ -131,6 +132,10 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 			if err != nil {
 				sugar.Log.Error("update chat_msg send_state fail", err)
 			}
+
+			sugar.Log.Warn("chat send msg failed")
+		} else {
+			sugar.Log.Warn("chat send msg success")
 		}
 	}()
 
@@ -138,11 +143,17 @@ func ChatSendMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) (ChatMsg, e
 	return ret, nil
 }
 
-func chatSendMsg(ipfsNode *ipfsCore.IpfsNode, msgPacket vo.ChatPacketParams) error {
+func chatSendMsg(ipfsNode *ipfsCore.IpfsNode, swapMsg vo.ChatSwapMsgParams) error {
 
 	var err error
 
-	msgTopicKey := vo.CHAT_MSG_SWAP_TOPIC + msgPacket.Data.(vo.ChatSwapMsgParams).FromId
+	msgPacket := vo.ChatPacketParams{
+		Type: vo.MSG_TYPE_NEW,
+		From: ipfsNode.Identity.String(),
+		Data: swapMsg,
+	}
+
+	msgTopicKey := vo.CHAT_MSG_SWAP_TOPIC + swapMsg.ToId
 
 	ipfsTopic, ok := TopicJoin.Load(msgTopicKey)
 	if !ok {
@@ -155,19 +166,19 @@ func chatSendMsg(ipfsNode *ipfsCore.IpfsNode, msgPacket vo.ChatPacketParams) err
 		TopicJoin.Store(msgTopicKey, ipfsTopic)
 	}
 
-	ctx := context.Background()
-
 	msgBytes, err := json.Marshal(msgPacket)
 	if err != nil {
 		sugar.Log.Error("marshal send msg failed.", err)
 		return err
 	}
 
-	err = ipfsTopic.Publish(ctx, msgBytes)
+	err = ipfsTopic.Publish(context.Background(), msgBytes)
 	if err != nil {
 		sugar.Log.Error("ChatSendMsg failed.", err)
 		return err
 	}
+
+	sugar.Log.Debugf("ChatSendMsg topic: %s, data: %v", msgTopicKey, msgPacket)
 
 	return nil
 }

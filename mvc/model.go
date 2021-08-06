@@ -121,9 +121,11 @@ type ChatMsg struct {
 	FromId      string `json:"fromId"`      //发送者
 	ToId        string `json:"toId"`        //接收者
 	Ptime       int64  `json:"ptime"`       //创建时间
-	IsWithdraw  int64  `json:"isWithdraw"`  //require     coment 是否撤回         0 未撤回  1  撤回
+	IsWithdraw  int64  `json:"isWithdraw"`  //是否撤回         0 未撤回  1  撤回
 	IsRead      int64  `json:"isRead"`      //是否已读
 	RecordId    string `json:"recordId"`    //房间id
+	SendState   int64  `json:"sendState"`   //发送状态  0 待发送或已发送  1 发送成功  -1 发送失败
+	SendFail    string `json:"sendFail"`    // 发送失败原因
 }
 
 // chat_record
