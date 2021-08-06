@@ -43,7 +43,9 @@ func ChatListenMsgUpdateUser(ipfsNode *ipfsCore.IpfsNode, token string) error {
 		return fmt.Errorf("subscribe failed")
 	}
 
-	listenCancelFunc()
+	if listenCancelFunc != nil {
+		listenCancelFunc()
+	}
 
 	return nil
 }
