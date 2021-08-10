@@ -121,11 +121,23 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			var peer SysUser
 			err = db.DB.QueryRow("SELECT id, peer_id, name, nickname, phone, sex, img FROM sys_user WHERE id = ?", peerId).Scan(&peer.Id, &peer.PeerId, &peer.Name, &peer.NickName, &peer.Phone, &peer.Sex, &peer.Img)
 			if err != nil {
-				if err == sql.ErrNoRows {
-					sugar.Log.Warn("not found peer info, so set empty")
-				} else {
+				if err != sql.ErrNoRows {
 					sugar.Log.Error("query peer info failed.Err is ", err)
 					return ret, err
+				}
+
+				var fnickname string
+				err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
+				if err != nil {
+					if err != sql.ErrNoRows {
+						sugar.Log.Error("query user_friend nickname failed.Err is ", err)
+						return ret, err
+					}
+				}
+
+				if fnickname != "" {
+					peer.NickName = fnickname
+					ri.Name = fnickname
 				}
 
 			} else {
@@ -134,9 +146,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 				var fnickname string
 				err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
 				if err != nil {
-					if err == sql.ErrNoRows {
-						sugar.Log.Warn("not found friend nickname, so not set")
-					} else {
+					if err != sql.ErrNoRows {
 						sugar.Log.Error("query user_friend nickname failed.Err is ", err)
 						return ret, err
 					}
