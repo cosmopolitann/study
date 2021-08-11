@@ -153,7 +153,7 @@ func chatSendMsg(ipfsNode *ipfsCore.IpfsNode, swapMsg vo.ChatSwapMsgParams) erro
 		Data: swapMsg,
 	}
 
-	msgTopicKey := vo.CHAT_MSG_SWAP_TOPIC + swapMsg.ToId
+	msgTopicKey := getRecvTopic(swapMsg.ToId)
 
 	ipfsTopic, ok := TopicJoin.Load(msgTopicKey)
 	if !ok {
@@ -243,4 +243,10 @@ func publishUserInfo(ipfsNode *ipfsCore.IpfsNode, db *Sql, userId string) error 
 	}
 
 	return nil
+}
+
+// 获取广播topic
+func getRecvTopic(toUserId string) string {
+	// return vo.CHAT_MSG_SWAP_TOPIC + toUserId
+	return vo.CHAT_MSG_SWAP_TOPIC
 }

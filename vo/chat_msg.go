@@ -7,8 +7,8 @@ const (
 	MSG_TYPE_ACK       = "ack"                // 消息：消息回执
 	MSG_TYPE_HEARTBEAT = "heartbeat"          // 消息：心跳检查
 
-	// CHAT_MSG_SWAP_TOPIC = "xiaolong-chat-swap" // 消息接收主题
-	CHAT_MSG_SWAP_TOPIC = "xlcs" // 消息接收主题
+	CHAT_MSG_SWAP_TOPIC = "xiaolong-chat-swap" // 消息接收主题
+	// CHAT_MSG_SWAP_TOPIC = "xlcs" // 消息接收主题
 )
 
 const (

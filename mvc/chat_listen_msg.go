@@ -37,7 +37,7 @@ func ChatListenMsgUpdateUser(ipfsNode *ipfsCore.IpfsNode, token string) error {
 		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
 
-	err := updateIpfsTopicSubs(ipfsNode, vo.CHAT_MSG_SWAP_TOPIC+listenUserId)
+	err := updateIpfsTopicSubs(ipfsNode, getRecvTopic(listenUserId))
 	if err != nil {
 		sugar.Log.Error("subscribe failed")
 		return fmt.Errorf("subscribe failed")
@@ -68,7 +68,7 @@ func ChatListenMsgBlocked(ipfsNode *ipfsCore.IpfsNode, db *Sql, token string, cl
 		sugar.Log.Infof("Named User Listen %s", listenUserId)
 	}
 
-	err := updateIpfsTopicSubs(ipfsNode, vo.CHAT_MSG_SWAP_TOPIC+listenUserId)
+	err := updateIpfsTopicSubs(ipfsNode, getRecvTopic(listenUserId))
 	if err != nil {
 		sugar.Log.Error("subscribe failed")
 		return fmt.Errorf("subscribe failed")
@@ -374,7 +374,7 @@ func sendMsgAck(ipfsNode *ipfsCore.IpfsNode, db *Sql, ackMsg vo.ChatSwapAckParam
 
 	var err error
 
-	msgTopicKey := vo.CHAT_MSG_SWAP_TOPIC + ackMsg.ToId
+	msgTopicKey := getRecvTopic(ackMsg.ToId)
 
 	ipfsTopic, ok := TopicJoin.Load(msgTopicKey)
 	if !ok {

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"regexp"
 	"time"
 
 	"github.com/cosmopolitann/clouddb/jwt"
@@ -100,7 +101,6 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			ri.FromPeerId = user.PeerId
 			ri.FromNickName = user.NickName
 			ri.FromSex = user.Sex
-
 		}
 
 		if ri.ToId == user.Id {
@@ -117,69 +117,102 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 
 		sugar.Log.Debugf("Get Record %#v", ri)
 
-		if len(peerId) != 0 {
-			var peer SysUser
-			err = db.DB.QueryRow("SELECT id, peer_id, name, nickname, phone, sex, img FROM sys_user WHERE id = ?", peerId).Scan(&peer.Id, &peer.PeerId, &peer.Name, &peer.NickName, &peer.Phone, &peer.Sex, &peer.Img)
+		var peer SysUser
+		err = db.DB.QueryRow("SELECT id, peer_id, name, nickname, phone, sex, img FROM sys_user WHERE id = ?", peerId).Scan(&peer.Id, &peer.PeerId, &peer.Name, &peer.NickName, &peer.Phone, &peer.Sex, &peer.Img)
+		if err != nil {
+			if err != sql.ErrNoRows {
+				sugar.Log.Error("query peer info failed.Err is ", err)
+				return ret, err
+			}
+			// not found peer
+			var fnickname string
+			err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
 			if err != nil {
 				if err != sql.ErrNoRows {
-					sugar.Log.Error("query peer info failed.Err is ", err)
+					sugar.Log.Error("query user_friend nickname failed.Err is ", err)
+					return ret, err
+				}
+			}
+
+			if fnickname != "" {
+				peer.NickName = fnickname
+				ri.Name = fnickname
+			}
+
+			if req.Keyword != "" {
+				if peer.NickName == "" {
+					continue
+				} else {
+					re, err := regexp.Compile(".*" + regexp.QuoteMeta(req.Keyword) + ".*")
+					if err != nil {
+						return ret, err
+					}
+
+					if !re.Match([]byte(peer.NickName)) {
+						continue
+					}
+				}
+			}
+
+		} else {
+			sugar.Log.Debugf("Update Peer: %#v", peer)
+
+			var fnickname string
+			err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
+			if err != nil {
+				if err != sql.ErrNoRows {
+					sugar.Log.Error("query user_friend nickname failed.Err is ", err)
+					return ret, err
+				}
+			}
+
+			ri.Img = peer.Img
+
+			if req.Keyword != "" {
+				re, err := regexp.Compile(".*" + regexp.QuoteMeta(req.Keyword) + ".*")
+				if err != nil {
 					return ret, err
 				}
 
-				var fnickname string
-				err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
-				if err != nil {
-					if err != sql.ErrNoRows {
-						sugar.Log.Error("query user_friend nickname failed.Err is ", err)
-						return ret, err
-					}
+				matched := false
+				if fnickname != "" && re.Match([]byte(fnickname)) {
+					matched = true
+				} else if peer.NickName != "" && re.Match([]byte(peer.NickName)) {
+					matched = true
+				} else if peer.Name != "" && re.Match([]byte(peer.Name)) {
+					matched = true
 				}
 
-				if fnickname != "" {
-					peer.NickName = fnickname
-					ri.Name = fnickname
+				if !matched {
+					continue
 				}
+			}
 
+			if ri.FromId == peer.Id {
+				ri.FromName = peer.Name
+				ri.FromImg = peer.Img
+				ri.FromPhone = peer.Phone
+				ri.FromPeerId = peer.PeerId
+				ri.FromNickName = peer.NickName
+				ri.FromSex = peer.Sex
 			} else {
-				sugar.Log.Debugf("Update Peer: %#v", peer)
+				ri.ToName = peer.Name
+				ri.ToImg = peer.Img
+				ri.ToPhone = peer.Phone
+				ri.ToPeerId = peer.PeerId
+				ri.ToNickName = peer.NickName
+				ri.ToSex = peer.Sex
+			}
 
-				var fnickname string
-				err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
-				if err != nil {
-					if err != sql.ErrNoRows {
-						sugar.Log.Error("query user_friend nickname failed.Err is ", err)
-						return ret, err
-					}
-				}
+			if fnickname != "" {
+				peer.NickName = fnickname
+				ri.Name = fnickname
 
-				if fnickname != "" {
-					peer.NickName = fnickname
-					ri.Name = fnickname
+			} else if peer.NickName != "" {
+				ri.Name = peer.NickName
 
-				} else if peer.NickName != "" {
-					ri.Name = peer.NickName
-
-				} else if peer.Name != "" {
-					ri.Name = peer.Name
-				}
-
-				ri.Img = peer.Img
-
-				if ri.FromId == peer.Id {
-					ri.FromName = peer.Name
-					ri.FromImg = peer.Img
-					ri.FromPhone = peer.Phone
-					ri.FromPeerId = peer.PeerId
-					ri.FromNickName = peer.NickName
-					ri.FromSex = peer.Sex
-				} else {
-					ri.ToName = peer.Name
-					ri.ToImg = peer.Img
-					ri.ToPhone = peer.Phone
-					ri.ToPeerId = peer.PeerId
-					ri.ToNickName = peer.NickName
-					ri.ToSex = peer.Sex
-				}
+			} else if peer.Name != "" {
+				ri.Name = peer.Name
 			}
 		}
 

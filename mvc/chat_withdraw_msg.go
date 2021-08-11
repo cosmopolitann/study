@@ -85,15 +85,17 @@ func ChatWithdrawMsg(ipfsNode *ipfsCore.IpfsNode, db *Sql, value string) error {
 		return err
 	}
 
-	ipfsTopic, ok := TopicJoin.Load(vo.CHAT_MSG_SWAP_TOPIC)
+	msgTopicKey := getRecvTopic(msg.ToId)
+
+	ipfsTopic, ok := TopicJoin.Load(msgTopicKey)
 	if !ok {
-		ipfsTopic, err = ipfsNode.PubSub.Join(vo.CHAT_MSG_SWAP_TOPIC)
+		ipfsTopic, err = ipfsNode.PubSub.Join(msgTopicKey)
 		if err != nil {
 			sugar.Log.Error("PubSub.Join .Err is", err)
 			return err
 		}
 
-		TopicJoin.Store(vo.CHAT_MSG_SWAP_TOPIC, ipfsTopic)
+		TopicJoin.Store(msgTopicKey, ipfsTopic)
 	}
 
 	ctx := context.Background()

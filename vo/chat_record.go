@@ -19,6 +19,7 @@ type ChatRecordListParams struct {
 	FromId     string `json:"fromId"`
 	Token      string `json:"token"`
 	CustomerId string `json:"customerId"`
+	Keyword    string `json:"keyword"`
 }
 
 // 获取消息记录列表

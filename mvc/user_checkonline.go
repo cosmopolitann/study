@@ -49,7 +49,7 @@ func FriendCheckOnline(ipfsNode *ipfsCore.IpfsNode, value string) error {
 			From: ipfsNode.Identity.Pretty(),
 		}
 
-		msgTopicKey := vo.CHAT_MSG_SWAP_TOPIC + toUserId
+		msgTopicKey := getRecvTopic(toUserId)
 
 		ipfsTopic, err := GetPubsubTopic(ipfsNode, msgTopicKey)
 		if err != nil {
