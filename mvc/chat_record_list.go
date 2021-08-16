@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/cosmopolitann/clouddb/apis"
 	"github.com/cosmopolitann/clouddb/jwt"
 	"github.com/cosmopolitann/clouddb/sugar"
 	"github.com/cosmopolitann/clouddb/vo"
@@ -62,9 +63,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 		}
 	}
 
-	var user SysUser
-
-	err = db.DB.QueryRow("SELECT id, IFNULL(peer_id, ''), IFNULL(name, ''), IFNULL(nickname, ''), IFNULL(phone, ''), IFNULL(sex, 0), IFNULL(img, ''), IFNULL(role, '2') FROM sys_user WHERE id = ?", userId).Scan(&user.Id, &user.PeerId, &user.Name, &user.NickName, &user.Phone, &user.Sex, &user.Img, &user.Role)
+	user, err := apis.GetUserInfo(req.Token, userId)
 	if err != nil {
 		sugar.Log.Error("query user info failed.Err is ", err)
 		return ret, err
@@ -88,8 +87,6 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			return ret, err
 		}
 
-		sugar.Log.Debug(ri)
-
 		peerId := ""
 
 		if ri.FromId == user.Id {
@@ -99,7 +96,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			ri.FromImg = user.Img
 			ri.FromPhone = user.Phone
 			ri.FromPeerId = user.PeerId
-			ri.FromNickName = user.NickName
+			ri.FromNickName = user.Nickname
 			ri.FromSex = user.Sex
 		}
 
@@ -110,20 +107,20 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			ri.ToImg = user.Img
 			ri.ToPhone = user.Phone
 			ri.ToPeerId = user.PeerId
-			ri.ToNickName = user.NickName
+			ri.ToNickName = user.Nickname
 			ri.ToSex = user.Sex
-
 		}
 
 		sugar.Log.Debugf("Get Record %#v", ri)
 
-		var peer SysUser
-		err = db.DB.QueryRow("SELECT id, peer_id, name, nickname, phone, sex, img FROM sys_user WHERE id = ?", peerId).Scan(&peer.Id, &peer.PeerId, &peer.Name, &peer.NickName, &peer.Phone, &peer.Sex, &peer.Img)
+		peer, err := apis.GetUserInfo(req.Token, peerId)
 		if err != nil {
-			if err != sql.ErrNoRows {
-				sugar.Log.Error("query peer info failed.Err is ", err)
-				return ret, err
-			}
+			sugar.Log.Error("query peer info failed.Err is ", err)
+			return ret, err
+		}
+
+		if err != nil {
+
 			// not found peer
 			var fnickname string
 			err := db.DB.QueryRow("SELECT friend_nickname FROM user_friend WHERE user_id = ? AND friend_id = ?", userId, peerId).Scan(&fnickname)
@@ -135,12 +132,12 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 			}
 
 			if fnickname != "" {
-				peer.NickName = fnickname
+				peer.Nickname = fnickname
 				ri.Name = fnickname
 			}
 
 			if req.Keyword != "" {
-				if peer.NickName == "" {
+				if peer.Nickname == "" {
 					continue
 				} else {
 					re, err := regexp.Compile(".*" + regexp.QuoteMeta(req.Keyword) + ".*")
@@ -148,7 +145,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 						return ret, err
 					}
 
-					if !re.Match([]byte(peer.NickName)) {
+					if !re.Match([]byte(peer.Nickname)) {
 						continue
 					}
 				}
@@ -177,7 +174,7 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 				matched := false
 				if fnickname != "" && re.Match([]byte(fnickname)) {
 					matched = true
-				} else if peer.NickName != "" && re.Match([]byte(peer.NickName)) {
+				} else if peer.Nickname != "" && re.Match([]byte(peer.Nickname)) {
 					matched = true
 				} else if peer.Name != "" && re.Match([]byte(peer.Name)) {
 					matched = true
@@ -193,23 +190,23 @@ func ChatRecordList(db *Sql, value string) ([]vo.ChatRecordRespListParams, error
 				ri.FromImg = peer.Img
 				ri.FromPhone = peer.Phone
 				ri.FromPeerId = peer.PeerId
-				ri.FromNickName = peer.NickName
+				ri.FromNickName = peer.Nickname
 				ri.FromSex = peer.Sex
 			} else {
 				ri.ToName = peer.Name
 				ri.ToImg = peer.Img
 				ri.ToPhone = peer.Phone
 				ri.ToPeerId = peer.PeerId
-				ri.ToNickName = peer.NickName
+				ri.ToNickName = peer.Nickname
 				ri.ToSex = peer.Sex
 			}
 
 			if fnickname != "" {
-				peer.NickName = fnickname
+				peer.Nickname = fnickname
 				ri.Name = fnickname
 
-			} else if peer.NickName != "" {
-				ri.Name = peer.NickName
+			} else if peer.Nickname != "" {
+				ri.Name = peer.Nickname
 
 			} else if peer.Name != "" {
 				ri.Name = peer.Name

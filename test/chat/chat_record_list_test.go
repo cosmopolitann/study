@@ -33,7 +33,7 @@ func TestChatRecordList(t *testing.T) {
 		FromId:     "416203557629337600",
 		Token:      token,
 		CustomerId: "416418921625690112",
-		Keyword:    "*",
+		Keyword:    "",
 	}
 
 	value, _ := json.Marshal(req)
