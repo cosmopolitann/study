@@ -9,6 +9,40 @@ import (
 
 const API_PREFIX = "http://cloudapi.stariverpan.com"
 
+func GetUsers(authToken string, userIds []string) (uModels []UserModel, err error) {
+
+	sugar.Log.Info("GetUsers Req --->", authToken)
+
+	apiUrl := API_PREFIX + "/cmsprovider/v1/user/list"
+	header := map[string][]string{
+		"Authorization": {"Bearer " + authToken},
+	}
+	data := map[string]interface{}{
+		"userIds": userIds,
+	}
+	res, err := PostJson(apiUrl, header, data)
+	if err != nil {
+		err = fmt.Errorf("utils.PostJson err: %w", err)
+		return
+	}
+
+	resBytes, err := json.Marshal(res)
+	if err != nil {
+		err = fmt.Errorf("json.Marshal err: %w", err)
+		return
+	}
+
+	err = json.Unmarshal(resBytes, &uModels)
+	if err != nil {
+		err = fmt.Errorf("json.Unmarshal err: %w", err)
+		return
+	}
+
+	sugar.Log.Info("GetUsers Res <---", res)
+
+	return
+}
+
 func GetUserInfo(authToken, userId string) (uModel UserModel, err error) {
 
 	sugar.Log.Info("GetUserInfo Req --->", authToken, userId)

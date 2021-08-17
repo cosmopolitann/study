@@ -74,3 +74,12 @@ type ChatRenameRecordParams struct {
 	Name  string `json:"name"`
 	Token string `json:"token"`
 }
+
+type ChatRecored struct {
+	Id      string `json:"id"`
+	Name    string `json:"name"`    //       1 文本  2 表情 3 图片 4 文件
+	FromId  string `json:"fromId"`  //require     创建者
+	LastMsg string `json:"lastMsg"` //require     最后的消息
+	ToId    string `json:"toId"`    //require         0 未撤回  1  撤回
+	Ptime   int64  `json:"ptime"`   // require    时间
+}

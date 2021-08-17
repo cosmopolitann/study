@@ -183,68 +183,6 @@ func chatSendMsg(ipfsNode *ipfsCore.IpfsNode, swapMsg vo.ChatSwapMsgParams) erro
 	return nil
 }
 
-func publishUserInfo(ipfsNode *ipfsCore.IpfsNode, db *Sql, userId string) error {
-	var err error
-	topic := "/db-online-sync"
-	// publish msg
-	sugar.Log.Info("Publish Topic: ", "/db-online-sync")
-	ctx := context.Background()
-	tp, ok := TopicJoin.Load(topic)
-	if !ok {
-		tp, err = ipfsNode.PubSub.Join(topic)
-		if err != nil {
-			sugar.Log.Error("PubSub.Join .Err is", err)
-			return err
-		}
-		TopicJoin.Store(topic, tp)
-	}
-
-	var dl vo.RespSysUser
-	rows, err := db.DB.Query("select id,IFNULL(peer_id,'null'),IFNULL(name,'null'),IFNULL(phone,'null'),IFNULL(sex,0),IFNULL(ptime,0),IFNULL(utime,0),IFNULL(nickname,'null'),IFNULL(img,'null'),IFNULL(role,'2') from sys_user where id=?", userId)
-	if err != nil {
-		sugar.Log.Error("AddUser Query data is failed.Err is ", err)
-		return err
-	}
-	// 释放锁
-	defer rows.Close()
-	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.PeerId, &dl.Name, &dl.Phone, &dl.Sex, &dl.Ptime, &dl.Utime, &dl.NickName, &dl.Img, &dl.Role)
-		if err != nil {
-			sugar.Log.Error("AddUser Query scan data is failed.The err is ", err)
-			return err
-		}
-		sugar.Log.Info(" AddUser Query a entire data is ", dl)
-	}
-	//the first step.
-	var s3 UserAd
-	s3.Type = "receiveUserRegister"
-	s3.Data = dl
-	s3.FromId = ipfsNode.Identity.String()
-	//marshal UserAd.
-	//the second step
-	sugar.Log.Info("--- second step ---")
-
-	jsonBytes, err := json.Marshal(s3)
-	if err != nil {
-		sugar.Log.Error("Publish msg is failed.Err:", err)
-		return err
-	}
-	sugar.Log.Info("Frwarding information:=", string(jsonBytes))
-	sugar.Log.Info("Local PeerId :=", ipfsNode.Identity.String())
-	//the  third  step .
-	sugar.Log.Info("--- third step ---")
-
-	// fmt.Printf("DD: %s", string(jsonBytes))
-
-	err = tp.Publish(ctx, jsonBytes)
-	if err != nil {
-		sugar.Log.Error("Publish Err:", err)
-		return err
-	}
-
-	return nil
-}
-
 // 获取广播topic
 func getRecvTopic(toUserId string) string {
 	// return vo.CHAT_MSG_SWAP_TOPIC + toUserId
