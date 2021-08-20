@@ -14,7 +14,7 @@ func TestAddFolder(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong1.db")
 	if err != nil {
 		panic(err)
 	}
@@ -28,8 +28,8 @@ func TestAddFolder(t *testing.T) {
 	var f1 = vo.CloudAddFolderParams{
 		Id:       "123",
 		FileName: "_月亮湾",
-		ParentId: "411905426192338944",
-		Token:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MTExOTI3MjA0NDc1MDg0ODAiLCJleHAiOjE2MjYzMzM1NzJ9.EDv7k__JEugp-57RU3wDsJ1Swa3C0t-Ofr4KeQQhzeA",
+		ParentId: "3",
+		Token:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNDIwNzExNDIxNTQyODA5MCIsInBlZXJJZCI6IiIsIm5hbWUiOiLmtYvor5UiLCJwaG9uZSI6IiIsInNleCI6MCwibmlja25hbWUiOiLmtYvor5UiLCJpbWciOiIiLCJwdGltZSI6MTYyNzQ0NDAwOCwidXRpbWUiOjE2Mjc0NDQwMDgsInJvbGUiOiIxIiwiZXhwIjoxNjI5NjU3OTMwfQ.4P3tY5xUkKdUCHSlXliRnDDdrHK_cQNtskZgl6kTbWY",
 	}
 
 	b1, e := json.Marshal(f1)

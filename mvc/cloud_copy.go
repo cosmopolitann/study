@@ -46,7 +46,7 @@ func CopyFile(db *Sql, value string) error {
 
 func InsertInto(db *Sql, id, parent_id, userid string) string {
 	//query all file info,where parent_id=? and userid=?.
-	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where id=?", id)
+	rows, err := db.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null'),IFNULL(width,''),IFNULL(height,''),IFNULL(duration,0) from cloud_file where id=?", id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return ""
@@ -57,7 +57,7 @@ func InsertInto(db *Sql, id, parent_id, userid string) string {
 
 	var dl File
 	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail, &dl.Width, &dl.Height, &dl.Duration)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return ""
@@ -68,14 +68,14 @@ func InsertInto(db *Sql, id, parent_id, userid string) string {
 	//current timestamp.
 	t := time.Now().Unix()
 	//insert  data into the file table.
-	stmt1, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail) values(?,?,?,?,?,?,?,?,?,?)")
+	stmt1, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail,width,height,duration values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into cloud_file table is failed.", err)
 		return ""
 	}
 	//int => string. id => sid.
 	sid := strconv.FormatInt(id1, 10)
-	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, dl.IsFolder, dl.Thumbnail)
+	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, dl.IsFolder, dl.Thumbnail, dl.Width, dl.Height, dl.Duration)
 	if err != nil {
 		sugar.Log.Error("Insert into file  is Failed.", err)
 		return ""
@@ -108,7 +108,7 @@ func Re(user_id, id string, d *Sql, parent_id string, userid string) error {
 		sugar.Log.Error("Marshal data is failed.Err is ", err)
 		return err
 	}
-	rows, err := d.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where id=?", id)
+	rows, err := d.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null'),IFNULL(width,''),IFNULL(height,''),IFNULL(duration,0) from cloud_file where id=?", id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 		return err
@@ -119,7 +119,7 @@ func Re(user_id, id string, d *Sql, parent_id string, userid string) error {
 
 	var dl File
 	for rows.Next() {
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail, &dl.Width, &dl.Height, &dl.Duration)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 			return err
@@ -129,14 +129,14 @@ func Re(user_id, id string, d *Sql, parent_id string, userid string) error {
 	// insert table
 	id1 := utils.SnowId()
 	t := time.Now().Unix()
-	stmt1, err := d.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail) values(?,?,?,?,?,?,?,?,?,?)")
+	stmt1, err := d.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail,width,height,duration) values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		sugar.Log.Error("Insert into cloud_file table is failed.", err)
 		return err
 	}
 	sid := strconv.FormatInt(id1, 10)
 
-	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, dl.IsFolder, dl.Thumbnail)
+	res1, err := stmt1.Exec(sid, userid, dl.FileName, parent_id, t, dl.FileCid, dl.FileSize, dl.FileType, dl.IsFolder, dl.Thumbnail, dl.Width, dl.Height, dl.Duration)
 	if err != nil {
 		sugar.Log.Error("Insert into file  is Failed.", err)
 		return err
@@ -173,13 +173,13 @@ func walk(user_id, id string, d *Sql, node *FileNode) {
 	files := listFiles(user_id, id, d)
 	// loop this files.
 	for _, v := range files {
-		rows, err := d.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where id=?", v)
+		rows, err := d.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null'),IFNULL(width,''),IFNULL(height,''),IFNULL(duration,0) from cloud_file where id=?", v)
 		if err != nil {
 			sugar.Log.Error("Query data is failed.Err is ", err)
 		}
 		var dl File
 		for rows.Next() {
-			err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
+			err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail, &dl.Width, &dl.Height, &dl.Duration)
 			if err != nil {
 				sugar.Log.Error("Query scan data is failed.The err is ", err)
 			}
@@ -210,7 +210,7 @@ func listFiles(user_id, id string, d *Sql) []string {
 //
 func QueryAllInfo(user_id, id string, d *Sql) []string {
 	all := []string{}
-	rows, err := d.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file where user_id=? and parent_id=?", user_id, id)
+	rows, err := d.DB.Query("select id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null'),IFNULL(width,''),IFNULL(height,''),IFNULL(duration,0) from cloud_file where user_id=? and parent_id=?", user_id, id)
 	if err != nil {
 		sugar.Log.Error("Query data is failed.Err is ", err)
 	}
@@ -218,7 +218,7 @@ func QueryAllInfo(user_id, id string, d *Sql) []string {
 	defer rows.Close()
 	for rows.Next() {
 		var dl File
-		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail)
+		err = rows.Scan(&dl.Id, &dl.UserId, &dl.FileName, &dl.ParentId, &dl.Ptime, &dl.FileCid, &dl.FileSize, &dl.FileType, &dl.IsFolder, &dl.Thumbnail, &dl.Width, &dl.Height, &dl.Duration)
 		if err != nil {
 			sugar.Log.Error("Query scan data is failed.The err is ", err)
 		}

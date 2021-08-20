@@ -32,11 +32,11 @@ func MoveFile(db *Sql, value string) error {
 	for _, v := range mvFile.Ids {
 
 		log.Println("这是要移动的文件id：", v)
-		rows, _ := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null') from cloud_file as b WHERE (b.file_name,b.user_id,b.is_folder) in (SELECT a.file_name,a.user_id,a.is_folder from cloud_file as a WHERE a.id=?) and b.parent_id=?;", v, mvFile.ParentId)
+		rows, _ := db.DB.Query("SELECT id,IFNULL(user_id,'null'),IFNULL(file_name,'null'),IFNULL(parent_id,0),IFNULL(ptime,0),IFNULL(file_cid,'null'),IFNULL(file_size,0),IFNULL(file_type,0),IFNULL(is_folder,0),IFNULL(thumbnail,'null'),IFNULL(width,''),IFNULL(height,''),IFNULL(duration,0) from cloud_file as b WHERE (b.file_name,b.user_id,b.is_folder) in (SELECT a.file_name,a.user_id,a.is_folder from cloud_file as a WHERE a.id=?) and b.parent_id=?;", v, mvFile.ParentId)
 		var s File
 
 		for rows.Next() {
-			err := rows.Scan(&s.Id, &s.UserId, &s.FileName, &s.ParentId, &s.Ptime, &s.FileCid, &s.FileSize, &s.FileType, &s.IsFolder, &s.Thumbnail)
+			err := rows.Scan(&s.Id, &s.UserId, &s.FileName, &s.ParentId, &s.Ptime, &s.FileCid, &s.FileSize, &s.FileType, &s.IsFolder, &s.Thumbnail, &s.Width, &s.Height, &s.Duration)
 
 			if err != nil {
 				fmt.Println("query err is ", err)

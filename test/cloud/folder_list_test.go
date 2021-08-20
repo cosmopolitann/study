@@ -12,7 +12,7 @@ func TestFolderList(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong1.db")
 	if err != nil {
 		panic(err)
 	}
@@ -21,7 +21,7 @@ func TestFolderList(t *testing.T) {
 	e := d.Ping()
 	log.Println(" Ping is failed,err:=", e)
 	ss := Testdb(d)
-	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI","parentId":"0"}
+	value := `{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNDIwNzExNDIxNTQyODA5MCIsInBlZXJJZCI6IiIsIm5hbWUiOiLmtYvor5UiLCJwaG9uZSI6IiIsInNleCI6MCwibmlja25hbWUiOiLmtYvor5UiLCJpbWciOiIiLCJwdGltZSI6MTYyNzQ0NDAwOCwidXRpbWUiOjE2Mjc0NDQwMDgsInJvbGUiOiIxIiwiZXhwIjoxNjI5NjU3OTMwfQ.4P3tY5xUkKdUCHSlXliRnDDdrHK_cQNtskZgl6kTbWY","parentId":"0"}
 `
 	resp := ss.FolderList(value)
 	log.Println("这是返回的数据 =", resp)

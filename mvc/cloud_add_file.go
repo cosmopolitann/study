@@ -40,13 +40,13 @@ func AddFile(db *Sql, value string) (string, error) {
 
 	}
 	if c == 0 {
-		stmt, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail) values(?,?,?,?,?,?,?,?,?,?)")
+		stmt, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail,width,height,duration) values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
 		if err != nil {
 			sugar.Log.Error("Insert into cloud_file table is failed.", err)
 			return "", err
 		}
 		sid := strconv.FormatInt(id, 10)
-		res, err := stmt.Exec(sid, userId, f.FileName, f.ParentId, t, f.FileCid, f.FileSize, f.FileType, 0, f.Thumbnail)
+		res, err := stmt.Exec(sid, userId, f.FileName, f.ParentId, t, f.FileCid, f.FileSize, f.FileType, 0, f.Thumbnail, f.Width, f.Height, f.Duration)
 		if err != nil {
 			sugar.Log.Error("Insert into file  is Failed.", err)
 			return "", err
@@ -58,7 +58,7 @@ func AddFile(db *Sql, value string) (string, error) {
 		}
 		snowid = sid
 	} else if c == 1 {
-		stmt, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail) values(?,?,?,?,?,?,?,?,?,?)")
+		stmt, err := db.DB.Prepare("INSERT INTO cloud_file (id,user_id,file_name,parent_id,ptime,file_cid,file_size,file_type,is_folder,thumbnail,width,height,duration) values(?,?,?,?,?,?,?,?,?,?,?,?,?)")
 		if err != nil {
 			sugar.Log.Error("Insert into cloud_file table is failed.", err)
 			return "", err
@@ -79,7 +79,7 @@ func AddFile(db *Sql, value string) (string, error) {
 		snowid = sid
 	} else if c == 2 {
 		//
-		
+
 	}
 	return snowid, nil
 

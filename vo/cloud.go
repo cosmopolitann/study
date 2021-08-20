@@ -18,6 +18,9 @@ type CloudAddFileParams struct {
 	FileType  int64  `json:"fileType"`  //文件类型
 	Token     string `json:"token"`     //token
 	Thumbnail string `json:"thumbnail"` //缩略图
+	Duration  int64  `json:"duration"`  //时长
+	Width     string `json:"width"`     //宽
+	Height    string `json:"height"`    //高
 }
 
 //folder

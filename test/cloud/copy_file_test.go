@@ -14,7 +14,7 @@ func TestCopyFile(t *testing.T) {
 	sugar.Log.Info("~~~~  Connecting to the sqlite3 database. ~~~~")
 	//The path is default.
 	sugar.Log.Info("Start Open Sqlite3 Database.")
-	d, err := sql.Open("sqlite3", "/Users/apple/winter/D-cloud/tables/foo.db")
+	d, err := sql.Open("sqlite3", "/Users/apple/Desktop/xiaolong1.db")
 	if err != nil {
 		panic(err)
 	}
@@ -25,9 +25,9 @@ func TestCopyFile(t *testing.T) {
 	ss := Testdb(d)
 	//插入数据
 	value := `{
-"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0MDkzMzAyMDIxNjY5NTYwMzIiLCJleHAiOjE2MjU4ODk0NzZ9.OzEFVuB2FcRYurZiii1fpiAqX2KcesfS5arJfVJZQOI",
+"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNDIwNzExNDIxNTQyODA5MCIsInBlZXJJZCI6IiIsIm5hbWUiOiLmtYvor5UiLCJwaG9uZSI6IiIsInNleCI6MCwibmlja25hbWUiOiLmtYvor5UiLCJpbWciOiIiLCJwdGltZSI6MTYyNzQ0NDAwOCwidXRpbWUiOjE2Mjc0NDQwMDgsInJvbGUiOiIxIiwiZXhwIjoxNjI5NjU3OTMwfQ.4P3tY5xUkKdUCHSlXliRnDDdrHK_cQNtskZgl6kTbWY",
 "parentId":"11",
-"ids":["414849335038054400"]
+"ids":["435102234032738304"]
 }`
 	//b1, e := json.Marshal(fi)//
 	//fmt.Println(ss)//

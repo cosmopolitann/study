@@ -28,6 +28,9 @@ type File struct {
 	IsFolder  int64  `json:"isFolder"`  //是否是文件or 文件夹  0文件 1文件夹
 	Ptime     int64  `json:"ptime"`     //时间
 	Thumbnail string `json:"thumbnail"` //缩略图
+	Duration  int64  `json:"duration"`  //时长
+	Width     string `json:"width"`     //宽
+	Height    string `json:"height"`    //高
 }
 
 //DownLoadList
